@@ -78,8 +78,11 @@ class CommandQuery(FunctionCheck):
 
 
 class ReturnsNone(FunctionCheck):
+    """Özel metodun dönüşünü dilin protokolü belirler (`__exit__` None ile istisnayı geçirir)."""
+
     def findings(self):
-        return [alarm("None döndürüyor (Bl.7 · Don't Return Null)")] if self._may_return_none() else []
+        is_measured = not self._function.is_special() and self._may_return_none()
+        return [alarm("None döndürüyor (Bl.7 · Don't Return Null)")] if is_measured else []
 
     def _may_return_none(self):
         """Açık `return None`, değer döndüren fonksiyonda çıplak `return` ya da `Optional` dönüş türü."""

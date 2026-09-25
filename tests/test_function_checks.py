@@ -152,6 +152,12 @@ class ReturnsNoneTest(unittest.TestCase):
     def test_optional_annotation_is_an_alarm(self):
         self.assertEqual(levels(ReturnsNone(Snippet("def f(x) -> Optional[int]: return x").function()).findings()), [ALARM])
 
+    def test_protocol_method_returns_what_the_language_expects(self):
+        self.assertEqual(ReturnsNone(Snippet("def __exit__(self, *details):\n    return None").function()).findings(), [])
+
+    def test_ordinary_method_named_like_a_protocol_is_measured(self):
+        self.assertEqual(levels(ReturnsNone(Snippet("def exit_(self, *details):\n    return None").function()).findings()), [ALARM])
+
     def test_command_returning_nothing_is_fine(self):
         self.assertEqual(ReturnsNone(Snippet("def f(self) -> None:\n    self.x = 1\n    return").function()).findings(), [])
 
