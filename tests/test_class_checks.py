@@ -138,6 +138,15 @@ class ResponsibilitiesTest(unittest.TestCase):
         self.assertEqual(Responsibilities(Snippet(MUTUAL_CALLS).cls()).findings(), [])
 
 
+    def test_visitor_handing_itself_out_is_one_responsibility(self):
+        self.assertEqual(Responsibilities(Snippet(VISITOR).cls()).findings(), [])
+
+    def test_visitor_handing_itself_out_by_keyword_is_one_responsibility(self):
+        self.assertEqual(Responsibilities(Snippet(VISITOR.replace("accept(self)", "accept(visitor=self)")).cls()).findings(), [])
+
+    def test_handing_out_a_field_does_not_join_the_callbacks(self):
+        self.assertEqual(levels(Responsibilities(Snippet(FIELD_HANDED_OUT).cls()).findings()), [ALARM])
+
     def test_tear_down_belongs_to_the_fixture(self):
         self.assertEqual(Responsibilities(Snippet(TEST_WITH_TEAR_DOWN).cls()).findings(), [])
 
@@ -215,6 +224,33 @@ class Page:
 
     def heading(self):
         return self.title.upper()
+"""
+
+VISITOR = """
+class Renderer:
+    def __init__(self, document, style):
+        self._document, self._style = document, style
+
+    def fragments(self):
+        return [block.accept(self) for block in self._document.blocks()]
+
+    def visit_para(self, block):
+        return self._style.para(block)
+
+    def visit_code(self, block):
+        return self._style.code(block)
+"""
+
+FIELD_HANDED_OUT = """
+class Renderer:
+    def __init__(self, document, style):
+        self._document, self._style = document, style
+
+    def fragments(self):
+        return [block.accept(self._document) for block in self._document.blocks()]
+
+    def visit_para(self, block):
+        return self._style.para(block)
 """
 
 DATA_WITH_NAMED_CONSTRUCTOR = """

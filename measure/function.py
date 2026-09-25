@@ -4,7 +4,7 @@ from typing import NamedTuple
 
 from measure.construction import Constructions
 from measure.findings import Note
-from measure.syntax import assignment_targets, is_none, is_self_attribute, nesting, root_name, self_attributes, walk_own
+from measure.syntax import assignment_targets, is_name, is_none, is_self_attribute, nesting, root_name, self_attributes, walk_own
 
 RECEIVERS = ("self", "cls")
 TEST_PREFIX = "test_"
@@ -128,6 +128,11 @@ class Method(Function):
     def assigned_fields(self):
         return {target.attr for node in self.own_nodes() for target in assignment_targets(node) if is_self_attribute(target)}
 
+    def hands_out_self(self):
+        """`block.accept(self)` gibi kendini başkasına veren metot; karşı taraf public metotları geri çağırabilir."""
+        return any(isinstance(node, ast.Call) and any(is_name(value, "self") for value in _call_values(node))
+                   for node in self.own_nodes())
+
     def is_accessor(self):
         """Gövdesi yalnız `return self.x` ya da yalnız `self.x = değer` olan, kurucu olmayan metot."""
         body = self._node.body
@@ -148,6 +153,10 @@ class Method(Function):
 
     def _decorator_names(self):
         return {_decorator_name(decorator) for decorator in self.decorators()}
+
+
+def _call_values(call):
+    return call.args + [keyword.value for keyword in call.keywords]
 
 
 def _returns_field(statement):

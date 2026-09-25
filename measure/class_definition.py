@@ -82,11 +82,14 @@ class ClassDefinition:
                       and m.does_work())
 
     def _method_clusters(self):
-        """Her metot kendi başına bir küme olarak başlar."""
+        """Her metot kendi başına bir küme olarak başlar; kendini dışarı veren metot public metotlara bağlıdır."""
         names = {method.name() for method in self.methods()}
         reach = self.instance_fields() | names
-        return [Cluster(frozenset({m.name()}), frozenset((m.touched_attributes() & reach) | {m.name()}))
+        return [Cluster(frozenset({m.name()}), frozenset((m.touched_attributes() & reach) | {m.name()} | self._called_back(m)))
                 for m in self.methods() if not m.is_lifecycle()]
+
+    def _called_back(self, method):
+        return {m.name() for m in self.methods() if m.is_public()} if method.hands_out_self() else set()
 
 
 def _merged_with(clusters, method):
