@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clean Code Zihin Haritası</title>
+<style>
+  :root { --bg: #fbfaf7; --fg: #1f2328; --muted: #6b7280; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #16181c; --fg: #e6e6e6; --muted: #9aa0a6; } }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg);
+               font-family: system-ui, sans-serif; }
+  svg#map { width: 100vw; height: 100vh; display: block; }
+  .markmap { --markmap-text-color: var(--fg); }
+  #error { position: fixed; inset: 1rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<svg id="map" class="markmap"></svg>
+<p id="error" hidden></p>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markmap-view@0.18/dist/browser/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markmap-lib@0.18/dist/browser/index.iife.js"></script>
+<script>
+  // Tek kaynak zihin-haritasi.md; bu sayfa yalnız onu çizer. file:// üzerinden fetch
+  // çalışmaz, bu yüzden klasörde `python3 -m http.server` ile açılır.
+  async function draw() {
+    const source = await fetch("zihin-haritasi.md", { cache: "no-store" }).then(r => r.text());
+    const { Transformer, Markmap, deriveOptions } = window.markmap;
+    const { root, frontmatter } = new Transformer().transform(source);
+    Markmap.create("#map", deriveOptions(frontmatter?.markmap), root);
+  }
+  draw().catch(error => {
+    const note = document.getElementById("error");
+    note.hidden = false;
+    note.textContent = "Harita okunamadı (" + error.message + "). Klasörde `python3 -m http.server` çalıştırıp http://localhost:8000/zihin-haritasi.html adresini açın.";
+  });
+</script>
+</body>
+</html>
