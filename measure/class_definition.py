@@ -5,7 +5,9 @@ from typing import NamedTuple
 
 from measure.findings import Note
 from measure.function import Method
-from measure.syntax import FUNCTION_NODES
+from measure.syntax import FUNCTION_NODES, last_name
+
+TEST_CASE_BASE = "TestCase"
 
 
 class Cluster(NamedTuple):
@@ -37,8 +39,12 @@ class ClassDefinition:
         return not self.methods()
 
     def is_test_case(self):
-        """Test sınıfı ne nesne ne veri yapısıdır; Bl.6'nın ayrımı ona uygulanmaz."""
-        return any(method.is_test() for method in self.methods())
+        """Test sınıfı ne nesne ne veri yapısıdır; Bl.6'nın ayrımı ona uygulanmaz. Testi olmayan ortak kurulum
+        sınıfı da `TestCase`'ten türediği için test sınıfıdır."""
+        return any(method.is_test() for method in self.methods()) or TEST_CASE_BASE in self._base_names()
+
+    def _base_names(self):
+        return {last_name(base) for base in self._node.bases}
 
     def constructor_fields(self):
         return {field for method in self.methods() if method.is_constructor() for field in method.assigned_fields()}

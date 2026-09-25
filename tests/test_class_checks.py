@@ -159,6 +159,24 @@ class FieldsOutsideConstructorTest(unittest.TestCase):
     def test_fields_built_in_set_up_are_fine(self):
         self.assertEqual(FieldsOutsideConstructor(Snippet(FIELD_BUILT_IN_SET_UP).cls()).findings(), [])
 
+SHARED_FIXTURE_BASE = """
+class _BookTestCase(unittest.TestCase):
+    def setUp(self):
+        self.tmp = make_dir()
+
+    def tearDown(self):
+        self.tmp.cleanup()
+"""
+
+FIXTURE_LOOKALIKE = """
+class BookTestCase:
+    def __init__(self):
+        self.tmp = make_dir()
+
+    def cleanup(self):
+        self.tmp.cleanup()
+"""
+
 DATA_WITH_NAMED_CONSTRUCTOR = """
 class Metadata:
     def __init__(self, title, author):
@@ -202,6 +220,12 @@ class HybridTest(unittest.TestCase):
 
     def test_data_structure_is_not_a_hybrid(self):
         self.assertEqual(Hybrid(Snippet(POINT).cls()).findings(), [])
+
+    def test_shared_fixture_base_is_a_test_case(self):
+        self.assertEqual(Hybrid(Snippet(SHARED_FIXTURE_BASE).cls()).findings(), [])
+
+    def test_class_named_like_a_test_case_but_not_derived_is_measured(self):
+        self.assertEqual(levels(Hybrid(Snippet(FIXTURE_LOOKALIKE).cls()).findings()), [ALARM])
 
     def test_named_constructor_is_not_behavior(self):
         self.assertEqual(Hybrid(Snippet(DATA_WITH_NAMED_CONSTRUCTOR).cls()).findings(), [])
