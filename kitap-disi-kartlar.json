@@ -1,0 +1,1023 @@
+{
+  "sources": {
+    "gof": { "en": "Gamma, Helm, Johnson, Vlissides: Design Patterns (1994)", "tr": "Gamma, Helm, Johnson, Vlissides: Design Patterns (1994)" },
+    "poeaa": { "en": "Martin Fowler: Patterns of Enterprise Application Architecture (2002)", "tr": "Martin Fowler: Patterns of Enterprise Application Architecture (2002)" },
+    "ddd": { "en": "Eric Evans: Domain-Driven Design (2003)", "tr": "Eric Evans: Domain-Driven Design (2003)" },
+    "j2ee": { "en": "Alur, Crupi, Malks: Core J2EE Patterns (2001)", "tr": "Alur, Crupi, Malks: Core J2EE Patterns (2001)" },
+    "plopd": { "en": "Bobby Woolf: Null Object, Pattern Languages of Program Design 3 (1998)", "tr": "Bobby Woolf: Null Object, Pattern Languages of Program Design 3 (1998)" },
+    "fowler-ioc": { "en": "Martin Fowler: Inversion of Control Containers and the Dependency Injection Pattern (2004)", "tr": "Martin Fowler: Inversion of Control Containers and the Dependency Injection Pattern (2004)" }
+  },
+  "groups": [
+    {
+      "id": "creational",
+      "title": { "en": "Creational (GoF)", "tr": "Yaratımsal (GoF)" },
+      "cards": [
+        {
+          "id": "factory-method",
+          "pattern": "FACTORY METHOD",
+          "source": "gof",
+          "related": [{ "page": 156, "en": "Abstract Factory (Ch. 11)", "tr": "Soyut Fabrika (Bl. 11)" }],
+          "title": { "en": "Factory Method", "tr": "Fabrika Metodu (Factory Method)" },
+          "summary": {
+            "en": "A class runs a fixed workflow but leaves one step, creating the product, to its subclasses. The workflow never names a concrete class; each subclass decides which object is born inside it.",
+            "tr": "Bir sınıf sabit bir iş akışını yürütür ama bir adımı, ürünü yaratmayı, alt sınıflarına bırakır. İş akışı hiçbir somut sınıfın adını anmaz; içinde hangi nesnenin doğacağına her alt sınıf kendisi karar verir."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "public void process(ClearanceRequest request) {",
+              "    Clearance clearance = switch (request.type()) {   // yeni izin türü = bu metodu aç",
+              "        case TAKEOFF -> new TakeoffClearance(request.callsign(), request.runway());",
+              "        case LANDING -> new LandingClearance(request.callsign(), request.runway());",
+              "    };",
+              "    clearance.validateAgainst(request.runwayState());",
+              "    log.record(clearance);",
+              "}"
+            ],
+            "why": {
+              "en": "The workflow knows every concrete clearance class. Adding a taxi clearance means reopening a method that should be stable.",
+              "tr": "İş akışı her somut izin sınıfını tanıyor. Taksi izni eklemek, sabit kalması gereken bir metodu yeniden açmak demek."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public abstract class ClearanceProcessor {",
+              "    public final void process(ClearanceRequest request) {",
+              "        Clearance clearance = createClearance(request);   // fabrika metodu",
+              "        clearance.validateAgainst(request.runwayState());",
+              "        log.record(clearance);",
+              "    }",
+              "    protected abstract Clearance createClearance(ClearanceRequest request);",
+              "}",
+              "",
+              "public class TakeoffClearanceProcessor extends ClearanceProcessor {",
+              "    protected Clearance createClearance(ClearanceRequest r) {",
+              "        return new TakeoffClearance(r.callsign(), r.runway());",
+              "    }",
+              "}"
+            ],
+            "why": {
+              "en": "The workflow is final and closed; a new clearance type is a new subclass, and no existing file changes.",
+              "tr": "İş akışı final ve değişikliğe kapalı; yeni izin türü yeni bir alt sınıf, var olan hiçbir dosya değişmiyor."
+            }
+          },
+          "tip": {
+            "en": "Use it when creation is the only varying step of a stable workflow. If the choice must happen at runtime, or several related objects must be created together, inject an Abstract Factory instead; the book's Chapter 11 does exactly that.",
+            "tr": "Yaratma, sabit bir iş akışının tek değişen adımıysa kullan. Seçim çalışma zamanında yapılacaksa ya da birbiriyle ilişkili birden çok nesne birlikte yaratılacaksa, onun yerine bir Soyut Fabrika enjekte et; kitabın 11. bölümü tam olarak bunu yapar."
+          }
+        },
+        {
+          "id": "builder",
+          "pattern": "BUILDER",
+          "source": "gof",
+          "related": [{ "page": 43, "en": "Argument Objects (Ch. 3)", "tr": "Argüman Nesneleri (Bl. 3)" }],
+          "title": { "en": "Builder", "tr": "İnşacı (Builder)" },
+          "summary": {
+            "en": "Builds an object with many parts step by step through named calls, and hands out the finished object only when build() is called. Optional parts get defaults, and a half-built object never escapes.",
+            "tr": "Çok parçalı bir nesneyi adlandırılmış çağrılarla adım adım kurar ve bitmiş nesneyi ancak build() çağrılınca verir. İsteğe bağlı parçalar varsayılan alır ve yarım kurulmuş bir nesne dışarı hiç sızmaz."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "FlightPlan plan = new FlightPlan(",
+              "    callsign, ltfm, eddf, Altitude.flightLevel(350),",
+              "    null, null, true, false);   // hangisi alternatif meydan? true ne demek?"
+            ],
+            "why": {
+              "en": "Eight positional arguments, two nulls and two flags: the call cannot be read without opening the constructor.",
+              "tr": "Sekiz sıralı argüman, iki null ve iki bayrak: kurucuyu açmadan çağrı okunamıyor."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "FlightPlan plan = FlightPlan.builder(callsign)",
+              "    .from(ltfm)",
+              "    .to(eddf)",
+              "    .cruiseAt(Altitude.flightLevel(350))",
+              "    .withAlternate(edds)",
+              "    .build();                  // doğrulama burada, nesne burada doğar"
+            ],
+            "why": {
+              "en": "Every part is named, optional parts can be skipped, and validation runs once in build(), so an invalid plan is never created.",
+              "tr": "Her parçanın adı var, isteğe bağlı parçalar atlanabilir ve doğrulama bir kez build() içinde çalışır; geçersiz bir plan hiç yaratılmaz."
+            }
+          },
+          "tip": {
+            "en": "Reach for a builder when a constructor needs more than three arguments or several of them are optional. If the arguments form a real concept, first try an argument object (a value object) as Chapter 3 suggests; a builder is for construction, not for hiding a missing concept.",
+            "tr": "Kurucu üçten fazla argüman istiyorsa ya da bunların birkaçı isteğe bağlıysa inşacıya uzan. Argümanlar gerçek bir kavram oluşturuyorsa önce 3. bölümün önerdiği gibi bir argüman nesnesi (değer nesnesi) dene; inşacı kurmak içindir, eksik bir kavramı gizlemek için değil."
+          }
+        },
+        {
+          "id": "prototype",
+          "pattern": "PROTOTYPE",
+          "source": "gof",
+          "related": [],
+          "title": { "en": "Prototype", "tr": "Prototip (Prototype)" },
+          "summary": {
+            "en": "Creates a new object by copying a ready-made one and changing only what differs. Useful when setting up an object is costly or when the same template is reused every day.",
+            "tr": "Hazır bir nesneyi kopyalayıp yalnız farklı olan kısmı değiştirerek yeni nesne yaratır. Bir nesneyi kurmak pahalıysa ya da aynı şablon her gün yeniden kullanılıyorsa işe yarar."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "// her sabah aynı tarifeli uçuş için planı elle yeniden kurmak",
+              "FlightPlan today = new FlightPlan(FlightPlanId.next(), Callsign.of(\"THY1\"), ltfm, eddf, fl350);",
+              "for (RouteLeg leg : yesterday.legs())",
+              "    today.addLeg(leg.from(), leg.to(), leg.altitude());   // alanlar tek tek taşınıyor"
+            ],
+            "why": {
+              "en": "The caller knows every field of the plan and copies them by hand; a new field silently gets forgotten.",
+              "tr": "Çağıran planın her alanını biliyor ve elle kopyalıyor; eklenen yeni bir alan sessizce unutulur."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public FlightPlan copyFor(LocalDate date) {           // prototipin kendisi kopyalar",
+              "    FlightPlan copy = new FlightPlan(FlightPlanId.next(), callsign, departure, destination, cruisingAltitude);",
+              "    legs.forEach(leg -> copy.addLeg(leg.from(), leg.to(), leg.altitude()));",
+              "    return copy.scheduledOn(date);",
+              "}",
+              "",
+              "FlightPlan today = scheduledTemplate.copyFor(LocalDate.now());"
+            ],
+            "why": {
+              "en": "Copying is the plan's own job, so the knowledge of which fields exist stays inside the class.",
+              "tr": "Kopyalamak planın kendi işi; hangi alanların var olduğu bilgisi sınıfın içinde kalıyor."
+            }
+          },
+          "tip": {
+            "en": "In Java, write an explicit copy method or copy constructor; avoid Object.clone and Cloneable, whose shallow-copy contract is easy to get wrong.",
+            "tr": "Java'da açık bir kopyalama metodu ya da kopyalama kurucusu yaz; sığ kopya sözleşmesini yanlış kullanmak kolay olan Object.clone ve Cloneable'dan kaçın."
+          }
+        }
+      ]
+    },
+    {
+      "id": "structural",
+      "title": { "en": "Structural (GoF)", "tr": "Yapısal (GoF)" },
+      "cards": [
+        {
+          "id": "composite",
+          "pattern": "COMPOSITE",
+          "source": "gof",
+          "related": [{ "page": 38, "en": "Switch Statements (Ch. 3)", "tr": "Switch İfadeleri (Bl. 3)" }],
+          "title": { "en": "Composite", "tr": "Bileşik (Composite)" },
+          "summary": {
+            "en": "A part and a whole share one interface, so a tree can be used as if it were a single object. A group forwards each call to its children and combines their answers; the caller never asks which one it holds.",
+            "tr": "Parça ile bütün aynı arayüzü paylaşır; böylece bir ağaç tek bir nesneymiş gibi kullanılır. Grup her çağrıyı çocuklarına iletir ve cevaplarını birleştirir; çağıran elindekinin hangisi olduğunu hiç sormaz."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "int countAircraft(Object airspace) {",
+              "    if (airspace instanceof Sector s) return s.aircraft().size();",
+              "    if (airspace instanceof Tma t)",
+              "        return t.sectors().stream().mapToInt(this::countAircraft).sum();",
+              "    throw new IllegalArgumentException();   // yeni seviye = her fonksiyonu aç",
+              "}"
+            ],
+            "why": {
+              "en": "Every question about airspace repeats the same type ladder, and a new level in the hierarchy breaks all of them.",
+              "tr": "Hava sahasına dair her soru aynı tür merdivenini tekrarlıyor; hiyerarşiye eklenen yeni bir seviye hepsini bozuyor."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public interface Airspace { int aircraftCount(); }",
+              "",
+              "public class Sector implements Airspace {",
+              "    public int aircraftCount() { return aircraft.size(); }",
+              "}",
+              "",
+              "public class AirspaceGroup implements Airspace {",
+              "    private final List<Airspace> children = new ArrayList<>();   // Sector ya da AirspaceGroup",
+              "    public int aircraftCount() {",
+              "        return children.stream().mapToInt(Airspace::aircraftCount).sum();",
+              "    }",
+              "}"
+            ],
+            "why": {
+              "en": "The group holds Airspace, not Sector, so depth is unlimited and the caller writes turkey.aircraftCount() for any level.",
+              "tr": "Grup Sector değil Airspace tutuyor; derinlik sınırsız ve çağıran her seviye için turkey.aircraftCount() yazıyor."
+            }
+          },
+          "tip": {
+            "en": "Put add() only on the composite, not on the shared interface, so a leaf is never forced to throw. Make the combining rule (sum, any, all) visible in the method name, and use the pattern only when the data really is a tree.",
+            "tr": "add() metodunu ortak arayüze değil yalnız bileşiğe koy ki yaprak istisna fırlatmak zorunda kalmasın. Birleştirme kuralını (toplam, herhangi, hepsi) metot adında görünür kıl ve deseni yalnız veri gerçekten bir ağaçsa kullan."
+          }
+        },
+        {
+          "id": "facade",
+          "pattern": "FACADE",
+          "source": "gof",
+          "related": [{ "page": 115, "en": "Hiding the Boundary Interface (Ch. 8)", "tr": "Sınır Arayüzünü Gizlemek (Bl. 8)" }],
+          "title": { "en": "Facade", "tr": "Cephe (Facade)" },
+          "summary": {
+            "en": "Puts one simple door in front of a complicated subsystem. The caller asks for the whole task in a single call, and the facade coordinates the parts behind it.",
+            "tr": "Karmaşık bir alt sistemin önüne tek ve sade bir kapı koyar. Çağıran bütün işi tek bir çağrıyla ister, cephe arkadaki parçaları koordine eder."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "// konsol kodu beş alt sistemi tek tek biliyor",
+              "FlightPlan plan = plans.findActiveByCallsign(cs).orElseThrow();",
+              "Runway runway = runwayPlanner.assignArrival(plan);",
+              "Squawk code = squawkPool.allocate();",
+              "radar.track(cs, code);",
+              "strips.print(plan, runway, code);"
+            ],
+            "why": {
+              "en": "The console depends on five subsystems and on the order they must be called in; every console screen repeats it.",
+              "tr": "Konsol beş alt sisteme ve çağrılma sıralarına bağımlı; her konsol ekranı bunu tekrarlıyor."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public class ArrivalDesk {                       // cephe",
+              "    public ArrivalHandling handle(Callsign cs) {",
+              "        FlightPlan plan = plans.findActiveByCallsign(cs).orElseThrow();",
+              "        Runway runway = runwayPlanner.assignArrival(plan);",
+              "        Squawk code = squawkPool.allocate();",
+              "        radar.track(cs, code);",
+              "        return strips.print(plan, runway, code);",
+              "    }",
+              "}",
+              "",
+              "arrivalDesk.handle(callsign);                    // konsol yalnız bunu bilir"
+            ],
+            "why": {
+              "en": "The order and the five dependencies live in one place; the console knows a single operation.",
+              "tr": "Sıra ve beş bağımlılık tek yerde duruyor; konsol tek bir işlem biliyor."
+            }
+          },
+          "tip": {
+            "en": "Keep a facade thin: it coordinates, it does not decide. Once business rules creep in it becomes a god class; move those rules into the domain objects.",
+            "tr": "Cepheyi ince tut: koordine eder, karar vermez. İş kuralları içine sızdığı an tanrı sınıfa dönüşür; o kuralları alan nesnelerine taşı."
+          }
+        },
+        {
+          "id": "bridge",
+          "pattern": "BRIDGE",
+          "source": "gof",
+          "related": [{ "page": 149, "en": "Isolating from Change (Ch. 10)", "tr": "Değişimden Yalıtma (Bl. 10)" }],
+          "title": { "en": "Bridge", "tr": "Köprü (Bridge)" },
+          "summary": {
+            "en": "Separates what something does from how it is carried out, so the two sides can grow independently. Instead of one subclass for every combination, the abstraction holds an implementation object.",
+            "tr": "Bir şeyin ne yaptığını nasıl yapıldığından ayırır; iki taraf birbirinden bağımsız büyüyebilir. Her kombinasyon için bir alt sınıf yerine, soyutlama bir uygulama nesnesi tutar."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "class ApproachRadarOnScreen  extends RadarView { ... }",
+              "class ApproachRadarOnWeb     extends RadarView { ... }",
+              "class EnrouteRadarOnScreen   extends RadarView { ... }",
+              "class EnrouteRadarOnWeb      extends RadarView { ... }   // 2 x 2 = 4, 3 x 3 = 9 sınıf"
+            ],
+            "why": {
+              "en": "Two independent dimensions were folded into one hierarchy, so the class count multiplies.",
+              "tr": "Birbirinden bağımsız iki boyut tek bir hiyerarşiye katlanmış; sınıf sayısı çarpılarak artıyor."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public abstract class RadarView {",
+              "    protected final Renderer renderer;                    // köprü",
+              "    protected RadarView(Renderer renderer) { this.renderer = renderer; }",
+              "    public abstract void draw(List<Track> tracks);",
+              "}",
+              "",
+              "public class ApproachRadar extends RadarView { ... }     // ne gösterilir",
+              "public class ScreenRenderer implements Renderer { ... }   // nasıl çizilir",
+              "",
+              "new ApproachRadar(new WebRenderer());"
+            ],
+            "why": {
+              "en": "Views and renderers grow separately: 3 + 3 classes instead of 3 x 3.",
+              "tr": "Görünümler ve çiziciler ayrı ayrı çoğalıyor: 3 x 3 yerine 3 + 3 sınıf."
+            }
+          },
+          "tip": {
+            "en": "If you see class names made of two words from two lists (ApproachOnWeb, EnrouteOnScreen), a bridge is hiding. It is composition over inheritance applied to a whole hierarchy.",
+            "tr": "İki ayrı listeden iki kelimeyle kurulmuş sınıf adları (ApproachOnWeb, EnrouteOnScreen) görüyorsan orada bir köprü saklanıyor. Bu, kalıtım yerine bileşimin bütün bir hiyerarşiye uygulanmış hâlidir."
+          }
+        },
+        {
+          "id": "flyweight",
+          "pattern": "FLYWEIGHT",
+          "source": "gof",
+          "related": [],
+          "title": { "en": "Flyweight", "tr": "Sinek Siklet (Flyweight)" },
+          "summary": {
+            "en": "When thousands of objects carry the same heavy data, that data is kept once and shared. Each object keeps only its own varying part and points to the shared, immutable part.",
+            "tr": "Binlerce nesne aynı ağır veriyi taşıyorsa o veri bir kez tutulur ve paylaşılır. Her nesne yalnız kendine özgü değişen kısmını saklar, değişmeyen ortak kısma işaret eder."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "public class Track {",
+              "    private final Callsign callsign;",
+              "    private final Coordinates position;",
+              "    private final PerformanceTable performance = PerformanceTable.load(\"A320\");   // her iz için yeniden",
+              "}"
+            ],
+            "why": {
+              "en": "Every radar track loads its own copy of the same large performance table; memory grows with traffic.",
+              "tr": "Her radar izi aynı büyük performans tablosunun kendi kopyasını yüklüyor; bellek trafikle birlikte büyüyor."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public final class AircraftType {                       // paylaşılan, değişmez",
+              "    private static final Map<String, AircraftType> CACHE = new ConcurrentHashMap<>();",
+              "    public static AircraftType of(String icao) {",
+              "        return CACHE.computeIfAbsent(icao, AircraftType::load);",
+              "    }",
+              "}",
+              "",
+              "public record Track(Callsign callsign, Coordinates position, AircraftType type) {}"
+            ],
+            "why": {
+              "en": "One AircraftType per model, shared by every track of that model; each track stores only its own position.",
+              "tr": "Her model için tek bir AircraftType var ve o modelin bütün izleri onu paylaşıyor; her iz yalnız kendi konumunu saklıyor."
+            }
+          },
+          "tip": {
+            "en": "The shared part must be immutable, otherwise one object's change leaks into all others. Measure first: this is a memory optimisation, not a design goal.",
+            "tr": "Paylaşılan kısım değişmez olmalı; yoksa bir nesnenin değişikliği diğer hepsine sızar. Önce ölç: bu bir bellek optimizasyonudur, tasarım hedefi değil."
+          }
+        }
+      ]
+    },
+    {
+      "id": "behavioral",
+      "title": { "en": "Behavioral (GoF)", "tr": "Davranışsal (GoF)" },
+      "cards": [
+        {
+          "id": "observer",
+          "pattern": "OBSERVER",
+          "source": "gof",
+          "related": [{ "page": 149, "en": "Isolating from Change (Ch. 10)", "tr": "Değişimden Yalıtma (Bl. 10)" }],
+          "title": { "en": "Observer", "tr": "Gözlemci (Observer)" },
+          "summary": {
+            "en": "An object announces a change, and everyone who subscribed is notified. The publisher does not know who is listening, so new listeners are added without touching it.",
+            "tr": "Bir nesne bir değişikliği duyurur, abone olan herkes haberdar edilir. Yayıncı kimin dinlediğini bilmez; yeni dinleyiciler ona dokunmadan eklenir."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "public void onPositionUpdate(Track track) {",
+              "    display.redraw(track);",
+              "    conflictAlert.check(track);",
+              "    recorder.save(track);          // yeni tüketici = RadarFeed'i aç",
+              "}"
+            ],
+            "why": {
+              "en": "The radar feed knows every consumer by name and depends on all of them.",
+              "tr": "Radar beslemesi her tüketiciyi adıyla tanıyor ve hepsine bağımlı."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public interface TrackListener { void onUpdate(Track track); }",
+              "",
+              "public class RadarFeed {",
+              "    private final List<TrackListener> listeners = new CopyOnWriteArrayList<>();",
+              "    public void subscribe(TrackListener listener) { listeners.add(listener); }",
+              "    void publish(Track track) { listeners.forEach(l -> l.onUpdate(track)); }",
+              "}",
+              "",
+              "feed.subscribe(display::redraw);",
+              "feed.subscribe(conflictAlert::check);"
+            ],
+            "why": {
+              "en": "The feed depends only on the TrackListener interface; wiring happens in main, not inside the feed.",
+              "tr": "Besleme yalnız TrackListener arayüzüne bağımlı; bağlama içeride değil main'de yapılıyor."
+            }
+          },
+          "tip": {
+            "en": "Listeners must not throw into the publisher or block it for long; one slow listener stalls all others. Domain events in DDD are the same idea at the architecture level.",
+            "tr": "Dinleyiciler yayıncıya istisna fırlatmamalı ve onu uzun süre bekletmemeli; tek bir yavaş dinleyici diğer hepsini durdurur. DDD'deki alan olayları aynı fikrin mimari düzeydeki hâlidir."
+          }
+        },
+        {
+          "id": "state",
+          "pattern": "STATE",
+          "source": "gof",
+          "related": [{ "page": 38, "en": "Switch Statements (Ch. 3)", "tr": "Switch İfadeleri (Bl. 3)" }],
+          "title": { "en": "State", "tr": "Durum (State)" },
+          "summary": {
+            "en": "An object's behaviour changes with its state, and each state becomes its own class. The object delegates to its current state instead of switching on a status field in every method.",
+            "tr": "Bir nesnenin davranışı durumuna göre değişir ve her durum kendi sınıfı olur. Nesne her metotta bir durum alanı üzerinde switch yapmak yerine mevcut durumuna devreder."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "public void activate() {",
+              "    switch (status) {",
+              "        case FILED -> status = ACTIVE;",
+              "        case ACTIVE, CLOSED -> throw new IllegalTransitionException(status);",
+              "    }",
+              "}",
+              "public void close() { switch (status) { ... } }      // aynı switch her metotta"
+            ],
+            "why": {
+              "en": "The same switch on status is repeated in every method; a new state means editing all of them.",
+              "tr": "Durum üzerindeki aynı switch her metotta tekrarlanıyor; yeni bir durum hepsini düzenlemek demek."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "interface PlanState {",
+              "    default PlanState activate() { throw new IllegalTransitionException(this); }",
+              "    default PlanState close()    { throw new IllegalTransitionException(this); }",
+              "}",
+              "final class Filed  implements PlanState { public PlanState activate() { return new Active(); } }",
+              "final class Active implements PlanState { public PlanState close()    { return new Closed(); } }",
+              "final class Closed implements PlanState { }",
+              "",
+              "public void activate() { state = state.activate(); }   // FlightPlan yalnız devreder"
+            ],
+            "why": {
+              "en": "Each state lists only the transitions it allows; forbidden ones fall back to the default and throw.",
+              "tr": "Her durum yalnız izin verdiği geçişleri listeliyor; yasak olanlar varsayılana düşüp istisna fırlatıyor."
+            }
+          },
+          "tip": {
+            "en": "With a few states and simple rules, an enum with methods or a sealed interface plus switch is enough. Choose State classes when each state carries real behaviour of its own.",
+            "tr": "Durum az ve kurallar basitse metotlu bir enum ya da sealed arayüz ile switch yeterlidir. Her durumun gerçekten kendine ait bir davranışı varsa Durum sınıflarını seç."
+          }
+        },
+        {
+          "id": "chain-of-responsibility",
+          "pattern": "CHAIN OF RESPONSIBILITY",
+          "source": "gof",
+          "related": [],
+          "title": { "en": "Chain of Responsibility", "tr": "Sorumluluk Zinciri (Chain of Responsibility)" },
+          "summary": {
+            "en": "A request travels along a chain of handlers until one of them takes it. The sender does not know who will handle it, and the chain can be reordered or extended freely.",
+            "tr": "Bir istek, işleyicilerden biri onu üstlenene kadar bir zincir boyunca ilerler. Gönderen isteği kimin ele alacağını bilmez; zincir serbestçe yeniden sıralanır ya da uzatılır."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "void escalate(Alert alert) {",
+              "    if (alert.severity() == LOW) sectorController.handle(alert);",
+              "    else if (alert.severity() == MEDIUM) supervisor.handle(alert);",
+              "    else emergencyCell.handle(alert);          // yeni kademe = yeni else if",
+              "}"
+            ],
+            "why": {
+              "en": "The escalation order is hard-coded in one conditional that grows with every new level.",
+              "tr": "Tırmanma sırası, her yeni kademeyle büyüyen tek bir koşul yapısına gömülü."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public abstract class AlertHandler {",
+              "    private final AlertHandler next;",
+              "    protected AlertHandler(AlertHandler next) { this.next = next; }",
+              "    public final void handle(Alert alert) {",
+              "        if (canHandle(alert)) process(alert); else next.handle(alert);",
+              "    }",
+              "    protected abstract boolean canHandle(Alert alert);",
+              "    protected abstract void process(Alert alert);",
+              "}",
+              "",
+              "new SectorController(new Supervisor(new EmergencyCell()));"
+            ],
+            "why": {
+              "en": "Each level knows only its own threshold and its successor; the order is built in one line of wiring.",
+              "tr": "Her kademe yalnız kendi eşiğini ve bir sonrakini biliyor; sıra tek satırlık bağlamayla kuruluyor."
+            }
+          },
+          "tip": {
+            "en": "Always end the chain with a handler that accepts everything, otherwise a request can fall off the end silently. Servlet filters and logging handlers are everyday examples.",
+            "tr": "Zinciri her zaman her şeyi kabul eden bir işleyiciyle bitir; yoksa bir istek sessizce zincirin sonundan düşebilir. Servlet filtreleri ve log işleyicileri gündelik örneklerdir."
+          }
+        },
+        {
+          "id": "mediator",
+          "pattern": "MEDIATOR",
+          "source": "gof",
+          "related": [{ "page": 97, "en": "Law of Demeter (Ch. 6)", "tr": "Demeter Yasası (Bl. 6)" }],
+          "title": { "en": "Mediator", "tr": "Arabulucu (Mediator)" },
+          "summary": {
+            "en": "Objects stop talking to each other directly and talk to a mediator instead. The web of many-to-many links becomes a star with the mediator in the centre.",
+            "tr": "Nesneler birbirleriyle doğrudan konuşmayı bırakır, bunun yerine bir arabulucuyla konuşur. Çoktan çoğa bağlantı ağı, ortasında arabulucunun durduğu bir yıldıza dönüşür."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "// her uçak diğer uçakları tanıyor",
+              "void requestDescent(Aircraft self, List<Aircraft> nearby) {",
+              "    for (Aircraft other : nearby)",
+              "        if (other.isBelow(self)) other.warn(self);   // N uçak, N x N bağ",
+              "}"
+            ],
+            "why": {
+              "en": "Every aircraft depends on every other aircraft; coordination rules are scattered among them.",
+              "tr": "Her uçak diğer her uçağa bağımlı; koordinasyon kuralları aralarına dağılmış."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public class Tower {                                 // arabulucu",
+              "    public Clearance requestDescent(Callsign cs, Altitude target) {",
+              "        if (separation.isSafe(cs, target)) return Clearance.descend(cs, target);",
+              "        return Clearance.hold(cs);",
+              "    }",
+              "}",
+              "",
+              "Clearance c = tower.requestDescent(callsign, Altitude.flightLevel(120));"
+            ],
+            "why": {
+              "en": "Aircraft know only the tower, which is how real air traffic control works; the separation rule lives in one place.",
+              "tr": "Uçaklar yalnız kuleyi tanıyor; gerçek hava trafik kontrolü de böyle işler. Ayrılma kuralı tek yerde duruyor."
+            }
+          },
+          "tip": {
+            "en": "Watch the mediator's size: it attracts every coordination rule and can turn into a god class. Split it by responsibility when it grows past a single change reason.",
+            "tr": "Arabulucunun boyutunu izle: bütün koordinasyon kurallarını kendine çeker ve tanrı sınıfa dönüşebilir. Tek bir değişme nedenini aşınca sorumluluğa göre böl."
+          }
+        },
+        {
+          "id": "memento",
+          "pattern": "MEMENTO",
+          "source": "gof",
+          "related": [{ "page": 99, "en": "Hiding Structure (Ch. 6)", "tr": "Yapıyı Gizlemek (Bl. 6)" }],
+          "title": { "en": "Memento", "tr": "Hatıra (Memento)" },
+          "summary": {
+            "en": "Saves an object's state in an opaque snapshot so it can be restored later, without exposing the object's internals. The caller keeps the snapshot but cannot read or change it.",
+            "tr": "Bir nesnenin durumunu, iç yapısını açmadan, sonra geri yüklenebilecek kapalı bir anlık görüntüye kaydeder. Çağıran görüntüyü saklar ama onu okuyamaz, değiştiremez."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "// geri alma için planın içi dışarı açılıyor",
+              "Altitude savedAltitude = plan.getCruisingAltitude();",
+              "List<RouteLeg> savedLegs = new ArrayList<>(plan.getLegs());",
+              "...",
+              "plan.setCruisingAltitude(savedAltitude);           // setter kuralları atlıyor",
+              "plan.setLegs(savedLegs);"
+            ],
+            "why": {
+              "en": "Undo forces getters and setters on the aggregate, and the setters bypass its invariants.",
+              "tr": "Geri alma, küme üzerinde getter ve setter açmaya zorluyor; setter'lar değişmez kuralları atlıyor."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public final class FlightPlan {",
+              "    public Snapshot snapshot() { return new Snapshot(cruisingAltitude, List.copyOf(legs)); }",
+              "    public void restore(Snapshot s) { cruisingAltitude = s.altitude; legs = new ArrayList<>(s.legs); }",
+              "",
+              "    public static final class Snapshot {                // alanları dışarıya kapalı",
+              "        private final Altitude altitude;",
+              "        private final List<RouteLeg> legs;",
+              "        private Snapshot(Altitude a, List<RouteLeg> l) { altitude = a; legs = l; }",
+              "    }",
+              "}"
+            ],
+            "why": {
+              "en": "Only FlightPlan can create or read a Snapshot; the undo stack stores it without knowing what is inside.",
+              "tr": "Snapshot'ı yalnız FlightPlan yaratabilir ve okuyabilir; geri alma yığını içinde ne olduğunu bilmeden onu saklıyor."
+            }
+          },
+          "tip": {
+            "en": "Snapshots of large objects are costly; for long histories consider storing commands or domain events instead and replaying them.",
+            "tr": "Büyük nesnelerin anlık görüntüleri pahalıdır; uzun geçmişler için bunun yerine komutları ya da alan olaylarını saklayıp yeniden oynatmayı düşün."
+          }
+        },
+        {
+          "id": "iterator",
+          "pattern": "ITERATOR",
+          "source": "gof",
+          "related": [{ "page": 93, "en": "Data Abstraction (Ch. 6)", "tr": "Veri Soyutlama (Bl. 6)" }],
+          "title": { "en": "Iterator", "tr": "Yineleyici (Iterator)" },
+          "summary": {
+            "en": "Lets a caller walk through a collection one element at a time without seeing how the collection is stored. Java's for-each loop is built on it.",
+            "tr": "Çağıranın bir koleksiyonu, nasıl saklandığını görmeden, eleman eleman dolaşmasını sağlar. Java'nın for-each döngüsü bunun üzerine kuruludur."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "public List<RouteLeg> getLegs() { return legs; }    // iç liste dışarıda",
+              "",
+              "for (int i = 0; i < plan.getLegs().size(); i++)",
+              "    plan.getLegs().get(i) ...;                        // ve biri .add() çağırabilir"
+            ],
+            "why": {
+              "en": "The internal list is handed out; callers depend on it being a List and can modify it behind the plan's back.",
+              "tr": "İç liste dışarı veriliyor; çağıranlar onun bir List olmasına bağımlı ve planın haberi olmadan onu değiştirebilir."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public final class FlightPlan implements Iterable<RouteLeg> {",
+              "    public Iterator<RouteLeg> iterator() {",
+              "        return Collections.unmodifiableList(legs).iterator();",
+              "    }",
+              "}",
+              "",
+              "for (RouteLeg leg : plan) draw(leg);                  // nasıl saklandığı gizli"
+            ],
+            "why": {
+              "en": "Callers can only walk the legs; storage can change from List to array or database cursor without touching them.",
+              "tr": "Çağıranlar bacakları yalnız dolaşabiliyor; saklama List'ten diziye ya da veritabanı imlecine değişse de onlara dokunulmaz."
+            }
+          },
+          "tip": {
+            "en": "In modern Java you rarely write an Iterator class; implement Iterable or return a Stream. The lesson that remains is to expose traversal, not the container.",
+            "tr": "Modern Java'da Iterator sınıfını nadiren yazarsın; Iterable'ı uygula ya da bir Stream döndür. Kalıcı ders şu: kabı değil, dolaşmayı dışarı aç."
+          }
+        },
+        {
+          "id": "interpreter",
+          "pattern": "INTERPRETER",
+          "source": "gof",
+          "related": [],
+          "title": { "en": "Interpreter", "tr": "Yorumlayıcı (Interpreter)" },
+          "summary": {
+            "en": "Represents each rule of a small language as a class, and evaluates a sentence by combining those classes. Suited to compact, stable grammars such as report codes or filter expressions.",
+            "tr": "Küçük bir dilin her kuralını bir sınıf olarak temsil eder ve bir cümleyi bu sınıfları birleştirerek değerlendirir. Rapor kodları ya da filtre ifadeleri gibi kısa ve kararlı gramerlere uygundur."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "// METAR ayrıştırma her yere dağılmış",
+              "String[] parts = metar.split(\" \");",
+              "int windDir = Integer.parseInt(parts[2].substring(0, 3));",
+              "int windKt  = Integer.parseInt(parts[2].substring(3, 5));   // grup kayarsa yanlış değer"
+            ],
+            "why": {
+              "en": "Positional string slicing encodes the grammar implicitly; one optional group shifts every index.",
+              "tr": "Konuma göre metin kesmek grameri örtük olarak kodluyor; isteğe bağlı tek bir grup her indeksi kaydırıyor."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "interface MetarGroup {",
+              "    boolean matches(String token);",
+              "    void apply(String token, Metar.Builder metar);",
+              "}",
+              "",
+              "final class WindGroup implements MetarGroup {         // \"24012KT\" kuralı",
+              "    public boolean matches(String t) { return t.matches(\"\\\\d{5}KT\"); }",
+              "    public void apply(String t, Metar.Builder m) { m.wind(WindReading.parse(t)); }",
+              "}",
+              "",
+              "for (String token : tokens) groups.stream().filter(g -> g.matches(token)).findFirst()",
+              "    .ifPresent(g -> g.apply(token, builder));"
+            ],
+            "why": {
+              "en": "Each grammar rule is a small, testable class, and group order no longer matters.",
+              "tr": "Her gramer kuralı küçük ve test edilebilir bir sınıf; grupların sırası artık önemli değil."
+            }
+          },
+          "tip": {
+            "en": "For a large or evolving grammar, use a parser generator instead. Chapter 9's domain-specific testing language and Chapter 11's DSLs are the book's closest relatives of this idea.",
+            "tr": "Büyük ya da evrilen bir gramer için bunun yerine bir ayrıştırıcı üreteci kullan. 9. bölümün alana özgü test dili ve 11. bölümün DSL'leri, kitapta bu fikre en yakın akrabalardır."
+          }
+        }
+      ]
+    },
+    {
+      "id": "enterprise",
+      "title": { "en": "Enterprise and domain-driven", "tr": "Kurumsal ve alan odaklı" },
+      "cards": [
+        {
+          "id": "repository",
+          "pattern": "REPOSITORY",
+          "source": "ddd",
+          "related": [{ "page": 101, "en": "Active Record (Ch. 6)", "tr": "Aktif Kayıt (Bl. 6)" }, { "page": 157, "en": "Dependency Injection (Ch. 11)", "tr": "Bağımlılık Enjeksiyonu (Bl. 11)" }],
+          "title": { "en": "Repository", "tr": "Depo (Repository)" },
+          "summary": {
+            "en": "Gives the domain a collection-like interface for its aggregate roots and hides the database behind it. The interface lives in the domain and speaks its language; the implementation lives in an adapter.",
+            "tr": "Alana, kümelerinin kökleri için koleksiyon benzeri bir arayüz verir ve veritabanını onun arkasına gizler. Arayüz alanda yaşar ve alanın dilini konuşur; uygulaması bir adaptörde yaşar."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "public Clearance issue(Callsign cs, Runway runway) {",
+              "    FlightPlanEntity e = em.createQuery(",
+              "        \"select p from FlightPlanEntity p where p.callsign = :cs and p.status = 'ACTIVE'\",",
+              "        FlightPlanEntity.class).setParameter(\"cs\", cs.value()).getSingleResult();",
+              "    ...                                              // use case JPA biliyor",
+              "}"
+            ],
+            "why": {
+              "en": "The use case knows JPA, table columns and query syntax; it cannot be tested without a database.",
+              "tr": "Kullanım senaryosu JPA'yı, tablo sütunlarını ve sorgu sözdizimini biliyor; veritabanı olmadan test edilemiyor."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public interface FlightPlanRepository {              // alan katmanında, port",
+              "    Optional<FlightPlan> findActiveByCallsign(Callsign callsign);",
+              "    void save(FlightPlan plan);",
+              "}",
+              "",
+              "FlightPlan plan = plans.findActiveByCallsign(cs).orElseThrow();",
+              "",
+              "// testte: new InMemoryFlightPlanRepository()"
+            ],
+            "why": {
+              "en": "The use case speaks domain language; JPA lives only in the adapter, and an in-memory version makes tests fast.",
+              "tr": "Kullanım senaryosu alanın dilini konuşuyor; JPA yalnız adaptörde duruyor, bellek içi bir sürüm testleri hızlandırıyor."
+            }
+          },
+          "tip": {
+            "en": "One repository per aggregate root, never per table. Return domain objects, never entities, and keep business rules out of queries.",
+            "tr": "Tablo başına değil, küme kökü başına bir depo. Asla entity değil alan nesnesi döndür ve iş kurallarını sorgulardan uzak tut."
+          }
+        },
+        {
+          "id": "data-mapper",
+          "pattern": "DATA MAPPER",
+          "source": "poeaa",
+          "related": [{ "page": 101, "en": "Active Record (Ch. 6)", "tr": "Aktif Kayıt (Bl. 6)" }],
+          "title": { "en": "Data Mapper", "tr": "Veri Eşleyici (Data Mapper)" },
+          "summary": {
+            "en": "A separate class translates between domain objects and database rows. The domain object does not know the database exists, and the table shape can differ from the object shape.",
+            "tr": "Ayrı bir sınıf, alan nesneleri ile veritabanı satırları arasında çeviri yapar. Alan nesnesi veritabanının varlığını bilmez; tablonun şekli nesnenin şeklinden farklı olabilir."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "@Entity",
+              "public class FlightPlan {                          // alan nesnesi tabloya bağlı",
+              "    @Id private Long id;",
+              "    private int cruisingAltitudeFeet;               // Altitude değer nesnesi kayboldu",
+              "    public void save() { ... }                      // kendini kaydediyor",
+              "}"
+            ],
+            "why": {
+              "en": "The domain object mirrors the table and saves itself; value objects flatten into primitives.",
+              "tr": "Alan nesnesi tablonun aynası ve kendini kaydediyor; değer nesneleri ilkel tiplere düzleşiyor."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public class FlightPlanMapper {                      // adaptör katmanında",
+              "    FlightPlan toDomain(FlightPlanEntity e) {",
+              "        return new FlightPlan(new FlightPlanId(e.id), Callsign.of(e.callsign),",
+              "                              new Altitude(e.cruisingAltitudeFeet));",
+              "    }",
+              "    FlightPlanEntity toEntity(FlightPlan p) { ... }",
+              "}"
+            ],
+            "why": {
+              "en": "FlightPlan keeps its value objects and invariants; only the mapper knows both shapes.",
+              "tr": "FlightPlan değer nesnelerini ve değişmez kurallarını koruyor; iki şekli de yalnız eşleyici biliyor."
+            }
+          },
+          "tip": {
+            "en": "JPA's EntityManager is itself a data mapper. In a hexagonal design you usually add a second, explicit mapper between the JPA entity and the domain object; that is the price of a domain free of the framework.",
+            "tr": "JPA'nın EntityManager'ı kendisi bir veri eşleyicidir. Altıgen tasarımda genellikle JPA entity'si ile alan nesnesi arasına ikinci, açık bir eşleyici eklersin; bu, çerçeveden bağımsız bir alanın bedelidir."
+          }
+        },
+        {
+          "id": "dao",
+          "pattern": "DAO",
+          "source": "j2ee",
+          "related": [{ "page": 101, "en": "Active Record (Ch. 6)", "tr": "Aktif Kayıt (Bl. 6)" }, { "page": 163, "en": "Pure Java AOP Frameworks (Ch. 11)", "tr": "Saf Java AOP Framework'leri (Bl. 11)" }],
+          "title": { "en": "Data Access Object", "tr": "Veri Erişim Nesnesi (DAO)" },
+          "summary": {
+            "en": "Collects the SQL, connections and row reading for one table in a single class. It speaks the language of tables: insert, update, select by id.",
+            "tr": "Bir tablonun SQL'ini, bağlantısını ve satır okumasını tek bir sınıfta toplar. Tabloların dilini konuşur: ekle, güncelle, kimliğe göre seç."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "public void closeFlight(long id) throws SQLException {",
+              "    try (Connection c = dataSource.getConnection();",
+              "         PreparedStatement ps = c.prepareStatement(\"update flight_plans set status = ? where id = ?\")) {",
+              "        ps.setString(1, \"CLOSED\"); ps.setLong(2, id); ps.executeUpdate();",
+              "    }                                                  // SQL iş kodunun ortasında",
+              "}"
+            ],
+            "why": {
+              "en": "SQL and connection handling sit inside business code and repeat wherever the table is touched.",
+              "tr": "SQL ve bağlantı yönetimi iş kodunun içinde duruyor ve tabloya dokunulan her yerde tekrarlanıyor."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public class FlightPlanDao {",
+              "    public Optional<FlightPlanRow> selectById(long id) { ... }",
+              "    public void updateStatus(long id, String status) { ... }",
+              "}",
+              "",
+              "// Depo onu kullanır, alan onu hiç görmez",
+              "public class JdbcFlightPlanRepository implements FlightPlanRepository { private final FlightPlanDao dao; ... }"
+            ],
+            "why": {
+              "en": "Table access has one home; the repository above it turns rows into domain objects.",
+              "tr": "Tablo erişiminin tek bir evi var; üstündeki depo satırları alan nesnelerine çeviriyor."
+            }
+          },
+          "tip": {
+            "en": "DAO speaks table language, Repository speaks domain language. In small systems they merge into one class; ask which vocabulary the methods use to know what you have.",
+            "tr": "DAO tablo dilini, Depo alan dilini konuşur. Küçük sistemlerde ikisi tek sınıfta birleşir; elindekinin ne olduğunu anlamak için metotların hangi sözcükleri kullandığına bak."
+          }
+        },
+        {
+          "id": "null-object",
+          "pattern": "NULL OBJECT",
+          "source": "plopd",
+          "related": [{ "page": 110, "en": "Special Case Pattern (Ch. 7)", "tr": "Özel Durum Deseni (Bl. 7)" }],
+          "title": { "en": "Null Object", "tr": "Boş Nesne (Null Object)" },
+          "summary": {
+            "en": "Instead of null, pass an object that implements the interface and does nothing. Callers stop checking for null, because there is always a real object to call.",
+            "tr": "null yerine, arayüzü uygulayan ve hiçbir şey yapmayan bir nesne ver. Çağıranlar null kontrolünü bırakır, çünkü çağrılacak gerçek bir nesne her zaman vardır."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "public Clearance issue(Callsign cs, Runway runway) {",
+              "    Clearance c = plan.clearForTakeoff(runway);",
+              "    if (log != null) log.record(c);                  // her kullanımda kontrol",
+              "    return c;",
+              "}"
+            ],
+            "why": {
+              "en": "Every use of the optional dependency needs a null check, and one forgotten check is a NullPointerException.",
+              "tr": "İsteğe bağlı bağımlılığın her kullanımı bir null kontrolü istiyor; unutulan tek bir kontrol bir NullPointerException demek."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public interface ClearanceLog {",
+              "    void record(Clearance c);",
+              "    ClearanceLog NONE = c -> {};                     // sessizce yutar",
+              "}",
+              "",
+              "new IssueClearanceUseCase(plans, ClearanceLog.NONE, clock);",
+              "log.record(c);                                      // kontrol yok"
+            ],
+            "why": {
+              "en": "The dependency is always present; not wanting a log is expressed by the object, not by null.",
+              "tr": "Bağımlılık her zaman var; log istememek null ile değil, nesneyle ifade ediliyor."
+            }
+          },
+          "tip": {
+            "en": "Null Object is the do-nothing special case of the book's Special Case pattern (Chapter 7). Use it only when silence is really intended; wired by mistake in production, it hides lost data.",
+            "tr": "Boş Nesne, kitabın Özel Durum deseninin (7. bölüm) hiçbir şey yapmayan özel hâlidir. Yalnız sessizlik gerçekten isteniyorsa kullan; üretimde yanlışlıkla bağlanırsa kaybolan veriyi gizler."
+          }
+        },
+        {
+          "id": "value-object",
+          "pattern": "VALUE OBJECT",
+          "source": "ddd",
+          "related": [{ "page": 43, "en": "Argument Objects (Ch. 3)", "tr": "Argüman Nesneleri (Bl. 3)" }],
+          "title": { "en": "Value Object", "tr": "Değer Nesnesi (Value Object)" },
+          "summary": {
+            "en": "An object identified only by its value: two with equal fields are the same thing. It is immutable, validates itself on creation, and replaces primitive values that carry hidden rules.",
+            "tr": "Yalnız değeriyle tanınan nesne: alanları eşit olan iki tanesi aynı şeydir. Değiştirilemezdir, yaratılırken kendini doğrular ve gizli kurallar taşıyan ilkel değerlerin yerine geçer."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "void assignRunway(String callsign, String runway, int altitudeFeet) { ... }",
+              "",
+              "assignRunway(\"06L\", \"THY123\", -500);     // sıra karıştı, irtifa geçersiz, derleyici sustu"
+            ],
+            "why": {
+              "en": "Three primitives with hidden rules: order can be swapped and invalid values pass through.",
+              "tr": "Gizli kuralları olan üç ilkel tip: sıra karışabiliyor ve geçersiz değerler geçip gidiyor."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public record Runway(String designator) {",
+              "    public Runway {",
+              "        if (!designator.matches(\"(0[1-9]|[12][0-9]|3[0-6])[LCR]?\"))",
+              "            throw new InvalidRunwayException(designator);",
+              "    }",
+              "}",
+              "",
+              "void assignRunway(Callsign callsign, Runway runway, Altitude altitude) { ... }"
+            ],
+            "why": {
+              "en": "Types stop a swapped order at compile time, and an invalid runway can never be created.",
+              "tr": "Tipler karışan sırayı derleme zamanında durduruyor; geçersiz bir pist hiç yaratılamıyor."
+            }
+          },
+          "tip": {
+            "en": "Ask whether two instances with equal fields are the same thing; if yes, it is a value object. In Java a record gives immutability and value equality for free, but copy mutable components such as lists in the compact constructor.",
+            "tr": "Alanları eşit iki örneğin aynı şey olup olmadığını sor; evetse bu bir değer nesnesidir. Java'da record değiştirilemezliği ve değer eşitliğini bedava verir, ama liste gibi değişebilir bileşenleri kompakt kurucuda kopyala."
+          }
+        },
+        {
+          "id": "aggregate",
+          "pattern": "AGGREGATE",
+          "source": "ddd",
+          "related": [{ "page": 97, "en": "Law of Demeter (Ch. 6)", "tr": "Demeter Yasası (Bl. 6)" }],
+          "title": { "en": "Aggregate", "tr": "Küme (Aggregate)" },
+          "summary": {
+            "en": "A cluster of objects that must stay consistent together, with a single root as the only door. Outsiders talk to the root, reference other aggregates only by id, and one transaction changes one aggregate.",
+            "tr": "Birlikte tutarlı kalması gereken nesnelerden oluşan, tek kapısı bir kök olan küme. Dışarıdakiler yalnız kökle konuşur, başka kümelere yalnız kimlikle başvurur ve bir işlem tek bir kümeyi değiştirir."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "// bacak doğrudan listeye ekleniyor, kök habersiz",
+              "plan.getLegs().add(new RouteLeg(4, ist, ank, Altitude.flightLevel(410)));",
+              "// seyir irtifası FL350 idi: kural sessizce çiğnendi"
+            ],
+            "why": {
+              "en": "An internal entity is changed from outside, so the root cannot enforce the rule that legs stay below cruising altitude.",
+              "tr": "Kümenin içindeki bir varlık dışarıdan değiştiriliyor; kök, bacakların seyir irtifasının altında kalması kuralını uygulayamıyor."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public void addLeg(Waypoint from, Waypoint to, Altitude altitude) {   // tek kapı",
+              "    if (altitude.isAbove(cruisingAltitude))",
+              "        throw new LegAboveCruisingAltitudeException(id, altitude);",
+              "    legs.add(new RouteLeg(legs.size() + 1, from, to, altitude));",
+              "}",
+              "",
+              "public List<RouteLeg> legs() { return List.copyOf(legs); }            // salt okunur"
+            ],
+            "why": {
+              "en": "Legs are added only through the root, which checks the invariant; readers get a copy they cannot modify.",
+              "tr": "Bacaklar yalnız kök üzerinden ekleniyor ve kök değişmez kuralı denetliyor; okuyanlar değiştiremeyecekleri bir kopya alıyor."
+            }
+          },
+          "tip": {
+            "en": "Keep aggregates small: include only what must be consistent in the same transaction. Physical containment (a sector is part of the airspace) is not a reason to put things in one aggregate.",
+            "tr": "Kümeleri küçük tut: yalnız aynı işlemde tutarlı olması gerekenleri içine al. Fiziksel olarak içinde olmak (sektörün hava sahasının parçası olması) bir şeyleri aynı kümeye koymak için gerekçe değildir."
+          }
+        },
+        {
+          "id": "service-locator",
+          "pattern": "SERVICE LOCATOR",
+          "source": "fowler-ioc",
+          "related": [{ "page": 157, "en": "Dependency Injection (Ch. 11)", "tr": "Bağımlılık Enjeksiyonu (Bl. 11)" }],
+          "title": { "en": "Service Locator", "tr": "Servis Bulucu (Service Locator)" },
+          "summary": {
+            "en": "An object fetches its own dependencies from a central registry by name or type. The book's JNDI lookup is this pattern; it removes new, but the object stays active and its needs are hidden in its body.",
+            "tr": "Bir nesne kendi bağımlılıklarını merkezi bir kayıttan adla ya da tiple kendisi çeker. Kitaptaki JNDI araması bu desendir; new'ü kaldırır ama nesne etkin kalır ve ihtiyaçları gövdesinde gizlenir."
+          },
+          "bad": {
+            "lang": "java",
+            "code": [
+              "public class IssueClearanceUseCase {",
+              "    public Clearance issue(Callsign cs, Runway runway) {",
+              "        FlightPlanRepository plans = ServiceLocator.get(FlightPlanRepository.class);",
+              "        ClearanceLog log = ServiceLocator.get(ClearanceLog.class);   // bağımlılık gövdede",
+              "        ...",
+              "    }",
+              "}"
+            ],
+            "why": {
+              "en": "The constructor promises nothing, the dependencies appear only when the method runs, and tests must set up the global locator.",
+              "tr": "Kurucu hiçbir şey vaat etmiyor, bağımlılıklar ancak metot çalışınca ortaya çıkıyor ve testler küresel bulucuyu kurmak zorunda."
+            }
+          },
+          "good": {
+            "lang": "java",
+            "code": [
+              "public class IssueClearanceUseCase {",
+              "    private final FlightPlanRepository plans;",
+              "    private final ClearanceLog log;",
+              "    public IssueClearanceUseCase(FlightPlanRepository plans, ClearanceLog log) {",
+              "        this.plans = plans; this.log = log;          // edilgen: verilir",
+              "    }",
+              "}"
+            ],
+            "why": {
+              "en": "Dependencies are visible in the signature, fields are final, and a test simply passes fakes.",
+              "tr": "Bağımlılıklar imzada görünüyor, alanlar final ve test sadece sahte nesneleri veriyor."
+            }
+          },
+          "tip": {
+            "en": "Today it is usually treated as an anti-pattern in application code. It survives at the edges, for example in plugin loaders such as ServiceLoader, where the set of implementations is unknown until runtime.",
+            "tr": "Bugün uygulama kodunda genellikle bir karşı desen sayılır. Kenarlarda yaşamaya devam eder; örneğin uygulama kümesi çalışma zamanına kadar bilinmeyen ServiceLoader gibi eklenti yükleyicilerinde."
+          }
+        }
+      ]
+    }
+  ]
+}
