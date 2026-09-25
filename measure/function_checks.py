@@ -5,7 +5,7 @@ import ast
 from abc import ABC, abstractmethod
 
 from measure.findings import alarm, look
-from measure.syntax import assignment_targets, is_class_name, is_empty_body, is_name, is_none, is_self_attribute
+from measure.syntax import assignment_targets, is_empty_body, is_name, is_none, is_self_attribute
 
 IDEAL_BODY_LINES = 4
 MAX_BODY_LINES = 20
@@ -13,11 +13,6 @@ MAX_NESTING = 2
 MAX_ARGUMENTS = 2
 POLYADIC_ARGUMENTS = 4
 SELF_EVIDENT_NUMBERS = frozenset({0, 1, -1, 2})
-CHAIN_PREVIEW = 60
-DATA_STRUCTURE_METHODS = frozenset({"items", "keys", "values", "get", "copy", "count", "index", "split", "rsplit",
-                                    "splitlines", "strip", "lstrip", "rstrip", "lower", "upper", "replace", "join",
-                                    "startswith", "endswith", "format", "removeprefix", "removesuffix", "encode",
-                                    "decode"})
 
 
 class FunctionCheck(ABC):
@@ -98,33 +93,6 @@ class ReturnsNone(FunctionCheck):
         return text != "None" and ("None" in text or "Optional" in text)
 
 
-class TrainWrecks(FunctionCheck):
-    def findings(self):
-        return [alarm(f"zincirleme çağrı '{ast.unparse(node)[:CHAIN_PREVIEW]}' (Bl.6 · Train Wrecks; G36)")
-                for node in self._outermost_chains()]
-
-    def _outermost_chains(self):
-        chained = [node for node in self._function.own_nodes() if self._is_call_on_call(node)]
-        inner = {id(node.func.value) for node in chained}
-        return [node for node in chained if id(node) not in inner]
-
-    @classmethod
-    def _is_call_on_call(cls, node):
-        """Dönen nesne üzerinde yeni çağrı. Demeter'in izin verdikleri sayılmaz: fonksiyonun kendi kurduğu
-        nesne, `super()` ve veri yapısı işlemleri (Bl.6)."""
-        is_method_call = isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
-        if not is_method_call or node.func.attr in DATA_STRUCTURE_METHODS:
-            return False
-        return isinstance(node.func.value, ast.Call) and not cls._creates_object(node.func.value.func)
-
-    @staticmethod
-    def _creates_object(callee):
-        """`Sınıf(...)`, `Sınıf.fabrika(...)` ve `super()` nesneyi fonksiyonun kendisine kurar."""
-        if isinstance(callee, ast.Attribute):
-            return isinstance(callee.value, ast.Name) and is_class_name(callee.value.id)
-        return isinstance(callee, ast.Name) and (callee.id == "super" or is_class_name(callee.id))
-
-
 class SwallowedExceptions(FunctionCheck):
     def findings(self):
         return [alarm("istisna yutuluyor: except gövdesi boş (Bl.7; G4)") for node in self._function.own_nodes()
@@ -143,4 +111,4 @@ class MagicNumbers(FunctionCheck):
 
 
 FUNCTION_CHECKS = (FunctionSize, NestingDepth, ArgumentCount, FlagArguments, OutputArguments, CommandQuery,
-                   ReturnsNone, TrainWrecks, SwallowedExceptions, MagicNumbers)
+                   ReturnsNone, SwallowedExceptions, MagicNumbers)

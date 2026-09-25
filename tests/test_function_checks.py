@@ -3,7 +3,7 @@ import unittest
 from measure.findings import ALARM, LOOK
 from measure.function_checks import (IDEAL_BODY_LINES, MAX_BODY_LINES, ArgumentCount, CommandQuery, FlagArguments,
                                      FunctionSize, MagicNumbers, NestingDepth, OutputArguments, ReturnsNone,
-                                     SwallowedExceptions, TrainWrecks)
+                                     SwallowedExceptions)
 from tests.snippets import Snippet, function_with_body_lines, levels
 
 DOCUMENTED_IDEAL = 'def f():\n    """Belge."""\n' + "\n".join(f"    x{i} = {i}" for i in range(IDEAL_BODY_LINES))
@@ -154,32 +154,6 @@ class ReturnsNoneTest(unittest.TestCase):
 
     def test_command_returning_nothing_is_fine(self):
         self.assertEqual(ReturnsNone(Snippet("def f(self) -> None:\n    self.x = 1\n    return").function()).findings(), [])
-
-
-class TrainWrecksTest(unittest.TestCase):
-    def test_call_on_a_returned_object_is_a_train_wreck(self):
-        self.assertEqual(levels(TrainWrecks(Snippet("def f(ctxt): ctxt.options().scratch_dir()").function()).findings()), [ALARM])
-
-    def test_long_chain_is_reported_once(self):
-        self.assertEqual(len(TrainWrecks(Snippet("def f(a): a.b().c().d()").function()).findings()), 1)
-
-    def test_object_created_by_the_function_may_be_called(self):
-        self.assertEqual(TrainWrecks(Snippet("def f(path): Path(path).read_text()").function()).findings(), [])
-
-    def test_object_made_by_a_static_factory_may_be_called(self):
-        self.assertEqual(TrainWrecks(Snippet("def f(data): Card.of(data).kind()").function()).findings(), [])
-
-    def test_call_on_what_an_instance_returns_is_a_train_wreck(self):
-        self.assertEqual(levels(TrainWrecks(Snippet("def f(deck): deck.of(1).kind()").function()).findings()), [ALARM])
-
-    def test_call_on_what_a_constant_returns_is_a_train_wreck(self):
-        self.assertEqual(levels(TrainWrecks(Snippet("def f(): RULES.get(1).kind()").function()).findings()), [ALARM])
-
-    def test_super_may_be_called(self):
-        self.assertEqual(TrainWrecks(Snippet("def f(self): super().close()").function()).findings(), [])
-
-    def test_data_structure_operations_are_not_train_wrecks(self):
-        self.assertEqual(TrainWrecks(Snippet("def f(text): clean(text).strip()").function()).findings(), [])
 
 
 class SwallowedExceptionsTest(unittest.TestCase):
