@@ -86,7 +86,7 @@ class ClassDefinition:
         names = {method.name() for method in self.methods()}
         reach = self.instance_fields() | names
         return [Cluster(frozenset({m.name()}), frozenset((m.touched_attributes() & reach) | {m.name()}))
-                for m in self.methods() if not m.is_constructor()]
+                for m in self.methods() if not m.is_lifecycle()]
 
 
 def _merged_with(clusters, method):

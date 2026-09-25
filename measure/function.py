@@ -9,6 +9,8 @@ from measure.syntax import assignment_targets, is_none, is_self_attribute, nesti
 RECEIVERS = ("self", "cls")
 TEST_PREFIX = "test_"
 CONSTRUCTORS = frozenset({"__init__", "setUp"})  # setUp: test sınıfının kurulumu (Bl.9 · JUnit @Before)
+# tearDown kurulumun aynasıdır: kurucunun kurduğunu söker, ayrı bir sorumluluk değildir.
+LIFECYCLE = CONSTRUCTORS | {"tearDown"}
 CLASS_LEVEL_DECORATORS = frozenset({"staticmethod", "classmethod"})
 UNBOUND_DECORATORS = CLASS_LEVEL_DECORATORS | {"abstractmethod"}
 MUTATORS = frozenset({"append", "extend", "insert", "update", "add", "remove", "discard", "pop", "clear",
@@ -116,6 +118,9 @@ class Method(Function):
 
     def is_constructor(self):
         return self._node.name in CONSTRUCTORS
+
+    def is_lifecycle(self):
+        return self._node.name in LIFECYCLE
 
     def touched_attributes(self):
         return self_attributes(self._node)

@@ -138,6 +138,12 @@ class ResponsibilitiesTest(unittest.TestCase):
         self.assertEqual(Responsibilities(Snippet(MUTUAL_CALLS).cls()).findings(), [])
 
 
+    def test_tear_down_belongs_to_the_fixture(self):
+        self.assertEqual(Responsibilities(Snippet(TEST_WITH_TEAR_DOWN).cls()).findings(), [])
+
+    def test_ordinary_cleanup_method_is_a_responsibility_of_its_own(self):
+        self.assertEqual(levels(Responsibilities(Snippet(CLEANUP_BESIDE_WORK).cls()).findings()), [ALARM])
+
 class CohesionTest(unittest.TestCase):
     def test_field_used_by_one_method_is_worth_a_look(self):
         self.assertEqual(levels(Cohesion(Snippet(SUPER_DASHBOARD).cls()).findings()), [LOOK, LOOK])
@@ -184,6 +190,31 @@ class Chapter:
 
     def render(self):
         return self.title.upper() + render(self.first)
+"""
+
+TEST_WITH_TEAR_DOWN = """
+class PageTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = make_dir()
+        self.page = Page(self.tmp)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_title(self):
+        self.assertEqual(self.page.title(), "Başlık")
+"""
+
+CLEANUP_BESIDE_WORK = """
+class Page:
+    def __init__(self, tmp, title):
+        self.tmp, self.title = tmp, title
+
+    def cleanup(self):
+        self.tmp.cleanup()
+
+    def heading(self):
+        return self.title.upper()
 """
 
 DATA_WITH_NAMED_CONSTRUCTOR = """
