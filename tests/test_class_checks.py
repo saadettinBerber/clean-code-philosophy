@@ -177,6 +177,15 @@ class BookTestCase:
         self.tmp.cleanup()
 """
 
+FIELDS_ASSIGNED_TOGETHER = """
+class Chapter:
+    def __init__(self, title, pages):
+        self.title, (self.first, *self.rest) = title, pages
+
+    def render(self):
+        return self.title.upper() + render(self.first)
+"""
+
 DATA_WITH_NAMED_CONSTRUCTOR = """
 class Metadata:
     def __init__(self, title, author):
@@ -211,6 +220,10 @@ class Metadata:
 class HybridTest(unittest.TestCase):
     def test_public_field_beside_behavior_is_a_hybrid(self):
         self.assertEqual(levels(Hybrid(Snippet(PUBLIC_FIELD_WITH_BEHAVIOR).cls()).findings()), [ALARM])
+
+    def test_fields_assigned_together_are_public_state(self):
+        findings = Hybrid(Snippet(FIELDS_ASSIGNED_TOGETHER).cls()).findings()
+        self.assertIn("['first', 'rest', 'title']", findings[0].message)
 
     def test_public_accessor_beside_behavior_is_a_hybrid(self):
         self.assertEqual(levels(Hybrid(Snippet(PUBLIC_ACCESSOR_WITH_BEHAVIOR).cls()).findings()), [ALARM])

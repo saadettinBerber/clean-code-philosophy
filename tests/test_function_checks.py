@@ -121,6 +121,9 @@ class OutputArgumentsTest(unittest.TestCase):
     def test_assigning_into_an_argument_is_an_output_argument(self):
         self.assertEqual(levels(OutputArguments(Snippet("def f(page): page['title'] = 1").function()).findings()), [ALARM])
 
+    def test_assigning_into_an_argument_inside_a_tuple_is_an_output_argument(self):
+        self.assertEqual(levels(OutputArguments(Snippet("def f(page): page['title'], n = 1, 2").function()).findings()), [ALARM])
+
     def test_rebinding_the_name_is_not_an_output_argument(self):
         self.assertEqual(OutputArguments(Snippet("def f(page): page = 1").function()).findings(), [])
 

@@ -41,9 +41,16 @@ def self_attributes(node):
 
 
 def assignment_targets(node):
+    """Atamanın hedefleri; `a, b = ...` demeti tek tek hedeflerine açılır."""
     if isinstance(node, ast.Assign):
-        return node.targets
+        return [target for written in node.targets for target in _unpacked(written)]
     return [node.target] if isinstance(node, (ast.AugAssign, ast.AnnAssign)) else []
+
+
+def _unpacked(target):
+    if isinstance(target, (ast.Tuple, ast.List)):
+        return [inner for element in target.elts for inner in _unpacked(element)]
+    return _unpacked(target.value) if isinstance(target, ast.Starred) else [target]
 
 
 def root_name(node):
