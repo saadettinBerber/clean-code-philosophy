@@ -168,7 +168,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] İş mantığında istisna akış denetimi için kullanılmıyor; özel durumu SPECIAL CASE nesnesi karşılıyor. (Bl.7 · Define the Normal Flow) [ö/o]
 - [ ] Null döndürülmüyor: istisna, boş koleksiyon ya da özel durum nesnesi döndürülüyor. Null döndüren dış API sarmalanıyor. (Bl.7 · Don't Return Null) [ö]
 - [ ] Null argüman olarak geçilmiyor. (Bl.7 · Don't Pass Null) [ö]
-- [ ] İstisna yutulmuyor: boş yakalama bloğu ya da yalnız loglayıp susan dal yok. (Bl.4 · Mumbling; G4) [ö]
+- [ ] İstisna yutulmuyor: boş yakalama bloğu ya da yalnız loglayıp susan dal yok. (Bl.4 · Mumbling) [ö]
 
 ## 8 · Sınırlar (Bl.8)
 - [ ] Ham eşleme (`Map`) ya da dış kütüphane nesnesi sistemde elden ele dolaşmıyor; bir sınıfın ya da küçük bir ailenin içinde kalıyor. Public API sınır türü döndürmüyor ve almıyor. Dış pakete başvuran dosya sayısı en az. (Bl.8 · Using Third-Party Code; Clean Boundaries) [ö]
@@ -183,14 +183,14 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] Testte yalnız bellek ve işlemci verimliliği gevşeyebilir; temizlik gevşemez. (Bl.9 · A Dual Standard) [o]
 - [ ] Test başına tek kavram var ve assert sayısı en az. Test adı o kavramı söylüyor. (Bl.9 · One Assert per Test, Single Concept per Test) [ö/o]
 - [ ] F.I.R.S.T. (Bl.9 · F.I.R.S.T.; T9):
-  - Fast: milisaniyede koşar; 100 ms'yi aşan test alarmdır.
+  - Fast: milisaniyede koşar; 100 ms'yi aşan test alarmdır (eşik kitapta yok, bizim alarmımız).
   - Independent: sıra değişince de geçer.
   - Repeatable: her ortamda koşar; dosya sistemindeki gerçek dosyalara, dış süreçlere, ağa, saate ya da tohumsuz rastgeleliğe bağlı değil.
   - Self-Validating: her testin assert'i var; sonuç konsola yazılıp gözle okunmuyor.
   - Timely: kodla birlikte yazıldı.
 
   [ö]
-- [ ] Testler üretim nesnelerinin özel (private) üyelerine dokunmuyor. (Bl.10 · Encapsulation) [ö]
+- [ ] Testler üretim nesnelerinin özel (private) üyelerine dokunmuyor. Test için erişim düzeyi gevşetmek son çaredir: önce gizliliği koruyan yol aranır, bulunamazsa yalnız aynı paketteki teste açılır. (Bl.10 · Encapsulation) [ö]
 - [ ] Bozulabilecek her şey test edildi. Önemsiz görünen testler atlanmadı. Atlanan her testin gerekçesi, gereksinim hakkında bir soru olarak yazıldı: `@Ignore("soru: …")`. (T1, T3, T4) [ö/o]
 - [ ] Kapsam aracı değişen dosyalarda koştu, çalışmayan dallar incelendi. (T2, T8) [ö]
 - [ ] Sınırın iki yanı ayrı testlerle sınandı. Bulunan hatanın çevresi sıkı test edildi; başarısızlık örüntüsüne bakıldı. (T5, T6, T7; G3) [o]
@@ -216,7 +216,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] Service locator (global kayıt sözlüğü, adla arama) DI'ın yerine kullanılmıyor. (Bl.11 · Dependency Injection) [ö]
 - [ ] Nesnenin **ne zaman** kurulacağına uygulama, **nasıl** kurulacağına fabrika karar veriyor; fabrika dışarıdan veriliyor. (Bl.11 · Factories) [o]
 - [ ] Alan nesneleri düz nesne (POJO): diski, çerçeveyi ya da dış kütüphaneyi bilmiyor. G/Ç kenarda. (Bl.11 · Scaling Up) [ö]
-- [ ] Kesişen kaygılar (günlükleme, önbellek, yeniden deneme) alan koduna dağılmadan, hedef kod elle değiştirilmeden sarmalayıcıyla (DECORATOR, PROXY) tek bir yerde ekleniyor. Çalışma anında sınıf ya da modül yamama, özel yükleyici ya da sınıf üreten gizli mekanizma gibi görünmez büyü yok. Sarmalayıcı sarmaladığı koddan karmaşık değil. (Bl.11 · Cross-Cutting Concerns, Java Proxies, Pure Java AOP) [ö/o]
+- [ ] Kesişen kaygılar (günlükleme, önbellek, yeniden deneme) alan koduna dağılmadan, hedef kod elle değiştirilmeden sarmalayıcıyla (DECORATOR, PROXY) tek bir yerde ekleniyor. Sarmalayıcı sarmaladığı koddan karmaşık değil; kitap vekil kodunun hacmini ve karmaşıklığını temiz kodun önünde engel sayar. Bu eleştiriden türeyen bir yasak da var (kitapta açıkça yok): çalışma anında sınıf ya da modül yamama, özel yükleyici ya da sınıf üreten gizli mekanizma gibi görünmez büyü yok. (Bl.11 · Cross-Cutting Concerns, Java Proxies, Pure Java AOP) [ö/o]
 - [ ] Önden büyük tasarım yapılmadı. Karar son sorumlu ana kadar ertelendi. Yeni standart ya da kütüphane gösterilebilir bir değer kattığı için eklendi. (Bl.11 · Test Drive the System Architecture, Optimize Decision Making, Use Standards Wisely) [o]
 - [ ] Üst düzey kod alanın diliyle okunuyor. (Bl.11 · Systems Need Domain-Specific Languages; N2) [o]
 - [ ] Çalışabilecek en basit şey yapıldı. (Bl.11 · Conclusion) [o]
@@ -252,7 +252,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] Kod küçüldüğü için düşen kapsam yüzdesi gerileme sanılmadı. (Bl.16) [o]
 
 ## 17 · Kalan koku kodları (başka bölümde geçmeyenler)
-- [ ] G1: Kaynak dosyadaki ikinci dil (HTML, CSS, SQL) en az ve en dar yerde. EPUB ve HTML üreten modüller için geçerli. [ö]
+- [ ] G1: Kaynak dosyadaki ikinci dil (HTML, CSS, SQL) en az ve en dar yerde. Her kaynak dosya için geçerli; kitabın örnekleri Java dosyasına gömülü XML, HTML, YAML ve JavaScript'tir. [ö]
 - [ ] G2: Adından beklenen bariz davranış uygulanmış. [o]
 - [ ] G4: Emniyet kapatılmamış: derleyici, tür denetleyici ya da linter uyarısı susturulmamış; başarısız test kapatılmamış ya da silinmemiş. [ö]
 - [ ] G6: Kod doğru soyutlama düzeyinde; taban sınıfta ayrıntı yok. [o]
@@ -267,7 +267,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] G26: Kesin: para için kayan noktalı sayı yok, "ilk eşleşme tektir" varsayımı yok. [ö/o]
 - [ ] G27: Karar gelenekle değil yapıyla zorlanıyor: adlandırılmış enum üzerinde switch yerine soyut metotlu taban sınıf. [o]
 - [ ] G32: Yapı keyfi değil; dışarıdan kullanılan sınıf başka bir sınıfın içine gömülmemiş. [ö/o]
-- [ ] J1: İçe aktarma listesi kısa, modül az şeye bağımlı. J2: Sabitler kalıtımla alınmıyor. J3: Anlamlı sabit grupları davranış taşıyan enum. [ö]
+- [ ] J1: İçe aktarma listesi, birlikte çalışılan paketlerin kısa bir beyanı. Aynı paketten iki ya da daha fazla sınıf kullanılıyorsa sınıflar tek tek değil, paket olarak içe aktarılıyor; dile göre biçimi eşlemede. J2: Sabitler kalıtımla alınmıyor. J3: Anlamlı sabit grupları davranış taşıyan enum. [ö]
 - [ ] E1: Proje tek adımda kuruluyor. [ö]
 
 ---
@@ -348,6 +348,7 @@ Maddelerdeki ortak kavramın her dildeki karşılığı. Yeni bir dil bu tabloya
 | Yapıyla zorlama (G27) | `ABC` + `@abstractmethod` örnekleme anında zorlar; yalnız `Protocol` tür denetleyicide zorlar, çalışma anında değil | `abstract` metot derleme anında zorlar (s.301) |
 | Davranış taşıyan enum | `enum.Enum` + metot; üyeler kendi gövdesini taşıyamaz, davranış değerden okunur | `enum` + sabit başına gövdeli soyut metot (s.308-309) |
 | Ham eşleme (Bl.8) | `dict` | `Map` (s.114) |
+| Paketi içe aktarma (J1) | `import paket.modul` ve nitelikli ad (`modul.Sinif`). `from x import *` karşılık değildir: adları ad alanına kopyalar, modülü yükleyip sert bağımlılık kurar ve adın kaynağını gizler (kitapta yok). | `import package.*;` Joker yalnız paketi arama yoluna ekler, gerçek bağımlılık kurmaz (s.307). |
 
 **Hatalar**
 
