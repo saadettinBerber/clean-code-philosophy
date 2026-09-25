@@ -143,7 +143,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
   (Bl.6 · Data/Object Anti-Symmetry) [o]
 - [ ] Sınıf alanlarını erişimcilerle dışarı itmiyor, verinin özünü işleyen soyut bir arayüz sunuyor ("galon" değil "kalan yakıt yüzdesi"). Düşünmeden eklenmiş getter/setter yok; birlikte değişen değerler tek bir işlemle ayarlanıyor. (Bl.6 · Data Abstraction; G8) [ö]
 - [ ] **Melez yok.** Aynı sınıf hem açık durum hem anlamlı davranış taşımıyor; melez hem yeni türü hem yeni işlemi zorlaştırır. (Bl.6 · Hybrids; G14) [ö]
-  - **Açık durum (A):** dışa açık alan, yalnız alanı döndüren erişimci (getter ya da property), yalnız alana atayan değiştirici (setter).
+  - **Açık durum (A):** dışa açık alan, yalnız alanı döndüren erişimci (getter ya da property), yalnız alana atayan değiştirici (setter). Bağımlılık enjeksiyonu setter'ı sayılmaz: atadığı alan başka metotlarda işbirlikçi olarak çağrılıyor ve onu döndüren bir erişimci yok. Böyle bir setter durumu dışarı açmaz, işbirlikçiyi içeri alır.
   - **Anlamlı davranış (B):** erişimci olmayan, bir deyimden uzun ya da başkasını çağıran ya da durum değiştiren public metot. Dilin protokol metotları ve adlı kurucular sayılmaz.
   - **Kural:** A > 0 ve B > 0 ise melez adayıdır. Başka modüller bu sınıfın alanlarını okuyup karar veriyorsa melezlik gerçektir.
 - [ ] Demeter: metot yalnız dört şeyle konuşuyor: kendi nesnesi, kendi kurduğu nesne, argümanı ve kendi alanı. Bir çağrının dönen değeri üzerinde yeni bir çağrı yapmıyor. (Bl.6 · The Law of Demeter; G36) [ö]
@@ -208,11 +208,18 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] Argüman taşımamak için alana yükseltilen değişkenler uyumu düşürdüyse, onları paylaşan metotlar yeni bir sınıfa çıkarıldı. Her alan yapıcıda doğuyor; bir metotta ilk kez atanıp yalnız yardımcılarca okunan taşıyıcı alan yok. (Bl.10 · Maintaining Cohesion Results in Many Small Classes; G31) [ö]
 - [ ] Yalnız bir public metoda hizmet eden özel yardımcı kümesi yok; varsa bu bir bölme adayıdır. (Bl.10 · Organizing for Change) [ö]
 - [ ] Yeni tür eklemek var olan sınıfları açmıyor, yalnız yeni bir sınıf ekliyor (OCP). Ama mantıksal olarak tamam olan ve dokunulmayan sınıf "ileride lazım olur" diye bölünmedi; tasarımı değiştirmenin tetiği gerçek bir değişikliktir. (Bl.10 · Organizing for Change) [ö/o]
-- [ ] Sınıf somut ayrıntıya değil soyutlamaya bağlı; değişen ya da yavaş bağımlılık yapıcıdan veriliyor, testte bir sahteyle değiştirilebiliyor. (Bl.10 · Isolating from Change, DIP) [ö]
+- [ ] Sınıf somut ayrıntıya değil soyutlamaya bağlı; değişen ya da yavaş bağımlılık dışarıdan (yapıcı ya da setter ile) veriliyor, testte bir sahteyle değiştirilebiliyor. (Bl.10 · Isolating from Change, DIP) [ö]
 - [ ] Dil sınıf dışı fonksiyona izin veriyorsa yalnız kapsam için açılmış, bütün metotları static olan sınıf yok; fonksiyonlar modülde durur. İzin vermiyorsa tümü static sınıf modülün karşılığıdır (`PrimeGenerator`). (Bl.10; G18) [ö]
 
 ## 11 · Sistemler (Bl.11)
-- [ ] Kurulum ile kullanım ayrı. Nesne bağımlılığını kendisi kurmuyor ve aramıyor, yapıcıdan alıyor (DI). Bağlama işi tek bir yerde yapılıyor: giriş noktası (`main`) ya da onun çağırdığı kurulum fabrikası. Uygulama giriş noktasını bilmiyor; bağımlılık okları `main`'den uzağa gider. (Bl.11 · Separate Constructing a System from Using It, Separation of Main, Dependency Injection) [ö]
+- [ ] Kurulum ile kullanım ayrı. Nesne bağımlılığını kendisi kurmuyor ve aramıyor; tamamen edilgen. Bağımlılık yapıcı argümanıyla, setter ile ya da ikisiyle veriliyor (DI). Bağlama işi tek bir yerde yapılıyor: giriş noktası (`main`) ya da onun çağırdığı kurulum fabrikası. Uygulama giriş noktasını bilmiyor; bağımlılık okları `main`'den uzağa gider. (Bl.11 · Separate Constructing a System from Using It, Separation of Main, Dependency Injection) [ö]
+- [ ] Setter ile verilen bağımlılık kitabın öbür kurallarını bozmuyor. Kitap iki yolu da tanır (s.157), ama setter şu kuralları bozmaya açıktır:
+  - Nesne setter çağrılmadan çalışamıyorsa bu gizli bir zamansal bağdır. Zorunlu bağımlılık yapıcıdan verilir. Setter, yapıcının kurduğu çalışır bir varsayılanı değiştirmek içindir. (G31 · Hidden Temporal Couplings)
+  - Alan yine yapıcıda doğuyor, setter yalnız değerini değiştiriyor. (Bl.5 · Variable Declarations)
+  - Varsayılan null değil. Anlamlı bir varsayılan gerçekleştirim ya da SPECIAL CASE nesnesi kullanılıyor. (Bl.7 · Don't Pass Null, Define the Normal Flow)
+  - Enjekte edilen alanı döndüren bir getter yok. İşbirlikçi dışarı verilirse Demeter zinciri başlar, sınıf da melez olur. (Bl.6 · Hybrids, The Law of Demeter)
+
+  (Bl.11 · Dependency Injection) [ö/o]
 - [ ] Gömülü tembel kurulum yok (`if (service == null) service = new MyServiceImpl(...);`). Tembellik ancak ölçülmüş bir ihtiyaçla gelir. (Bl.11 · LAZY INITIALIZATION eleştirisi) [ö]
 - [ ] Service locator (global kayıt sözlüğü, adla arama) DI'ın yerine kullanılmıyor. (Bl.11 · Dependency Injection) [ö]
 - [ ] Nesnenin **ne zaman** kurulacağına uygulama, **nasıl** kurulacağına fabrika karar veriyor; fabrika dışarıdan veriliyor. (Bl.11 · Factories) [o]
@@ -390,6 +397,8 @@ Maddelerdeki ortak kavramın her dildeki karşılığı. Yeni bir dil bu tabloya
 | Giriş noktası | `main()` ve `if __name__ == "__main__":` | `public static void main` (s.155) |
 | Gömülü tembel kurulum | `if self._x is None: self._x = Somut()` | `if (service == null) service = new MyServiceImpl(...);` (s.154) |
 | Service locator | global kayıt sözlüğü, adla arama | JNDI `lookup` (s.157) |
+| Bağımlılığı verme (DI) | yapıcı argümanı ya da setter: `set_data_source(self, source)`; alan `__init__`'te çalışır bir varsayılanla doğar | yapıcı argümanı ya da setter: `setDataSource(...)` (s.157) |
+| Bağlama yeri | `main` ya da onun çağırdığı kurulum modülünde elle bağlama (kitapta yok) | `main` ya da DI kapsayıcısı; Spring XML `p:dataSource-ref` setter ile bağlar (s.157, 163-164) |
 | Kesişen kaygı | dekoratör, aynı arayüzü uygulayan sarmalayıcı sınıf | JDK Proxy, Spring AOP, AspectJ (s.161-166) |
 | Görünmez büyü | monkeypatch, `sys.meta_path`, metaclass | çalışma anında bytecode yeniden yazma, özel ClassLoader, yansımayla özel üyeye erişim (kitapta yok) |
 | Uyarı susturma (G4) | `# noqa`, `# type: ignore`, `# pylint: disable`, `warnings.filterwarnings("ignore")` | `@SuppressWarnings`, derleyici uyarısını kapatmak (s.289) |
