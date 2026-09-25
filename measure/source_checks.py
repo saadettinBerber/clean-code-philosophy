@@ -1,12 +1,11 @@
-"""Kaynak dosya ölçümleri: yorumlar (Bl.4) ve sınıf olmak isteyen fonksiyon kümeleri (Bl.2, Bl.10, G23).
-Her ölçüm, ölçtüğü kaynağı alanında tutan bir sınıftır; bulguları kendi satırlarıyla not olarak döner.
-"""
+"""Kaynak dosya ölçümleri: yorumlar (Bl.4) ve sınıf olmak isteyen fonksiyon kümeleri (Bl.2, Bl.10, G23)."""
 import ast
 import re
-from abc import ABC, abstractmethod
+from abc import ABC
 from collections import defaultdict
 
 from measure.findings import Note, alarm
+from measure.source_check import SourceCheck
 from measure.syntax import FUNCTION_NODES, is_string_literal
 
 TODO = re.compile(r"\b(TODO|FIXME|XXX)\b")
@@ -14,17 +13,6 @@ TICKET = re.compile(r"\b[A-Z][A-Z0-9]+-\d+\b|#\d+")
 TRIVIAL_EXPRESSIONS = (ast.Name, ast.Constant, ast.Attribute)
 MIN_CARRIERS = 3
 PROCEDURAL_DECLARATION = "Prosedürel (Bl.6):"
-
-
-class SourceCheck(ABC):
-    """Tek kaynağın ölçümü; not listesi döner."""
-
-    def __init__(self, source):
-        self._source = source
-
-    @abstractmethod
-    def notes(self):
-        """Notlar; temizse boş liste."""
 
 
 class CommentCheck(SourceCheck, ABC):
