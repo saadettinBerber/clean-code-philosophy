@@ -2,13 +2,15 @@
 import ast
 from typing import NamedTuple
 
+from measure.construction import Constructions
 from measure.findings import Note
 from measure.syntax import assignment_targets, is_none, is_self_attribute, nesting, root_name, self_attributes, walk_own
 
 RECEIVERS = ("self", "cls")
 TEST_PREFIX = "test_"
 CONSTRUCTORS = frozenset({"__init__", "setUp"})  # setUp: test sınıfının kurulumu (Bl.9 · JUnit @Before)
-UNBOUND_DECORATORS = frozenset({"staticmethod", "classmethod", "abstractmethod"})
+CLASS_LEVEL_DECORATORS = frozenset({"staticmethod", "classmethod"})
+UNBOUND_DECORATORS = CLASS_LEVEL_DECORATORS | {"abstractmethod"}
 MUTATORS = frozenset({"append", "extend", "insert", "update", "add", "remove", "discard", "pop", "clear",
                       "setdefault", "sort", "reverse"})
 
@@ -126,14 +128,21 @@ class Method(Function):
         body = self._node.body
         return len(body) == 1 and not self.is_constructor() and (_returns_field(body[0]) or _sets_field(body[0]))
 
+    def is_named_constructor(self):
+        """Nesneyi kuran sınıf ya da statik metot: davranış değil, adlı kurucudur (Bl.2 · Method Names)."""
+        return bool(self._decorator_names() & CLASS_LEVEL_DECORATORS) and Constructions().is_factory(self)
+
     def does_work(self):
         return len(self._node.body) > 1 or any(isinstance(node, ast.Call) for node in self.own_nodes())
 
     def ignores_self(self):
         """`self`'i hiç kullanmayan örnek metodu (G14, G18)."""
-        bound = not ({_decorator_name(d) for d in self.decorators()} & UNBOUND_DECORATORS)
+        bound = not (self._decorator_names() & UNBOUND_DECORATORS)
         uses_self = any(isinstance(node, ast.Name) and node.id == "self" for node in self.own_nodes())
         return bound and not self.is_special() and not uses_self
+
+    def _decorator_names(self):
+        return {_decorator_name(decorator) for decorator in self.decorators()}
 
 
 def _returns_field(statement):

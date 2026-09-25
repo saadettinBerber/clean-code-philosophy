@@ -30,9 +30,9 @@ class Constructions:
         return isinstance(node, ast.Call) and (ast.unparse(node.func) in self._factories or _names_a_class(node.func))
 
     def factories_in(self, source):
-        return frozenset(function.reference() for function in source.functions() if self._is_factory(function))
+        return frozenset(function.reference() for function in source.functions() if self.is_factory(function))
 
-    def _is_factory(self, function):
+    def is_factory(self, function):
         """Her dönüşü bu fonksiyonda kurulan bir nesne olan fonksiyon."""
         built = self._built_names(function)
         values = [node.value for node in function.returns()]

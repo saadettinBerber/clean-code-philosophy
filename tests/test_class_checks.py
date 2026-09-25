@@ -159,6 +159,36 @@ class FieldsOutsideConstructorTest(unittest.TestCase):
     def test_fields_built_in_set_up_are_fine(self):
         self.assertEqual(FieldsOutsideConstructor(Snippet(FIELD_BUILT_IN_SET_UP).cls()).findings(), [])
 
+DATA_WITH_NAMED_CONSTRUCTOR = """
+class Metadata:
+    def __init__(self, title, author):
+        self.title, self.author = title, author
+
+    @classmethod
+    def for_book(cls, book):
+        return cls(book["title"].strip(), book["author"])
+"""
+
+DATA_WITH_STATIC_FACTORY = """
+class Header:
+    def __init__(self, prefix):
+        self.prefix = prefix
+
+    @staticmethod
+    def of(settings):
+        return TopHeader(settings) if settings.get("top") else Header(settings.get("prefix"))
+"""
+
+DATA_WITH_CLASS_QUERY = """
+class Metadata:
+    def __init__(self, title):
+        self.title = title
+
+    @classmethod
+    def label(cls, book):
+        return book["title"].strip().upper()
+"""
+
 
 class HybridTest(unittest.TestCase):
     def test_public_field_beside_behavior_is_a_hybrid(self):
@@ -172,6 +202,15 @@ class HybridTest(unittest.TestCase):
 
     def test_data_structure_is_not_a_hybrid(self):
         self.assertEqual(Hybrid(Snippet(POINT).cls()).findings(), [])
+
+    def test_named_constructor_is_not_behavior(self):
+        self.assertEqual(Hybrid(Snippet(DATA_WITH_NAMED_CONSTRUCTOR).cls()).findings(), [])
+
+    def test_static_factory_choosing_a_subclass_is_not_behavior(self):
+        self.assertEqual(Hybrid(Snippet(DATA_WITH_STATIC_FACTORY).cls()).findings(), [])
+
+    def test_class_method_computing_an_answer_is_behavior(self):
+        self.assertEqual(levels(Hybrid(Snippet(DATA_WITH_CLASS_QUERY).cls()).findings()), [ALARM])
 
     def test_test_case_is_not_a_hybrid(self):
         self.assertEqual(Hybrid(Snippet(PUBLIC_FIXTURE_TEST_CASE).cls()).findings(), [])

@@ -70,9 +70,10 @@ class ClassDefinition:
         return fields + sorted(m.name() for m in self.methods() if m.is_public() and m.is_accessor())
 
     def behavior_methods(self):
-        """Erişimci olmayan, anlamlı iş yapan public metotlar (Bl.6 · Hybrids)."""
+        """Erişimci ve adlı kurucu olmayan, anlamlı iş yapan public metotlar (Bl.6 · Hybrids)."""
         return sorted(m.name() for m in self.methods()
-                      if m.is_public() and not m.is_special() and not m.is_accessor() and m.does_work())
+                      if m.is_public() and not m.is_special() and not m.is_accessor() and not m.is_named_constructor()
+                      and m.does_work())
 
     def _method_clusters(self):
         """Her metot kendi başına bir küme olarak başlar."""
