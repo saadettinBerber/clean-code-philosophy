@@ -52,14 +52,18 @@ markmap:
 ## 1 · Temiz Kod
 - There Will Be Code: kod, gereksinimin kesin ifadesidir; yok olmayacak
 - Bad Code / Total Cost of Owning a Mess: karmaşa, ekibin hızını sıfıra doğru düşürür
+  - Bad Code: LeBlanc yasası, sonra hiç demektir
 - Grand Redesign in the Sky: baştan yazmak çözüm değildir, sürekli temizlik çözümdür
 - Attitude / Primal Conundrum: hızlı gitmenin tek yolu kodu temiz tutmaktır
 - What Is Clean Code?: zarif, verimli, tek işe odaklı, niyeti açık, özenle yazılmış
+  - Dave Thomas: testi olmayan kod temiz değildir; bir işi yapmanın tek yolu, en küçük API
+  - Ron Jeffries: tekrar yok, tek iş, ifade gücü; erken kurulan küçük ve basit soyutlamalar
 - We Are Authors: kod okunmak için yazılır; okuma yazmadan çok daha sık yapılır
 - **Boy Scout Rule**: dokunduğun kodu bulduğundan temiz bırak
 
 ## 2 · Anlamlı İsimler
 - Use Intention-Revealing Names: ad neden var olduğunu, ne yaptığını söyler
+  - Ölçü birimi adda: elapsedTimeInDays
 - Avoid Disinformation: yanlış ipucu verme (Set olan şeye "List" deme)
 - Make Meaningful Distinctions: a1/a2, Info/Data gibi gürültü ayrım değildir
 - Pronounceable / Searchable: telaffuz edilebilir, aranabilir; magic number yok
@@ -67,15 +71,18 @@ markmap:
 - Avoid Mental Mapping: okuyucu adı kafasında çevirmesin
 - Class Names: isim; Method Names: fiil
 - Don't Be Cute / Don't Pun: espri yok, aynı sözcük iki anlamda kullanılmaz
+  - Don't Pun: değer birleştiren add başka, koleksiyona öğe koyan insert/append başka
 - Pick One Word per Concept: bir kavram → tek sözcük
 - Solution / Problem Domain Names: önce çözüm alanının, yoksa problem alanının adı
 - Add Meaningful Context / Don't Add Gratuitous Context: bağlamı sınıf ve ad alanı verir
+- Bl.17'deki ad kokuları: N2 ad soyutlama düzeyini söyler (dial değil connect) · N4 belirsiz olmayan ad · N7 ad yan etkiyi söyler (createOrReturnOos) · G11 tutarlılık
 
 ## 3 · Fonksiyonlar
 - **Small!**: küçük olmalı, daha da küçük; idealde 2-4 satır; 20 satıra neredeyse hiç ulaşmamalı
 - Blocks and Indenting: if/else/while bloğu tek satır olur (bir çağrı); girinti 1-2 düzey
 - **Do One Thing**: tek bir iş yapar, onu iyi yapar, yalnız onu yapar
   - Sections within Functions: içinde bölümler görünüyorsa birden fazla iş yapıyordur
+  - Tek iş testi: içinden, uygulamasını yeniden söylemekten öte adı olan bir fonksiyon çıkarılabiliyorsa birden fazla iş yapıyordur
 - One Level of Abstraction per Function
   - Stepdown Rule: kod yukarıdan aşağı bir hikâye gibi okunur, her fonksiyon bir alt düzeye iner
 - Switch Statements: tek switch, fabrikanın dibine gömülür, polimorfik nesne üretir
@@ -87,6 +94,7 @@ markmap:
   - Common Monadic Forms: sorgu ya da dönüşüm; olay ise adı belli olsun
   - **Flag Arguments**: bayrak argümanı fonksiyonun iki iş yaptığını ilan eder → ikiye böl
   - Dyadic / Triads: sıra karışır, okuyucu durur
+    - Dyadic Functions: ikiliyi tekliye indirmenin üç yolu: argümanın metodu yap, argümanı alana çevir, argümanı yapıcıda alan bir sınıf çıkar (FieldWriter)
   - Argument Objects: birlikte gezen değişkenler kendi adını hak eden bir kavramdır
     - ◇ Değeriyle tanınan, değişmez argüman nesnesi → VALUE OBJECT
     - ◇ Çok parçalı nesneyi adım adım, yarım bırakmadan kur → BUILDER
@@ -103,6 +111,7 @@ markmap:
 
 ## 4 · Yorumlar
 - Comments Do Not Make Up for Bad Code: yorum, ifade başarısızlığıdır
+  - Bölüm girişi: yanlış yorum, hiç yorum olmamasından çok daha kötüdür
 - Explain Yourself in Code: yorum yerine iyi adlı bir fonksiyon
 - Good Comments
   - Legal; Informative; **Explanation of Intent (NEDEN)**; Clarification
@@ -121,10 +130,15 @@ markmap:
   - Newspaper Metaphor: yukarıda başlık/özet, aşağı indikçe ayrıntı
   - Vertical Openness / Density: kavramlar boş satırla ayrılır, ilişkili satırlar sık durur
   - Vertical Distance: ilişkili kavramlar yakın; çağıran çağrılanın üstünde
+    - Variable Declarations: yerel değişken kullanımına yakın, döngü denetim değişkeni döngü deyiminde; alanlar tek ve bilinen bir yerde
+    - protected alanlardan kaçın: sıkı ilişkili kavramları dosyalara dağıtır
   - Vertical Ordering: bağımlılık aşağı doğru akar
 - Horizontal Formatting: kısa satır; boşluk ilişkiyi gösterir; hizalama yok
+  - Horizontal Formatting: 100-120 karakter kabul edilir, ötesi özensizliktir
 - Indentation: kapsamı görünür kılar, bozulmaz
 - **Team Rules**: ekip tek bir stilde anlaşır
+  - Team Rules: kurallar biçimlendirme aracına kodlanır
+- Bl.17 bağlantısı · G35 Keep Configurable Data at High Levels: bilinen sabit alt düzeye gömülmez, argümanla aşağı iner
 
 ## 6 · Nesneler ve Veri Yapıları
 - Data Abstraction: veriyi değil, soyut arayüzü göster
@@ -133,9 +147,13 @@ markmap:
   - Nesne: veriyi gizler, davranışı açar → yeni tür kolay, yeni işlem zor
   - Veri yapısı: veriyi açar, davranışı yok → yeni işlem kolay, yeni tür zor
   - "Her şey nesnedir" bir efsanedir; seçim beklenen değişikliğe göre yapılır
+  - VISITOR ya da çift dağıtımın bedeli: yapıyı prosedürel programa geri çevirir (dipnot 1)
 - **Law of Demeter**: yalnız yakın arkadaşlarla konuş
+  - Dört arkadaş: f metodu yalnız kendi sınıfının, f'nin kurduğu nesnenin, argümanın ve alanın metotlarını çağırır
   - Train Wrecks: a.b().c().d() zinciri
+    - Zinciri ara değişkenlere bölmek, zincirdekiler nesneyse ihlali gidermez; iş nesneye taşınır (createScratchFileStream)
   - Hybrids: yarı nesne yarı veri → her iki yönde de zor
+    - Melez tanımı: public alan ya da alanı fiilen açan erişimciler ile anlamlı davranış aynı sınıfta
   - Hiding Structure: nesneye veri sorma, ona işi yaptır
     - ◇ Durumu içini açmadan dışarıda sakla, geri yükle → MEMENTO
   - ◇ Nesneler birbirine değil bir aracıya konuşsun → MEDIATOR
@@ -149,17 +167,24 @@ markmap:
 ## 7 · Hata Yönetimi
 - Use Exceptions Rather Than Return Codes
 - Write Your Try-Catch-Finally Statement First: işlemin sınırını önce çiz
+  - try bloğu bir işlem gibidir: catch programı tutarlı bir durumda bırakır
+  - Test geçince yakalanan tür, fırlatılan gerçek türe daraltılır (FileNotFoundException)
 - Use Unchecked Exceptions: imzalardan sızan bağımlılığı önler
+  - Denetimli istisna OCP'yi bozar; yalnız kritik bir kütüphanede değer taşır
 - Provide Context with Exceptions: işlem ve neden mesajda olsun
 - Define Exception Classes in Terms of a Caller's Needs: sarmala, çağıranın diline çevir
+  - Çoğu zaman tek istisna sınıfı yeter; ayrı sınıf yalnız biri yakalanırken öbürü geçsin diye açılır
 - Define the Normal Flow: Special Case nesnesiyle istisnasız akış
   - ◇ Hiçbir şey yapmayan varsayılan, Special Case'in özel hâli → NULL OBJECT
 - **Don't Return Null** / **Don't Pass Null**
 
 ## 8 · Sınırlar
 - Using Third-Party Code: sınır arayüzünü (Map vb.) sistemde dolaştırma, sarmala
+  - Sınır türü public API'den döndürülmez, argüman olarak alınmaz
   - ◇ Karmaşık alt sisteme tek, sade kapı → FACADE
 - Exploring and Learning Boundaries: Learning Tests; bedava ve öğretici
+  - Learning Tests Are Better Than Free: yeni sürümde yeniden koşulur, davranış farkını hemen gösterir
+  - Giden sınır testleri: öğrenme gerekmese de arayüzü üretim kodu gibi kullanan testler geçişi kolaylaştırır
 - Using Code That Does Not Yet Exist: istediğin arayüzü tanımla → ADAPTER
 - Clean Boundaries: yabancı koda az yerde dokun; sınırı testlerle tanımla
 
@@ -169,7 +194,9 @@ markmap:
 - Tests Enable the -ilities: esneklik, bakım ve yeniden kullanım testlerle gelir
 - Clean Tests: okunabilirlik; build-operate-check
   - Domain-Specific Testing Language
+    - Baştan tasarlanmaz, yeniden düzenlemeden doğar
   - A Dual Standard: test kodu da temizdir ama üretim verimliliği gerekmez
+    - Sınırı: yalnız bellek ve işlemci verimliliği gevşer, temizlik gevşemez
 - One Assert per Test → **Single Concept per Test**
 - **F.I.R.S.T.**: Fast, Independent, Repeatable, Self-Validating, Timely
 
@@ -184,7 +211,10 @@ markmap:
   - "Çalışıyor" ile "temiz" ayrı işlerdir; çalışınca durma
 - **Cohesion**: az alan; her metot alanların çoğunu kullanır
   - Maintaining Cohesion Results in Many Small Classes: yalnız birkaç metodun paylaştığı alanlar yeni bir sınıf ister
+    - Argüman taşımamak için alana yükseltilen değişkenler uyumu düşürür → onları paylaşan metotlar yeni sınıfa çıkar
 - Organizing for Change: açık/kapalı ilke (OCP); yeni iş alt sınıfla eklenir
+  - Yalnız bir public metoda hizmet eden özel yardımcı kümesi bölme adayıdır
+  - Sınıf mantıksal olarak tamamsa dokunulmaz; tasarımı değiştirmenin tetiği gerçek değişikliktir
 - **Isolating from Change**: somut ayrıntıya değil soyutlamaya bağlan → **DIP**
   - Bağımlılık yapıcıya verilir → test kendi sahte nesnesini verir
   - ◇ Değişikliği abonelere bildir, yayıncı onları tanımaz → OBSERVER
@@ -193,20 +223,26 @@ markmap:
 ## 11 · Sistemler
 - How Would You Build a City?: soyutlama düzeyleri ve modülerlik ile
 - **Separate Constructing a System from Using It**
+  - LAZY INITIALIZATION eleştirisi: gömülü tembel kurulum somut sınıfa bağlar, testi zorlar, SRP'yi bozar; ölçülmüş ihtiyaç yoksa erken optimizasyondur
   - Separation of Main: kurulum main'de, uygulama hazır nesneleri kullanır; oklar main'den dışa
   - Factories: ne zaman kurulacağına uygulama karar verir, nasıl kurulacağına fabrika
     - ◇ Hangi nesnenin yaratılacağı alt sınıfa kalsın → FACTORY METHOD
     - ◇ Hazır bir nesneyi kopyalayıp yenisini üret → PROTOTYPE
   - **Dependency Injection**: nesne bağımlılığını kendisi kurmaz, edilgen kalır → SRP desteklenir
+    - Bağımlılık yapıcı argümanıyla, setter ile ya da ikisiyle verilir
+    - JNDI araması DI'ın yarım hâlidir: nesne bağımlılığını hâlâ kendisi çözer
     - ◇ Bağımlılığı kendin ara (JNDI gibi), DI'ın yarım hâli → SERVICE LOCATOR
 - Scaling Up: sistem, kaygılar ayrıldıkça büyüyebilir
+  - POJO: çerçeve türünden türemez, çerçevenin yaşam döngüsü metotlarını uygulamaz, iş metodunda bağımlılık aramaz (EJB2 karşı örneği)
   - Cross-Cutting Concerns: proxy / AOP ile kesişen kaygılar
     - ◇ İstek bir zincirde sırayla dolaşsın (filtre zinciri) → CHAIN OF RESPONSIBILITY
+  - Pure Java AOP Frameworks: eşleme anotasyonları, eşleme sık değişmiyorsa sınıfta kalabilir; tam POJO için dış yapılandırmaya taşınır
 - Test Drive the System Architecture: ön tasarım (BDUF) yok; basit ama ayrışmış başla
 - Optimize Decision Making: kararı en son sorumlu ana kadar ertele
 - Use Standards Wisely: standart, ancak kanıtlanabilir değer katıyorsa
 - Systems Need Domain-Specific Languages
   - ◇ Küçük bir dilin gramerini yorumla → INTERPRETER
+- Conclusion: çalışabilecek en basit şeyi kullan; niyet her soyutlama düzeyinde açık kalsın
 
 ## 12 · Ortaya Çıkış (Emergence)
 - Getting Clean via Emergent Design: dört kural iyi tasarımın ortaya çıkmasını sağlar
@@ -217,6 +253,7 @@ markmap:
     - TEMPLATE METHOD üst düzey tekrarı kaldırır
   - Expressive: iyi ad, küçük fonksiyon/sınıf, standart kalıp adları, iyi test
   - Minimal Classes and Methods: sayıyı düşük tut ama en düşük öncelik bu
+    - Dogma: her sınıfa arayüz açmak, alan ile davranışı ayrı sınıflara bölmek (bkz. Omurga)
 - Conclusion: deneyimin yerini tutmaz, ama onu hızla kazandırır
 
 ## 13 · Eşzamanlılık
@@ -228,6 +265,10 @@ markmap:
 - Synchronized bölümleri küçük tut; aralarında bağımlılık kurma
 - Doğru kapanma kodu zordur
 - Testing Threaded Code: seyrek hatalar da hatadır; önce thread'siz kodu çalıştır; takılabilir, ayarlanabilir kod
+  - Run with More Threads Than Processors: görev değişimi sıklaşsın, hata ortaya çıksın
+  - Run on Different Platforms: bütün hedef platformlarda erken ve sık koş
+  - Instrument Your Code to Try and Force Failures: jiggling (wait, sleep, yield, öncelik), elle ya da otomatik
+- Ek A · Dependencies Between Methods Can Break Concurrent Code: tek tek güvenli çağrılardan kurulan bileşik işlem güvenli değildir → putIfAbsent ya da kilit
 
 ## 14 · Ardışık İyileştirme
 - Args Implementation: temiz son hâl
@@ -239,14 +280,19 @@ markmap:
 ## 15-16 · Vaka İncelemeleri
 - JUnit Internals: iyi koda bile Boy Scout uygulanır
 - Refactoring SerialDate: önce testleri güçlendir, sonra adım adım temizle
+  - First, Make It Work: kapsam aracı çalışmayan kodu gösterir (Clover, T2)
+  - Kod küçülünce düşen kapsam yüzdesi gerileme değildir
+  - DayDateFactory: taban sınıf türevini yaratmaz, fabrika yaratır (G7)
 
 ## 17 · Kokular ve Sezgisel Kurallar
 - Comments: C1 uygunsuz bilgi · C2 eski · C3 gereksiz · C4 kötü yazılmış · C5 yorumdaki kod
 - Environment: E1 derleme tek adım · E2 testler tek adım
 - Functions: F1 çok argüman · F2 çıktı argümanı · F3 bayrak argümanı · F4 ölü fonksiyon
 - General
-  - G2 bariz davranış eksik · **G3 sınırlarda yanlış davranış** · G4 aşılmış güvenlik önlemleri
+  - G1 bir kaynak dosyada birden çok dil · G2 bariz davranış eksik · **G3 sınırlarda yanlış davranış** · G4 aşılmış güvenlik önlemleri
   - **G5 tekrar** · G6 yanlış soyutlama düzeyi · G7 taban sınıfın türeve bağımlı olması
+    - G5'in üç biçimi: birebir aynı kod → metot; aynı switch/if zinciri → polimorfizm; benzer algoritma → TEMPLATE METHOD ya da STRATEGY
+    - G7 istisnası: türev sayısı kesin sabitse (sonlu durum makinesi) taban türevleri bilebilir, o zaman ikisi aynı dağıtım biriminde durur
   - G8 fazla bilgi · G9 ölü kod · G10 dikey ayrılık · G11 tutarsızlık · G12 karmaşa
   - G13 yapay bağ · **G14 feature envy** · **G15 seçici argüman** · G16 gizli niyet
   - **G17 yanlış yerdeki sorumluluk** · G18 uygunsuz static · G19 açıklayıcı değişken
@@ -261,4 +307,5 @@ markmap:
   - N5 uzun kapsam → uzun ad · N6 kodlama yok · N7 yan etkiyi adda söyle
 - Tests: T1 yetersiz test · T2 kapsam aracı · T3 önemsiz testi atlama · T4 yok sayılan test bir sorudur
   - **T5 sınır koşullarını test et** · **T6 hatanın çevresini sıkı test et** · T7-T8 başarısızlık örüntüleri · T9 hızlı
+- Conclusion: bu liste tam değildir; bir değer sistemi sunar, kural kataloğu değildir
 

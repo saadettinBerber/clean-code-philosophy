@@ -411,23 +411,3 @@ Maddelerdeki ortak kavramın her dildeki karşılığı. Yeni bir dil bu tabloya
 | Bileşik işlem | kilit (kitapta yok) | `ConcurrentHashMap.putIfAbsent` (s.329) |
 | Kapanma | `join(timeout)`, `future.result(timeout)`, `CancelledError` yeniden fırlatılır | `Thread.join(ms)`, `Future.get(t, unit)`, `InterruptedException` sonrası `interrupt()` (kitapta yok) |
 | Para (G26) | `int` kuruş ya da `Decimal` | tamsayı tabanlı Money sınıfı (s.301) |
-
----
-
-
-## Haritaya eklenecekler (kitapta var, haritada yok)
-Harita güncelleme kuralına göre, "önce kitaba sor" adımı bu okumayla yapıldı. Eklenmesi kullanıcı onayı bekliyor:
-- **Bl.1:** LeBlanc yasası; Dave Thomas'ın "testi olmayan kod temiz değildir"; Jeffries'in erken basit soyutlaması.
-- **Bl.2:** N2, N4, N7, G11; ölçü birimi adda; "add yerine append/insert".
-- **Bl.3:** tek iş testi (içinden ad çıkarılabiliyor mu); tek argümana indirmenin üç yolu.
-- **Bl.4:** yanlış yorumun hiç yorum olmamasından kötü olduğu.
-- **Bl.5:** otomatik biçim aracı; 100-120 satır genişliği; Variable Declarations (döngü değişkeni, protected alan); G35.
-- **Bl.6:** Demeter'in dört maddesi; zinciri bölmenin ihlali gidermediği; melez tanımı; VISITOR'ın bedeli.
-- **Bl.7:** try'ın bir işlem olması; ayrı istisna sınıfının tek gerekçesi; yakalanan türün daraltılması; denetimsiz istisna.
-- **Bl.8:** sınır türü public API'ye çıkmaz; öğrenme testleri yeni sürümde yeniden koşulur; giden sınır testleri.
-- **Bl.9:** test dili yeniden düzenlemeden doğar; çifte standardın sınırı.
-- **Bl.10:** alana yükseltilen değişken; tek public metoda hizmet eden yardımcılar; "tamamsa dokunma".
-- **Bl.11:** LAZY INITIALIZATION eleştirisi; service locator; "en basit şey"; POJO'nun çerçeveden türememesi ve eşleme anotasyonlarının sınırı.
-- **Bl.12:** uygulama tekrarı; ifadenin dört aracı; veri ile davranışı ayırma dogması.
-- **Bl.13-16:** eşzamanlılık test maddeleri (işlemciden fazla thread, jiggling); Ek A (bileşik işlem, `putIfAbsent`); kapsam dersleri; DayDateFactory ve G7'nin sabit türev istisnası.
-- **Bl.17:** G1, T7-T8, G5'in üç biçimi, "liste bir değer sistemidir".
