@@ -36,6 +36,15 @@ class TrainWrecksTest(unittest.TestCase):
     def test_super_may_be_called(self):
         self.assertEqual(wrecks("def f(self): super().close()"), [])
 
+    def test_opened_file_may_be_read(self):
+        self.assertEqual(wrecks("def f(path): open(path).read()"), [])
+
+    def test_object_made_by_a_built_in_type_may_be_called(self):
+        self.assertEqual(wrecks("def f(items): list(items).sort()"), [])
+
+    def test_call_on_what_a_built_in_function_hands_out_is_a_train_wreck(self):
+        self.assertEqual(len(wrecks("def f(items): next(iter(items)).render()")), 1)
+
     def test_data_structure_operations_are_not_train_wrecks(self):
         self.assertEqual(wrecks("def f(text): clean(text).strip()"), [])
 
