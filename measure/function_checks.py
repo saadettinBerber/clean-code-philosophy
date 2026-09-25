@@ -5,7 +5,7 @@ import ast
 from abc import ABC, abstractmethod
 
 from measure.findings import alarm, look
-from measure.syntax import assignment_targets, is_empty_body, is_name, is_none, is_self_attribute
+from measure.syntax import assignment_targets, is_class_name, is_empty_body, is_name, is_none, is_self_attribute
 
 IDEAL_BODY_LINES = 4
 MAX_BODY_LINES = 20
@@ -108,16 +108,21 @@ class TrainWrecks(FunctionCheck):
         inner = {id(node.func.value) for node in chained}
         return [node for node in chained if id(node) not in inner]
 
-    @staticmethod
-    def _is_call_on_call(node):
+    @classmethod
+    def _is_call_on_call(cls, node):
         """Dönen nesne üzerinde yeni çağrı. Demeter'in izin verdikleri sayılmaz: fonksiyonun kendi kurduğu
-        nesne (`Sınıf(...)`), `super()` ve veri yapısı işlemleri (Bl.6)."""
-        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)):
+        nesne, `super()` ve veri yapısı işlemleri (Bl.6)."""
+        is_method_call = isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+        if not is_method_call or node.func.attr in DATA_STRUCTURE_METHODS:
             return False
-        receiver = node.func.value
-        is_permitted = isinstance(receiver, ast.Call) and isinstance(receiver.func, ast.Name) and (
-            receiver.func.id == "super" or receiver.func.id[:1].isupper())
-        return isinstance(receiver, ast.Call) and not is_permitted and node.func.attr not in DATA_STRUCTURE_METHODS
+        return isinstance(node.func.value, ast.Call) and not cls._creates_object(node.func.value.func)
+
+    @staticmethod
+    def _creates_object(callee):
+        """`Sınıf(...)`, `Sınıf.fabrika(...)` ve `super()` nesneyi fonksiyonun kendisine kurar."""
+        if isinstance(callee, ast.Attribute):
+            return isinstance(callee.value, ast.Name) and is_class_name(callee.value.id)
+        return isinstance(callee, ast.Name) and (callee.id == "super" or is_class_name(callee.id))
 
 
 class SwallowedExceptions(FunctionCheck):

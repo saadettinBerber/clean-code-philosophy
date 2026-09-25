@@ -27,6 +27,11 @@ def is_name(node, name):
     return isinstance(node, ast.Name) and node.id == name
 
 
+def is_class_name(name):
+    """Sınıf adı büyük harfle başlar (PEP 8); sabitler de tümü büyük harfle yazıldığı için ayrılır."""
+    return name[:1].isupper() and not name.isupper()
+
+
 def is_self_attribute(node):
     return isinstance(node, ast.Attribute) and is_name(node.value, "self")
 

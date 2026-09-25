@@ -166,6 +166,15 @@ class TrainWrecksTest(unittest.TestCase):
     def test_object_created_by_the_function_may_be_called(self):
         self.assertEqual(TrainWrecks(Snippet("def f(path): Path(path).read_text()").function()).findings(), [])
 
+    def test_object_made_by_a_static_factory_may_be_called(self):
+        self.assertEqual(TrainWrecks(Snippet("def f(data): Card.of(data).kind()").function()).findings(), [])
+
+    def test_call_on_what_an_instance_returns_is_a_train_wreck(self):
+        self.assertEqual(levels(TrainWrecks(Snippet("def f(deck): deck.of(1).kind()").function()).findings()), [ALARM])
+
+    def test_call_on_what_a_constant_returns_is_a_train_wreck(self):
+        self.assertEqual(levels(TrainWrecks(Snippet("def f(): RULES.get(1).kind()").function()).findings()), [ALARM])
+
     def test_super_may_be_called(self):
         self.assertEqual(TrainWrecks(Snippet("def f(self): super().close()").function()).findings(), [])
 
