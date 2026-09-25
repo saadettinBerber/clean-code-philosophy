@@ -103,6 +103,12 @@ class TrainWrecksTest(unittest.TestCase):
     def test_helper_that_may_return_nothing_is_not_a_factory(self):
         self.assertEqual(len(wrecks(SOMETIMES_EMPTY)), 1)
 
+    def test_factory_may_choose_between_two_constructions(self):
+        self.assertEqual(wrecks("def _a(x):\n    return Alpha() if x else Beta()\n\ndef f(x):\n    _a(x).go()\n"), [])
+
+    def test_choice_with_one_foreign_branch_is_not_a_factory(self):
+        self.assertEqual(len(wrecks("def _a(x):\n    return Alpha() if x else x.beta()\n\ndef f(x):\n    _a(x).go()\n")), 1)
+
     def test_procedure_without_return_is_not_a_factory(self):
         self.assertEqual(len(wrecks("def _run(x):\n    x.go()\n\ndef f(x):\n    _run(x).done()\n")), 1)
 

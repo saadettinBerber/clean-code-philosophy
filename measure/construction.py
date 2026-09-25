@@ -36,7 +36,13 @@ class Constructions:
         """Her dönüşü bu fonksiyonda kurulan bir nesne olan fonksiyon."""
         built = self._built_names(function)
         values = [node.value for node in function.returns()]
-        return bool(values) and all(self.creates(value) or _is_one_of(value, built) for value in values)
+        return bool(values) and all(self._is_built(value, built) for value in values)
+
+    def _is_built(self, value, built):
+        """Kurulan nesne; koşullu ifadede iki kol da kurulmuş olmalı."""
+        if isinstance(value, ast.IfExp):
+            return self._is_built(value.body, built) and self._is_built(value.orelse, built)
+        return self.creates(value) or _is_one_of(value, built)
 
     def _built_names(self, function):
         return {target.id for node in function.own_nodes() if isinstance(node, ast.Assign) and self.creates(node.value)
