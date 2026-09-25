@@ -45,6 +45,12 @@ class TrainWrecksTest(unittest.TestCase):
     def test_call_on_what_a_built_in_function_hands_out_is_a_train_wreck(self):
         self.assertEqual(len(wrecks("def f(items): next(iter(items)).render()")), 1)
 
+    def test_object_a_class_method_builds_with_cls_may_be_called(self):
+        self.assertEqual(wrecks("class Deck:\n    @classmethod\n    def of(cls, cards):\n        return cls(cards).shuffled()\n"), [])
+
+    def test_call_on_what_a_parameter_named_like_cls_hands_out_is_a_train_wreck(self):
+        self.assertEqual(len(wrecks("def f(klass):\n    klass(1).of(2).go()\n")), 1)
+
     def test_data_structure_operations_are_not_train_wrecks(self):
         self.assertEqual(wrecks("def f(text): clean(text).strip()"), [])
 
