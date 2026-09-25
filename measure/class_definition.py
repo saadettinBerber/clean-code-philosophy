@@ -73,7 +73,15 @@ class ClassDefinition:
     def public_state(self):
         """Dışa açık durum: alt çizgisiz alanlar ve public erişimciler (Bl.6 · Hybrids)."""
         fields = sorted(field for field in self.instance_fields() if not field.startswith("_"))
-        return fields + sorted(m.name() for m in self.methods() if m.is_public() and m.is_accessor())
+        return fields + sorted(m.name() for m in self.methods()
+                               if m.is_public() and m.is_accessor() and not self._injects(m))
+
+    def _injects(self, setter):
+        """İşbirlikçiyi içeri alan setter durumu açmaz: alan başkalarınca çağrılır, dışarı verilmez (Bl.11 · DI)."""
+        others = [method for method in self.methods() if method is not setter]
+        fields = setter.assigned_fields()
+        is_called = fields <= _union(method.collaborators() for method in others)
+        return setter.is_setter() and is_called and not fields & _union(method.returned_fields() for method in others)
 
     def behavior_methods(self):
         """Erişimci ve adlı kurucu olmayan, anlamlı iş yapan public metotlar (Bl.6 · Hybrids)."""
@@ -90,6 +98,10 @@ class ClassDefinition:
 
     def _called_back(self, method):
         return {m.name() for m in self.methods() if m.is_public()} if method.hands_out_self() else set()
+
+
+def _union(sets):
+    return set().union(*sets)
 
 
 def _merged_with(clusters, method):

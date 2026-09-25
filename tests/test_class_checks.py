@@ -59,6 +59,45 @@ class Parser:
         self._tokens = self._text.split()
 """
 
+INJECTED_COLLABORATOR = """
+class Portfolio:
+    def __init__(self, exchange):
+        self._exchange = exchange
+
+    def set_exchange(self, exchange):
+        self._exchange = exchange
+
+    def value_of(self, symbol):
+        return self._exchange.current_price(symbol)
+"""
+
+EXPOSED_COLLABORATOR = """
+class Portfolio:
+    def __init__(self, exchange):
+        self._exchange = exchange
+
+    def set_exchange(self, exchange):
+        self._exchange = exchange
+
+    def exchange(self):
+        return self._exchange
+
+    def value_of(self, symbol):
+        return self._exchange.current_price(symbol)
+"""
+
+SETTER_OF_MUTATED_DATA = """
+class Playlist:
+    def __init__(self):
+        self._songs = []
+
+    def set_songs(self, songs):
+        self._songs = songs
+
+    def enqueue(self, song):
+        self._songs.append(song)
+"""
+
 PUBLIC_FIELD_WITH_BEHAVIOR = """
 class Chapter:
     def __init__(self, pages):
@@ -318,6 +357,15 @@ class HybridTest(unittest.TestCase):
 
     def test_test_case_is_not_a_hybrid(self):
         self.assertEqual(Hybrid(Snippet(PUBLIC_FIXTURE_TEST_CASE).cls()).findings(), [])
+
+    def test_setter_injecting_a_collaborator_is_not_public_state(self):
+        self.assertEqual(Hybrid(Snippet(INJECTED_COLLABORATOR).cls()).findings(), [])
+
+    def test_injected_collaborator_handed_out_by_a_getter_is_public_state(self):
+        self.assertEqual(levels(Hybrid(Snippet(EXPOSED_COLLABORATOR).cls()).findings()), [ALARM])
+
+    def test_setter_of_data_mutated_in_place_is_public_state(self):
+        self.assertEqual(levels(Hybrid(Snippet(SETTER_OF_MUTATED_DATA).cls()).findings()), [ALARM])
 
 
 class UnusedSelfTest(unittest.TestCase):

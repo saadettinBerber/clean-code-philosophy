@@ -135,8 +135,24 @@ class Method(Function):
 
     def is_accessor(self):
         """Gövdesi yalnız `return self.x` ya da yalnız `self.x = değer` olan, kurucu olmayan metot."""
+        return self._is_single(_returns_field) or self.is_setter()
+
+    def is_setter(self):
+        return self._is_single(_sets_field)
+
+    def returned_fields(self):
+        """`return self.x` ile dışarı verilen alanlar."""
+        return {node.value.attr for node in self.own_nodes() if _returns_field(node)}
+
+    def collaborators(self):
+        """Metodu çağrılan alanlar: `self.x.m()`. Yerinde değiştirilen veri (`append`…) işbirlikçi değildir."""
+        return {node.func.value.attr for node in self.own_nodes()
+                if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                and is_self_attribute(node.func.value) and node.func.attr not in MUTATORS}
+
+    def _is_single(self, statement_kind):
         body = self._node.body
-        return len(body) == 1 and not self.is_constructor() and (_returns_field(body[0]) or _sets_field(body[0]))
+        return len(body) == 1 and not self.is_constructor() and statement_kind(body[0])
 
     def is_named_constructor(self):
         """Nesneyi kuran sınıf ya da statik metot: davranış değil, adlı kurucudur (Bl.2 · Method Names)."""
