@@ -19,7 +19,7 @@ class TrainWrecks(SourceCheck):
 
     def __init__(self, source):
         super().__init__(source)
-        self._constructions = Constructions()
+        self._constructions = Constructions.of(source)
 
     def notes(self):
         return [function.note(_train_wreck(chain)) for function in self._source.functions()

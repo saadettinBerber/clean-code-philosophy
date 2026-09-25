@@ -13,13 +13,41 @@ CONSTRUCTOR_NAMES = BUILT_IN_CONSTRUCTORS | {"cls"}
 
 class Constructions:
     """Kurucu sayılan çağrılar: `Sınıf(...)`, `modül.Sınıf(...)`, `Sınıf.fabrika(...)`, Python'un yerleşik
-    türleri (`list(...)`, `super()`), `open(...)` ve sınıf metodunda `cls(...)`."""
+    türleri (`list(...)`, `super()`), `open(...)`, sınıf metodunda `cls(...)` ve kaynağın kendi fabrikaları (`_kart(...)`, `self._yapici()`)."""
+
+    def __init__(self, factories=frozenset()):
+        self._factories = factories
+
+    @classmethod
+    def of(cls, source):
+        """Fabrikayı çağıran fonksiyon da fabrikadır; liste yeni fabrika çıkmayana dek genişler."""
+        factories, previous = frozenset(), None
+        while factories != previous:
+            previous, factories = factories, cls(factories).factories_in(source)
+        return cls(factories)
 
     def creates(self, node):
-        return isinstance(node, ast.Call) and self._is_constructor(node.func)
+        return isinstance(node, ast.Call) and (ast.unparse(node.func) in self._factories or _names_a_class(node.func))
 
-    @staticmethod
-    def _is_constructor(callee):
-        if isinstance(callee, ast.Attribute):
-            return is_class_name(callee.attr) or isinstance(callee.value, ast.Name) and is_class_name(callee.value.id)
-        return isinstance(callee, ast.Name) and (callee.id in CONSTRUCTOR_NAMES or is_class_name(callee.id))
+    def factories_in(self, source):
+        return frozenset(function.reference() for function in source.functions() if self._is_factory(function))
+
+    def _is_factory(self, function):
+        """Her dönüşü bu fonksiyonda kurulan bir nesne olan fonksiyon."""
+        built = self._built_names(function)
+        values = [node.value for node in function.returns()]
+        return bool(values) and all(self.creates(value) or _is_one_of(value, built) for value in values)
+
+    def _built_names(self, function):
+        return {target.id for node in function.own_nodes() if isinstance(node, ast.Assign) and self.creates(node.value)
+                for target in node.targets if isinstance(target, ast.Name)}
+
+
+def _names_a_class(callee):
+    if isinstance(callee, ast.Attribute):
+        return is_class_name(callee.attr) or isinstance(callee.value, ast.Name) and is_class_name(callee.value.id)
+    return isinstance(callee, ast.Name) and (callee.id in CONSTRUCTOR_NAMES or is_class_name(callee.id))
+
+
+def _is_one_of(node, names):
+    return isinstance(node, ast.Name) and node.id in names
