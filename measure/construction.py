@@ -3,12 +3,18 @@ metotlarını çağırabilir (Bl.6 · The Law of Demeter)."""
 import ast
 import builtins
 
-from measure.syntax import is_class_name
+from measure.syntax import is_class_name, last_name
 
 # `open` tür değildir ama dosya nesnesini kurar; `next`, `max`, `getattr` başkasının tuttuğu nesneyi verir.
 BUILT_IN_CONSTRUCTORS = frozenset(name for name, value in vars(builtins).items() if isinstance(value, type)) | {"open"}
 # `cls(...)` sınıf metodunda sınıfın kendisini kurar.
 CONSTRUCTOR_NAMES = BUILT_IN_CONSTRUCTORS | {"cls"}
+# Standart kütüphane kurucuları: her çağrı yeni bir nesne kurar, var olanın içinde gezinmez. Kitabın kendi çözümü
+# `ctxt.createScratchFileStream(name)` da nesneye yeni bir nesne kurdurur (Bl.6 · Hiding Structure). `parse_args`
+# davranışsız bir veri yapısı (`Namespace`) kurar; veri yapısına Demeter uygulanmaz (Bl.6 · Train Wrecks).
+# Başka nesnelerde de sık görülen belirsiz adlar (`compile`, `sub`, `match`) yalnız modülüyle nitelenmiş hâliyle girer.
+STANDARD_LIBRARY_CONSTRUCTORS = frozenset({"re.compile", "add_subparsers", "add_parser", "add_argument_group",
+                                           "add_mutually_exclusive_group", "parse_args"})
 
 
 class Constructions:
@@ -27,7 +33,8 @@ class Constructions:
         return cls(factories)
 
     def creates(self, node):
-        return isinstance(node, ast.Call) and (ast.unparse(node.func) in self._factories or _names_a_class(node.func))
+        return isinstance(node, ast.Call) and (ast.unparse(node.func) in self._factories or _names_a_class(node.func)
+                                               or _is_standard_constructor(node.func))
 
     def factories_in(self, source):
         return frozenset(function.reference() for function in source.functions() if self.is_factory(function))
@@ -47,6 +54,10 @@ class Constructions:
     def _built_names(self, function):
         return {target.id for node in function.own_nodes() if isinstance(node, ast.Assign) and self.creates(node.value)
                 for target in node.targets if isinstance(target, ast.Name)}
+
+
+def _is_standard_constructor(callee):
+    return ast.unparse(callee) in STANDARD_LIBRARY_CONSTRUCTORS or last_name(callee) in STANDARD_LIBRARY_CONSTRUCTORS
 
 
 def _names_a_class(callee):

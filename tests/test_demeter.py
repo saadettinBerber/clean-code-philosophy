@@ -130,10 +130,20 @@ class TrainWrecksTest(unittest.TestCase):
     def test_questions_about_a_string_are_data(self):
         self.assertEqual(wrecks("def f(host): word_before(host).isalnum()"), [])
 
+    def test_pattern_compiled_by_the_standard_library_may_be_called(self):
+        self.assertEqual(wrecks("def f(token, text): re.compile(token).sub('', text)"), [])
 
+    def test_call_on_what_another_objects_compile_returns_is_a_train_wreck(self):
+        self.assertEqual(len(wrecks("def f(compiler, token): compiler.compile(token).sub('')")), 1)
 
+    def test_parser_built_by_an_argument_parser_may_be_called(self):
+        self.assertEqual(wrecks("def f(parser): parser.add_subparsers().add_parser('info').set_defaults(run=go)"), [])
 
+    def test_namespace_built_by_parsing_arguments_is_data(self):
+        self.assertEqual(wrecks("def f(parser, argv): parser.parse_args(argv).run()"), [])
 
+    def test_call_on_what_another_parser_method_returns_is_a_train_wreck(self):
+        self.assertEqual(len(wrecks("def f(parser): parser.get_default('x').render()")), 1)
 
     def test_methods_are_measured_too(self):
         self.assertEqual(len(wrecks("class Report:\n    def f(self, ctxt):\n        ctxt.options().scratch_dir()\n")), 1)
