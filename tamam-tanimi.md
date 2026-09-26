@@ -148,6 +148,12 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
   - **Kural:** A > 0 ve B > 0 ise melez adayıdır. Başka modüller bu sınıfın alanlarını okuyup karar veriyorsa melezlik gerçektir.
 - [ ] Demeter: metot yalnız dört şeyle konuşuyor: kendi nesnesi, kendi kurduğu nesne, argümanı ve kendi alanı. Bir çağrının dönen değeri üzerinde yeni bir çağrı yapmıyor. (Bl.6 · The Law of Demeter; G36) [ö]
 - [ ] Tren kazası yok (`a.b().c().d()`). Zinciri ara değişkenlere bölmek ihlali gidermez; iş nesneye taşınır: `ctxt.createScratchFileStream(classFileName)`. Demeter veri yapılarına uygulanmaz. (Bl.6 · Train Wrecks, Hiding Structure) [ö/o]
+  - **Ölçüm nesnenin kökenine bakar.** Başka birinin döndürdüğü nesne, ister zincirde ister yerel bir adda dursun, yabancıdır. İki yazılış her zaman aynı kararı alır.
+  - **Dost sayılan kurulan nesneler:**
+    - sınıf kuruluşu;
+    - ölçülen kaynakların fabrikaları: ad önce çağıranın kendi modülünde ve sınıfında çözülür, belirsiz ad alarm verir;
+    - yeni nesne kuran standart kütüphane çağrıları. Kitabın `createScratchFileStream` çözümü de nesneye yeni bir nesne kurdurur.
+  - **Ölçümün bilerek görmedikleri okuma maddesidir:** yabancıyı argümanla bir yardımcıya verip orada çağırmak, alana koymak. Bunlar ihlali gidermez, yalnız yerini değiştirir. Koleksiyon öğesi (döngü öğesi, açılan demet) veri yapısına erişimdir.
 - [ ] Metot başka bir nesnenin verisiyle kendi verisinden çok uğraşmıyor (feature envy). (G14) [ö]
 - [ ] Veri taşıyıcı DTO (açık alanlı, fonksiyonsuz) davranışsız: üzerinde metot yok. Yalnız görünüş için yazılmış "bean" property'leri yok. (Bl.6 · Data Transfer Objects) [ö]
 - [ ] Active Record'a (kaydet/yükle metotlu veri yapısı) iş kuralı konmamış; iş kuralı ayrı bir nesnede. (Bl.6 · Active Record) [ö]
@@ -363,6 +369,8 @@ Maddelerdeki ortak kavramın her dildeki karşılığı. Yeni bir dil bu tabloya
 | Yapıyla zorlama (G27) | `ABC` + `@abstractmethod` örnekleme anında zorlar; yalnız `Protocol` tür denetleyicide zorlar, çalışma anında değil | `abstract` metot derleme anında zorlar (s.301) |
 | Davranış taşıyan enum | `enum.Enum` + metot; üyeler kendi gövdesini taşıyamaz, davranış değerden okunur | `enum` + sabit başına gövdeli soyut metot (s.308-309) |
 | Ham eşleme (Bl.8) | `dict` | `Map` (s.114) |
+| Yerel ada bağlama (Demeter ölçümü) | `x = …`, `x: T = …`, `(x := …)`, `with … as x`; `for` hedefi ve demet açma koleksiyon öğesidir | yerel değişken bildirimi, `try (… x = …)`; ölçüm aracı yok (kitapta yok) |
+| Yeni nesne kuran standart kütüphane çağrısı (Demeter) | `re.compile`; argparse `add_subparsers`, `add_parser`, `add_argument_group`, `add_mutually_exclusive_group`, `parse_args`; `redirect_stdout`, `redirect_stderr` | `new` her kuruluşu açıkça gösterir; statik fabrikalar (`Pattern.compile`) (kitapta yok) |
 | Gereğinden somut tür (G26) | tür ipucunda `Sequence` ya da `Iterable` yeterken `list` (kitapta yok) | `List` yeterken `ArrayList` (s.301) |
 | Dağıtım birimi (G7) | paket ya da dağıtım (kitapta yok) | jar dosyası (s.291) |
 | Paketi içe aktarma (J1) | `import paket.modul` ve nitelikli ad (`modul.Sinif`). `from x import *` karşılık değildir: adları ad alanına kopyalar, modülü yükleyip sert bağımlılık kurar ve adın kaynağını gizler (kitapta yok). | `import package.*;` Joker yalnız paketi arama yoluna ekler, gerçek bağımlılık kurmaz (s.307). |
