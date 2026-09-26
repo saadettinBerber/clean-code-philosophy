@@ -11,7 +11,8 @@ DATA_STRUCTURE_METHODS = frozenset({"items", "keys", "values", "get", "copy", "c
                                     "splitlines", "strip", "lstrip", "rstrip", "lower", "upper", "replace", "join",
                                     "startswith", "endswith", "format", "removeprefix", "removesuffix", "encode",
                                     "decode", "isalnum", "isalpha", "isdigit", "isspace", "isupper", "islower",
-                                    "partition", "rpartition", "find", "rfind", "casefold"})
+                                    "partition", "rpartition", "find", "rfind", "casefold", "group", "groups",
+                                    "groupdict"})
 
 
 class TrainWrecks(SourceCheck):

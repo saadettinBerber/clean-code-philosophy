@@ -124,8 +124,16 @@ class TrainWrecksTest(unittest.TestCase):
     def test_data_structure_operations_are_not_train_wrecks(self):
         self.assertEqual(wrecks("def f(text): clean(text).strip()"), [])
 
+    def test_groups_of_a_match_are_data(self):
+        self.assertEqual(wrecks("def f(rule, line): rule.match(line).group(1)"), [])
+
     def test_questions_about_a_string_are_data(self):
         self.assertEqual(wrecks("def f(host): word_before(host).isalnum()"), [])
+
+
+
+
+
 
     def test_methods_are_measured_too(self):
         self.assertEqual(len(wrecks("class Report:\n    def f(self, ctxt):\n        ctxt.options().scratch_dir()\n")), 1)
