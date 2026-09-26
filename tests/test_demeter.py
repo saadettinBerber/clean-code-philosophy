@@ -33,6 +33,19 @@ def f():
     _package().write()
 """
 FACTORY_OF_FACTORY = "def _a():\n    return Alpha()\n\ndef _b():\n    return _a()\n\ndef f():\n    _b().go()\n"
+CLASS_METHOD_BUILDS_WITH_CLS = """
+class Deck:
+    @classmethod
+    def of(cls, cards):
+        return cls(cards).shuffled()
+"""
+ONE_FOREIGN_BRANCH = "def _a(x):\n    return Alpha() if x else x.beta()\n\ndef f(x):\n    _a(x).go()\n"
+REDIRECTED = """
+def f(run):
+    with contextlib.redirect_stdout(io.StringIO()) as output:
+        run()
+    output.getvalue()
+"""
 SOMETIMES_EMPTY = "def _a(x):\n    if x:\n        return Alpha()\n    return\n\ndef f(x):\n    _a(x).go()\n"
 PROJECT_LOADS_PROGRESS = "class Project:\n    def load(self):\n        return Progress(self._path)\n"
 CACHE_LOADS_ITS_FIELD = "class Cache:\n    def load(self):\n        return self._items\n"
@@ -119,7 +132,7 @@ class TrainWrecksTest(unittest.TestCase):
         self.assertEqual(len(wrecks("def f(items): next(iter(items)).render()")), 1)
 
     def test_object_a_class_method_builds_with_cls_may_be_called(self):
-        self.assertEqual(wrecks("class Deck:\n    @classmethod\n    def of(cls, cards):\n        return cls(cards).shuffled()\n"), [])
+        self.assertEqual(wrecks(CLASS_METHOD_BUILDS_WITH_CLS), [])
 
     def test_call_on_what_a_parameter_named_like_cls_hands_out_is_a_train_wreck(self):
         self.assertEqual(len(wrecks("def f(klass):\n    klass(1).of(2).go()\n")), 1)
@@ -149,7 +162,7 @@ class TrainWrecksTest(unittest.TestCase):
         self.assertEqual(wrecks("def _a(x):\n    return Alpha() if x else Beta()\n\ndef f(x):\n    _a(x).go()\n"), [])
 
     def test_choice_with_one_foreign_branch_is_not_a_factory(self):
-        self.assertEqual(len(wrecks("def _a(x):\n    return Alpha() if x else x.beta()\n\ndef f(x):\n    _a(x).go()\n")), 1)
+        self.assertEqual(len(wrecks(ONE_FOREIGN_BRANCH)), 1)
 
     def test_procedure_without_return_is_not_a_factory(self):
         self.assertEqual(len(wrecks("def _run(x):\n    x.go()\n\ndef f(x):\n    _run(x).done()\n")), 1)
@@ -164,10 +177,10 @@ class TrainWrecksTest(unittest.TestCase):
         self.assertEqual(len(wrecks(USES_LOADED_PROGRESS)), 1)
 
     def test_object_made_by_another_modules_function_may_be_called(self):
-        self.assertEqual(wrecks("def make_card(x):\n    return Card(x)\n", "def f(x):\n    cards.make_card(x).render()\n"), [])
+        self.assertEqual(wrecks("def make_card(x):\n    return Card(x)\n", "def f(x): cards.make_card(x).go()"), [])
 
     def test_factory_of_a_factory_in_another_module_is_a_factory(self):
-        self.assertEqual(wrecks("def _a():\n    return Alpha()\n", "def b():\n    return _a()\n", "def f():\n    b().go()\n"), [])
+        self.assertEqual(wrecks("def _a():\n    return Alpha()\n", "def b(): return _a()", "def f(): b().go()"), [])
 
     def test_bare_name_resolves_to_its_own_modules_factory_first(self):
         self.assertEqual(wrecks("def _para(x):\n    return Para(x)\n\ndef f(x):\n    _para(x).go()\n",
@@ -183,7 +196,7 @@ class TrainWrecksTest(unittest.TestCase):
         self.assertEqual(len(wrecks(DOCUMENT_ASKS_ANOTHER, FAKE_HOLDS_PAGES)), 1)
 
     def test_method_of_another_object_resolves_among_all_sources(self):
-        self.assertEqual(len(wrecks(DOCUMENT_BUILDS_PAGES, FAKE_HOLDS_PAGES, "def f(doc):\n    doc.page(1).text()\n")), 1)
+        self.assertEqual(len(wrecks(DOCUMENT_BUILDS_PAGES, FAKE_HOLDS_PAGES, "def f(doc): doc.page(1).text()")), 1)
 
     def test_data_structure_operations_are_not_train_wrecks(self):
         self.assertEqual(wrecks("def f(text): clean(text).strip()"), [])
@@ -210,7 +223,7 @@ class TrainWrecksTest(unittest.TestCase):
         self.assertEqual(len(wrecks("def f(parser): parser.get_default('x').render()")), 1)
 
     def test_methods_are_measured_too(self):
-        self.assertEqual(len(wrecks("class Report:\n    def f(self, ctxt):\n        ctxt.options().scratch_dir()\n")), 1)
+        self.assertEqual(len(wrecks("class Report:\n    def f(self, ctxt):\n        ctxt.options().dir()\n")), 1)
 
 
 SPLIT = "def f(ctxt):\n    options = ctxt.options()\n    options.scratch_dir()\n"
@@ -254,11 +267,10 @@ class SplitChainTest(unittest.TestCase):
         self.assertEqual(len(wrecks("def f(a):\n    with a.lock() as held:\n        held.release()\n")), 1)
 
     def test_redirected_output_is_a_friend(self):
-        code = "def f(run):\n    with contextlib.redirect_stdout(io.StringIO()) as output:\n        run()\n    output.getvalue()\n"
-        self.assertEqual(wrecks(code), [])
+        self.assertEqual(wrecks(REDIRECTED), [])
 
     def test_redirector_imported_by_name_builds_too(self):
-        self.assertEqual(wrecks("def f(run):\n    with redirect_stderr(io.StringIO()) as errors:\n        run()\n    errors.getvalue()\n"), [])
+        self.assertEqual(wrecks(REDIRECTED.replace("contextlib.redirect_stdout", "redirect_stderr")), [])
 
     def test_opened_file_is_a_friend(self):
         self.assertEqual(wrecks("def f(path):\n    with open(path) as file:\n        file.read()\n"), [])

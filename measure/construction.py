@@ -13,7 +13,7 @@ CONSTRUCTOR_NAMES = BUILT_IN_CONSTRUCTORS | {"cls"}
 # Standart kütüphane kurucuları: her çağrı yeni bir nesne kurar, var olanın içinde gezinmez. Kitabın kendi çözümü
 # `ctxt.createScratchFileStream(name)` da nesneye yeni bir nesne kurdurur (Bl.6 · Hiding Structure). `parse_args`
 # davranışsız bir veri yapısı (`Namespace`) kurar; veri yapısına Demeter uygulanmaz (Bl.6 · Train Wrecks).
-# `redirect_stdout` ve `redirect_stderr` küçük harfle yazılmış sınıflardır; `with … as` hedefi verilen akışın kendisidir.
+# `redirect_stdout` ve `redirect_stderr` küçük harfle yazılmış sınıflardır; `with … as` hedefi verilen akıştır.
 # Başka nesnelerde de sık görülen belirsiz adlar (`compile`, `sub`, `match`) yalnız modülüyle nitelenmiş hâliyle girer.
 STANDARD_LIBRARY_CONSTRUCTORS = frozenset({"re.compile", "add_subparsers", "add_parser", "add_argument_group",
                                            "add_mutually_exclusive_group", "parse_args", "redirect_stdout",
@@ -39,7 +39,8 @@ class Constructions:
         return cls(functions, factories)
 
     def factories(self):
-        return frozenset(function for named in self._by_name.values() for function in named if self.is_factory(function))
+        functions = [function for named in self._by_name.values() for function in named]
+        return frozenset(function for function in functions if self.is_factory(function))
 
     def is_factory(self, function):
         return self.seen_from(function).is_factory()
@@ -93,7 +94,8 @@ class Sight:
         return self.creates(value) or _is_one_of(value, built)
 
     def _built_names(self):
-        return {target.id for node in self._caller.own_nodes() if isinstance(node, ast.Assign) and self.creates(node.value)
+        assignments = [node for node in self._caller.own_nodes() if isinstance(node, ast.Assign)]
+        return {target.id for node in assignments if self.creates(node.value)
                 for target in node.targets if isinstance(target, ast.Name)}
 
 
