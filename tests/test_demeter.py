@@ -253,6 +253,13 @@ class SplitChainTest(unittest.TestCase):
     def test_context_handed_out_by_another_object_is_a_stranger(self):
         self.assertEqual(len(wrecks("def f(a):\n    with a.lock() as held:\n        held.release()\n")), 1)
 
+    def test_redirected_output_is_a_friend(self):
+        code = "def f(run):\n    with contextlib.redirect_stdout(io.StringIO()) as output:\n        run()\n    output.getvalue()\n"
+        self.assertEqual(wrecks(code), [])
+
+    def test_redirector_imported_by_name_builds_too(self):
+        self.assertEqual(wrecks("def f(run):\n    with redirect_stderr(io.StringIO()) as errors:\n        run()\n    errors.getvalue()\n"), [])
+
     def test_opened_file_is_a_friend(self):
         self.assertEqual(wrecks("def f(path):\n    with open(path) as file:\n        file.read()\n"), [])
 
