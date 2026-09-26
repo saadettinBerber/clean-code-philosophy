@@ -3,7 +3,7 @@ import unittest
 from measure.findings import ALARM, LOOK
 from measure.test_checks import (AssertCount, MissingAssert, OperateAfterCheck, Printing, PrivateAccess,
                                  UnexplainedSkip, Unrepeatable)
-from tests.snippets import Snippet, levels
+from tests.snippets import Snippet, function_in, levels
 
 BUILD_OPERATE_CHECK = """
 def test_total(self):
@@ -43,12 +43,10 @@ def test_total(self):
 
 class IsTestTest(unittest.TestCase):
     def test_test_prefix_marks_a_test(self):
-        test = Snippet("def test_total(self): pass").function()
-        self.assertTrue(test.is_test())
+        self.assertTrue(function_in("def test_total(self): pass").is_test())
 
     def test_helper_is_not_a_test(self):
-        helper = Snippet("def make_cart(): pass").function()
-        self.assertFalse(helper.is_test())
+        self.assertFalse(function_in("def make_cart(): pass").is_test())
 
 
 class MissingAssertTest(unittest.TestCase):

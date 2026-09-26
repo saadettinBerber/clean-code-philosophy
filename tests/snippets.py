@@ -1,6 +1,9 @@
 """Testler için bellekte kod parçası kurar; disk ya da gerçek proje gerekmez (F.I.R.S.T · Repeatable)."""
+import ast
 import textwrap
 
+from measure.function import Function
+from measure.scope import Scope
 from measure.source_file import SourceFile
 
 SNIPPET_PATH = "parca.py"
@@ -17,6 +20,11 @@ class Snippet(SourceFile):
 
     def cls(self):
         return self.classes()[0]
+
+
+def function_in(code):
+    """Parçanın ilk fonksiyonu, test için yeni kurulmuş bir `Function` olarak (Bl.9 · BUILD-OPERATE-CHECK)."""
+    return Function(ast.parse(textwrap.dedent(code)).body[0], Scope(SNIPPET_PATH))
 
 
 def function_with_body_lines(count):
