@@ -33,8 +33,7 @@ class Function:
     def note(self, finding):
         return Note(self._scope.location(self._node), finding)
 
-    def reference(self):
-        """Kaynağın içinden çağrılırken yazıldığı biçim."""
+    def name(self):
         return self._node.name
 
     def is_special(self):
@@ -109,12 +108,6 @@ def _defaults(arguments):
 
 class Method(Function):
     """Sınıfın metodu: alanlarla ilişkisi de sorulabilir."""
-
-    def name(self):
-        return self._node.name
-
-    def reference(self):
-        return f"self.{self._node.name}"
 
     def is_constructor(self):
         return self._node.name in CONSTRUCTORS

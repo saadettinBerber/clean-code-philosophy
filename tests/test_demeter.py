@@ -1,5 +1,6 @@
 import unittest
 
+from measure.construction import Constructions
 from measure.demeter import TrainWrecks
 from tests.snippets import Snippet
 
@@ -32,11 +33,17 @@ def f():
 """
 FACTORY_OF_FACTORY = "def _a():\n    return Alpha()\n\ndef _b():\n    return _a()\n\ndef f():\n    _b().go()\n"
 SOMETIMES_EMPTY = "def _a(x):\n    if x:\n        return Alpha()\n    return\n\ndef f(x):\n    _a(x).go()\n"
+PROJECT_LOADS_PROGRESS = "class Project:\n    def load(self):\n        return Progress(self._path)\n"
+CACHE_LOADS_ITS_FIELD = "class Cache:\n    def load(self):\n        return self._items\n"
+USES_LOADED_PROGRESS = "def f(project):\n    project.load().pages()\n"
 
 
 
-def wrecks(code):
-    return [note.finding.message for note in TrainWrecks(Snippet(code)).notes()]
+def wrecks(*codes):
+    """Kaynaklar birlikte ölçülür; fabrika bilgisi hepsinden toplanır."""
+    sources = [Snippet(code) for code in codes]
+    constructions = Constructions.among([function for source in sources for function in source.functions()])
+    return [note.finding.message for source in sources for note in TrainWrecks(source, constructions).notes()]
 
 
 class TrainWrecksTest(unittest.TestCase):
@@ -120,6 +127,21 @@ class TrainWrecksTest(unittest.TestCase):
 
     def test_procedure_without_return_is_not_a_factory(self):
         self.assertEqual(len(wrecks("def _run(x):\n    x.go()\n\ndef f(x):\n    _run(x).done()\n")), 1)
+
+    def test_object_made_by_another_modules_factory_method_may_be_called(self):
+        self.assertEqual(wrecks(PROJECT_LOADS_PROGRESS, USES_LOADED_PROGRESS), [])
+
+    def test_name_shared_with_a_method_that_is_not_a_factory_is_a_train_wreck(self):
+        self.assertEqual(len(wrecks(PROJECT_LOADS_PROGRESS, CACHE_LOADS_ITS_FIELD, USES_LOADED_PROGRESS)), 1)
+
+    def test_factory_outside_the_measured_sources_is_unknown(self):
+        self.assertEqual(len(wrecks(USES_LOADED_PROGRESS)), 1)
+
+    def test_object_made_by_another_modules_function_may_be_called(self):
+        self.assertEqual(wrecks("def make_card(x):\n    return Card(x)\n", "def f(x):\n    cards.make_card(x).render()\n"), [])
+
+    def test_factory_of_a_factory_in_another_module_is_a_factory(self):
+        self.assertEqual(wrecks("def _a():\n    return Alpha()\n", "def b():\n    return _a()\n", "def f():\n    b().go()\n"), [])
 
     def test_data_structure_operations_are_not_train_wrecks(self):
         self.assertEqual(wrecks("def f(text): clean(text).strip()"), [])

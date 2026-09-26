@@ -4,7 +4,6 @@ import re
 from abc import ABC
 from collections import defaultdict
 
-from measure.demeter import TrainWrecks
 from measure.findings import Note, alarm
 from measure.source_check import SourceCheck
 from measure.syntax import FUNCTION_NODES, is_string_literal
@@ -92,4 +91,4 @@ class DispatchTables(SourceCheck):
         return keys_are_types and all(isinstance(value, ast.Name) and value.id in functions for value in table.values)
 
 
-SOURCE_CHECKS = (CommentedOutCode, TodosWithoutTicket, CarriedArguments, DispatchTables, TrainWrecks)
+SOURCE_CHECKS = (CommentedOutCode, TodosWithoutTicket, CarriedArguments, DispatchTables)

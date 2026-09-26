@@ -37,6 +37,11 @@ class MeasurementTest(unittest.TestCase):
     def test_test_functions_also_pass_the_test_checks(self):
         self.assertNotEqual(Measurement([Snippet("def test_total(self):\n    pass\n")]).notes(), [])
 
+    def test_factories_of_every_measured_source_are_known(self):
+        factory = Snippet("class Project:\n    def load(self):\n        return Progress(self)\n")
+        user = Snippet("def pages(project):\n    return project.load().pages()\n")
+        self.assertEqual(Measurement([factory, user]).notes(), [])
+
     def test_production_functions_skip_the_test_checks(self):
         self.assertEqual(Measurement([Snippet("def total(self):\n    pass\n")]).notes(), [])
 

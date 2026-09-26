@@ -1,8 +1,7 @@
 """Demeter Yasası ölçümü: fonksiyon yalnız yakın arkadaşlarıyla konuşur (Bl.6 · The Law of Demeter).
-Kaynağı bilir, çünkü kimin nesne kurduğu kaynağın kendi fabrikalarına da bağlıdır."""
+Kimin nesne kurduğunu ölçülen bütün kaynakların fabrikaları belirler; bu bilgi dışarıdan verilir (Bl.11 · DI)."""
 import ast
 
-from measure.construction import Constructions
 from measure.findings import alarm
 from measure.source_check import SourceCheck
 
@@ -19,9 +18,9 @@ class TrainWrecks(SourceCheck):
     """Dönen nesne üzerinde yeni çağrı. Fonksiyonun kendi kurduğu nesne ve veri yapısı işlemleri sayılmaz
     (Bl.6 · Train Wrecks; G36)."""
 
-    def __init__(self, source):
+    def __init__(self, source, constructions):
         super().__init__(source)
-        self._constructions = Constructions.of(source)
+        self._constructions = constructions
 
     def notes(self):
         return [function.note(_train_wreck(chain)) for function in self._source.functions()

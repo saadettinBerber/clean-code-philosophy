@@ -1,5 +1,7 @@
 """Ölçümün akışı: kaynakların fonksiyonlarını, sınıflarını ve kendilerini ölçer, notları sıralar."""
 from measure.class_checks import CLASS_CHECKS
+from measure.construction import Constructions
+from measure.demeter import TrainWrecks
 from measure.function_checks import FUNCTION_CHECKS
 from measure.source_checks import SOURCE_CHECKS
 from measure.switch_check import OneSwitch
@@ -14,7 +16,8 @@ class Measurement:
         self._sources = sources
 
     def notes(self):
-        return sorted(self._function_notes() + self._class_notes() + self._source_notes() + self._switch_notes())
+        return sorted(self._function_notes() + self._class_notes() + self._source_notes() + self._switch_notes()
+                      + self._demeter_notes())
 
     def _functions(self):
         return [function for source in self._sources for function in source.functions()]
@@ -41,3 +44,7 @@ class Measurement:
 
     def _switch_notes(self):
         return OneSwitch(self._functions()).notes()
+
+    def _demeter_notes(self):
+        constructions = Constructions.among(self._functions())
+        return [note for source in self._sources for note in TrainWrecks(source, constructions).notes()]

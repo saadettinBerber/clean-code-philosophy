@@ -2,6 +2,7 @@
 metotlarını çağırabilir (Bl.6 · The Law of Demeter)."""
 import ast
 import builtins
+from collections import defaultdict
 
 from measure.syntax import is_class_name, last_name
 
@@ -19,25 +20,32 @@ STANDARD_LIBRARY_CONSTRUCTORS = frozenset({"re.compile", "add_subparsers", "add_
 
 class Constructions:
     """Kurucu sayılan çağrılar: `Sınıf(...)`, `modül.Sınıf(...)`, `Sınıf.fabrika(...)`, Python'un yerleşik
-    türleri (`list(...)`, `super()`), `open(...)`, sınıf metodunda `cls(...)` ve kaynağın kendi fabrikaları (`_kart(...)`, `self._yapici()`)."""
+    türleri (`list(...)`, `super()`), `open(...)`, sınıf metodunda `cls(...)`, standart kütüphane kurucuları ve ölçülen
+    kaynakların fabrikaları. Tür bilgisi yoktur, fabrika ada göre çözülür: o adı taşıyan bütün fonksiyonlar fabrikaysa
+    çağrı kuruluştur; biri bile değilse ad belirsizdir ve kuruluş sayılmaz, alarm insanın okumasına kalır."""
 
-    def __init__(self, factories=frozenset()):
+    def __init__(self, functions=(), factories=frozenset()):
+        self._by_name = _by_name(functions)
         self._factories = factories
 
     @classmethod
-    def of(cls, source):
-        """Fabrikayı çağıran fonksiyon da fabrikadır; liste yeni fabrika çıkmayana dek genişler."""
+    def among(cls, functions):
+        """Fabrikayı çağıran fonksiyon da fabrikadır; küme yeni fabrika çıkmayana dek genişler."""
         factories, previous = frozenset(), None
         while factories != previous:
-            previous, factories = factories, cls(factories).factories_in(source)
-        return cls(factories)
+            previous, factories = factories, cls(functions, factories).factories()
+        return cls(functions, factories)
 
     def creates(self, node):
-        return isinstance(node, ast.Call) and (ast.unparse(node.func) in self._factories or _names_a_class(node.func)
-                                               or _is_standard_constructor(node.func))
+        return isinstance(node, ast.Call) and (_names_a_class(node.func) or _is_standard_constructor(node.func)
+                                               or self._calls_a_factory(node.func))
 
-    def factories_in(self, source):
-        return frozenset(function.reference() for function in source.functions() if self.is_factory(function))
+    def factories(self):
+        return frozenset(function for named in self._by_name.values() for function in named if self.is_factory(function))
+
+    def _calls_a_factory(self, callee):
+        named = self._by_name.get(last_name(callee), [])
+        return bool(named) and all(function in self._factories for function in named)
 
     def is_factory(self, function):
         """Her dönüşü bu fonksiyonda kurulan bir nesne olan fonksiyon."""
@@ -54,6 +62,13 @@ class Constructions:
     def _built_names(self, function):
         return {target.id for node in function.own_nodes() if isinstance(node, ast.Assign) and self.creates(node.value)
                 for target in node.targets if isinstance(target, ast.Name)}
+
+
+def _by_name(functions):
+    by_name = defaultdict(list)
+    for function in functions:
+        by_name[function.name()].append(function)
+    return by_name
 
 
 def _is_standard_constructor(callee):
