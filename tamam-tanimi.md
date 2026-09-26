@@ -152,7 +152,8 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
   - **Dost sayılan kurulan nesneler:**
     - sınıf kuruluşu;
     - ölçülen kaynakların fabrikaları: ad önce çağıranın kendi modülünde ve sınıfında çözülür, belirsiz ad alarm verir;
-    - yeni nesne kuran standart kütüphane çağrıları. Kitabın `createScratchFileStream` çözümü de nesneye yeni bir nesne kurdurur.
+    - yeni nesne kuran standart kütüphane çağrıları. Kitabın `createScratchFileStream` çözümü de nesneye yeni bir nesne kurdurur;
+    - bir tablodan seçilen sınıfla kurma: değerlerinin hepsi sınıf olan tablo, seçim varsayılanı da sınıfsa. Tek switch fabrikanın dibinde durur (Bl.3 · Switch Statements).
   - **Ölçümün bilerek görmedikleri okuma maddesidir:** yabancıyı argümanla bir yardımcıya verip orada çağırmak, alana koymak. Bunlar ihlali gidermez, yalnız yerini değiştirir. Koleksiyon öğesi (döngü öğesi, açılan demet) veri yapısına erişimdir.
 - [ ] Metot başka bir nesnenin verisiyle kendi verisinden çok uğraşmıyor (feature envy). (G14) [ö]
 - [ ] Veri taşıyıcı DTO (açık alanlı, fonksiyonsuz) davranışsız: üzerinde metot yok. Yalnız görünüş için yazılmış "bean" property'leri yok. (Bl.6 · Data Transfer Objects) [ö]
@@ -370,6 +371,7 @@ Maddelerdeki ortak kavramın her dildeki karşılığı. Yeni bir dil bu tabloya
 | Davranış taşıyan enum | `enum.Enum` + metot; üyeler kendi gövdesini taşıyamaz, davranış değerden okunur | `enum` + sabit başına gövdeli soyut metot (s.308-309) |
 | Ham eşleme (Bl.8) | `dict` | `Map` (s.114) |
 | Yerel ada bağlama (Demeter ölçümü) | `x = …`, `x: T = …`, `(x := …)`, `with … as x`; `for` hedefi ve demet açma koleksiyon öğesidir | yerel değişken bildirimi, `try (… x = …)`; ölçüm aracı yok (kitapta yok) |
+| Tablodan seçilen sınıfla kurma (Demeter) | `SINIFLAR[tür](veri)`, `SINIFLAR.get(tür, Varsayılan)(veri)`; tablo sözlük yazımı ya da `{s.KIND: s for s in (A, B)}` | `Map<String, Supplier<T>>` ya da `EnumMap` ile seçip kurmak (kitapta yok) |
 | Yeni nesne kuran standart kütüphane çağrısı (Demeter) | `re.compile`; argparse `add_subparsers`, `add_parser`, `add_argument_group`, `add_mutually_exclusive_group`, `parse_args`; `redirect_stdout`, `redirect_stderr` | `new` her kuruluşu açıkça gösterir; statik fabrikalar (`Pattern.compile`) (kitapta yok) |
 | Gereğinden somut tür (G26) | tür ipucunda `Sequence` ya da `Iterable` yeterken `list` (kitapta yok) | `List` yeterken `ArrayList` (s.301) |
 | Dağıtım birimi (G7) | paket ya da dağıtım (kitapta yok) | jar dosyası (s.291) |
