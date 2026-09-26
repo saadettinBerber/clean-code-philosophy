@@ -50,6 +50,22 @@ MODULE_TABLE = '_KINDS = {"a": Alpha, "b": Beta}\n'
 LOCAL_TABLE = 'def f(position):\n    kinds = {"top": Top, "none": NoHeader}\n    kinds[position]().go()\n'
 CLASSES_OF_A_COMPREHENSION = '_CARDS = {card.KIND: card for card in (Explain, Contrast)}\n'
 FACTORY_CHOOSING_FROM_A_TABLE = MODULE_TABLE + "def make(data):\n    return _KINDS.get(data, Gamma)(data)\n"
+OPENED_PAGE = """
+@contextmanager
+def opened(path):
+    with Document.open(path) as document:
+        yield Page(document)
+"""
+ASYNC_OPENED_PAGE = """
+@asynccontextmanager
+async def opened():
+    yield Page()
+
+async def f():
+    async with opened() as page:
+        page.text()
+"""
+USES_OPENED_PAGE = "def f(path):\n    with opened(path) as page:\n        page.text()\n"
 SOMETIMES_EMPTY = "def _a(x):\n    if x:\n        return Alpha()\n    return\n\ndef f(x):\n    _a(x).go()\n"
 PROJECT_LOADS_PROGRESS = "class Project:\n    def load(self):\n        return Progress(self._path)\n"
 CACHE_LOADS_ITS_FIELD = "class Cache:\n    def load(self):\n        return self._items\n"
@@ -281,10 +297,25 @@ class FactoryKnowledgeTest(unittest.TestCase):
     def test_comprehension_over_unknown_items_is_not_a_table_of_classes(self):
         self.assertEqual(len(wrecks("_CARDS = {c.KIND: c for c in CARDS}\ndef f(x): _CARDS[x](x).go()")), 1)
 
+    def test_context_manager_yielding_what_it_builds_is_a_factory(self):
+        self.assertEqual(wrecks(OPENED_PAGE + USES_OPENED_PAGE), [])
 
+    def test_context_manager_decorator_may_be_qualified_by_its_module(self):
+        qualified = OPENED_PAGE.replace("@contextmanager", "@contextlib.contextmanager")
+        self.assertEqual(wrecks(qualified + USES_OPENED_PAGE), [])
 
+    def test_context_manager_yielding_what_another_object_hands_out_is_not_a_factory(self):
+        yields_a_stranger = OPENED_PAGE.replace("yield Page(document)", "yield document.first()")
+        self.assertEqual(len(wrecks(yields_a_stranger + USES_OPENED_PAGE)), 1)
 
+    def test_asynchronous_context_manager_yielding_what_it_builds_is_a_factory(self):
+        self.assertEqual(wrecks(ASYNC_OPENED_PAGE), [])
 
+    def test_context_manager_yielding_nothing_is_not_a_factory(self):
+        self.assertEqual(len(wrecks(OPENED_PAGE.replace("yield Page(document)", "yield") + USES_OPENED_PAGE)), 1)
+
+    def test_generator_that_is_not_a_context_manager_is_not_a_factory(self):
+        self.assertEqual(len(wrecks(OPENED_PAGE.replace("@contextmanager", "@cache") + USES_OPENED_PAGE)), 1)
 
 
 SPLIT = "def f(ctxt):\n    options = ctxt.options()\n    options.scratch_dir()\n"

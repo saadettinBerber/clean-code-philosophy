@@ -13,6 +13,7 @@ CONSTRUCTORS = frozenset({"__init__", "setUp"})  # setUp: test sınıfının kur
 LIFECYCLE = CONSTRUCTORS | {"tearDown"}
 CLASS_LEVEL_DECORATORS = frozenset({"staticmethod", "classmethod"})
 UNBOUND_DECORATORS = CLASS_LEVEL_DECORATORS | {"abstractmethod"}
+CONTEXT_MANAGER_DECORATORS = frozenset({"contextmanager", "asynccontextmanager"})
 MUTATORS = frozenset({"append", "extend", "insert", "update", "add", "remove", "discard", "pop", "clear",
                       "setdefault", "sort", "reverse"})
 
@@ -72,11 +73,20 @@ class Function:
     def returns(self):
         return [node for node in self.own_nodes() if isinstance(node, ast.Return)]
 
+    def handed_out(self):
+        """Çağırana verilen değerler: dönüşler; bağlam yöneticisi üretecinde `with … as` hedefine giden `yield`ler."""
+        if self._decorator_names() & CONTEXT_MANAGER_DECORATORS:
+            return [node.value for node in self.own_nodes() if isinstance(node, ast.Yield)]
+        return [node.value for node in self.returns()]
+
     def return_annotation(self):
         return self._node.returns
 
     def decorators(self):
         return self._node.decorator_list
+
+    def _decorator_names(self):
+        return {_decorator_name(decorator) for decorator in self.decorators()}
 
     def signature(self):
         """`self` ve `cls` dışındaki parametreler, tür bildirimi ve varsayılanıyla."""
@@ -165,9 +175,6 @@ class Method(Function):
         bound = not (self._decorator_names() & UNBOUND_DECORATORS)
         uses_self = any(isinstance(node, ast.Name) and node.id == "self" for node in self.own_nodes())
         return bound and not self.is_special() and not uses_self
-
-    def _decorator_names(self):
-        return {_decorator_name(decorator) for decorator in self.decorators()}
 
 
 def _call_values(call):

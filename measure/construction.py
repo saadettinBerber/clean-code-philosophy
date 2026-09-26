@@ -76,9 +76,9 @@ class Sight:
         return isinstance(node, ast.Call) and not self.creates(node)
 
     def is_factory(self):
-        """Her dönüşü bu fonksiyonda kurulan bir nesne olan fonksiyon."""
+        """Çağırana verdiği her değer bu fonksiyonda kurulan bir nesne olan fonksiyon (dönüş ya da bağlam `yield`i)."""
         built = self._built_names()
-        values = [node.value for node in self._caller.returns()]
+        values = self._caller.handed_out()
         return bool(values) and all(self._is_built(value, built) for value in values)
 
     def _chooses_a_class(self, callee):
