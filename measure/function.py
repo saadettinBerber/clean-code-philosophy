@@ -36,6 +36,12 @@ class Function:
     def name(self):
         return self._node.name
 
+    def home(self):
+        return self._scope.home()
+
+    def module_home(self):
+        return self._scope.module_home()
+
     def is_special(self):
         return self._node.name.startswith("__") and self._node.name.endswith("__")
 

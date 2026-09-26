@@ -4,7 +4,7 @@ import ast
 import builtins
 from collections import defaultdict
 
-from measure.syntax import is_class_name, last_name
+from measure.syntax import is_class_name, is_self_attribute, last_name
 
 # `open` tür değildir ama dosya nesnesini kurar; `next`, `max`, `getattr` başkasının tuttuğu nesneyi verir.
 BUILT_IN_CONSTRUCTORS = frozenset(name for name, value in vars(builtins).items() if isinstance(value, type)) | {"open"}
@@ -36,22 +36,49 @@ class Constructions:
             previous, factories = factories, cls(functions, factories).factories()
         return cls(functions, factories)
 
-    def creates(self, node):
-        return isinstance(node, ast.Call) and (_names_a_class(node.func) or _is_standard_constructor(node.func)
-                                               or self._calls_a_factory(node.func))
-
     def factories(self):
         return frozenset(function for named in self._by_name.values() for function in named if self.is_factory(function))
 
-    def _calls_a_factory(self, callee):
-        named = self._by_name.get(last_name(callee), [])
-        return bool(named) and all(function in self._factories for function in named)
-
     def is_factory(self, function):
+        return self.seen_from(function).is_factory()
+
+    def seen_from(self, caller):
+        return Sight(self, caller)
+
+    def named(self, name):
+        return self._by_name.get(name, [])
+
+    def are_factories(self, functions):
+        return bool(functions) and all(function in self._factories for function in functions)
+
+
+class Sight:
+    """Bir fonksiyonun gözünden kuruluşlar. Ad, Python'un çözdüğü gibi önce çağıranın yanında aranır: çıplak ad
+    kendi modülünde, `self.ad` kendi sınıfında. Orada tanımlı değilse bütün kaynaklardaki aynı adlılara bakılır."""
+
+    def __init__(self, constructions, caller):
+        self._constructions = constructions
+        self._caller = caller
+
+    def creates(self, node):
+        return isinstance(node, ast.Call) and (_names_a_class(node.func) or _is_standard_constructor(node.func)
+                                               or self._constructions.are_factories(self._reachable(node.func)))
+
+    def is_factory(self):
         """Her dönüşü bu fonksiyonda kurulan bir nesne olan fonksiyon."""
-        built = self._built_names(function)
-        values = [node.value for node in function.returns()]
+        built = self._built_names()
+        values = [node.value for node in self._caller.returns()]
         return bool(values) and all(self._is_built(value, built) for value in values)
+
+    def _reachable(self, callee):
+        named = self._constructions.named(last_name(callee))
+        home = self._home_of(callee)
+        return [function for function in named if function.home() == home] or named
+
+    def _home_of(self, callee):
+        if isinstance(callee, ast.Name):
+            return self._caller.module_home()
+        return self._caller.home() if is_self_attribute(callee) else ()
 
     def _is_built(self, value, built):
         """Kurulan nesne; koşullu ifadede iki kol da kurulmuş olmalı."""
@@ -59,8 +86,8 @@ class Constructions:
             return self._is_built(value.body, built) and self._is_built(value.orelse, built)
         return self.creates(value) or _is_one_of(value, built)
 
-    def _built_names(self, function):
-        return {target.id for node in function.own_nodes() if isinstance(node, ast.Assign) and self.creates(node.value)
+    def _built_names(self):
+        return {target.id for node in self._caller.own_nodes() if isinstance(node, ast.Assign) and self.creates(node.value)
                 for target in node.targets if isinstance(target, ast.Name)}
 
 

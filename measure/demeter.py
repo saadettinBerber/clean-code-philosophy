@@ -27,15 +27,17 @@ class TrainWrecks(SourceCheck):
                 for chain in self._outermost_chains(function)]
 
     def _outermost_chains(self, function):
-        chained = [node for node in function.own_nodes() if self._is_call_on_call(node)]
+        sight = self._constructions.seen_from(function)
+        chained = [node for node in function.own_nodes() if _is_call_on_call(node, sight)]
         inner = {id(node.func.value) for node in chained}
         return [node for node in chained if id(node) not in inner]
 
-    def _is_call_on_call(self, node):
-        is_method_call = isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
-        if not is_method_call or node.func.attr in DATA_STRUCTURE_METHODS:
-            return False
-        return isinstance(node.func.value, ast.Call) and not self._constructions.creates(node.func.value)
+
+def _is_call_on_call(node, sight):
+    is_method_call = isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+    if not is_method_call or node.func.attr in DATA_STRUCTURE_METHODS:
+        return False
+    return isinstance(node.func.value, ast.Call) and not sight.creates(node.func.value)
 
 
 def _train_wreck(chain):

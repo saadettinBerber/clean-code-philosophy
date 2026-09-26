@@ -36,12 +36,37 @@ SOMETIMES_EMPTY = "def _a(x):\n    if x:\n        return Alpha()\n    return\n\n
 PROJECT_LOADS_PROGRESS = "class Project:\n    def load(self):\n        return Progress(self._path)\n"
 CACHE_LOADS_ITS_FIELD = "class Cache:\n    def load(self):\n        return self._items\n"
 USES_LOADED_PROGRESS = "def f(project):\n    project.load().pages()\n"
+DOCUMENT_BUILDS_PAGES = """
+class Document:
+    def page(self, number):
+        return Page(self, number)
+
+    def text(self, number):
+        return self.page(number).text()
+"""
+METHOD_CALLS_MODULE_FACTORY = """
+def _para(x):
+    return Para(x)
+
+class ParaTest:
+    def test_go(self):
+        _para(1).go()
+"""
+DOCUMENT_ASKS_ANOTHER = """
+class Document:
+    def page(self, number):
+        return Page(self, number)
+
+    def copy_text(self, other):
+        return other.page(1).text()
+"""
+FAKE_HOLDS_PAGES = "class FakeDocument:\n    def page(self, number):\n        return self._pages[number]\n"
 
 
 
 def wrecks(*codes):
     """Kaynaklar birlikte ölçülür; fabrika bilgisi hepsinden toplanır."""
-    sources = [Snippet(code) for code in codes]
+    sources = [Snippet(code, f"parca{index}.py") for index, code in enumerate(codes)]
     constructions = Constructions.among([function for source in sources for function in source.functions()])
     return [note.finding.message for source in sources for note in TrainWrecks(source, constructions).notes()]
 
@@ -142,6 +167,22 @@ class TrainWrecksTest(unittest.TestCase):
 
     def test_factory_of_a_factory_in_another_module_is_a_factory(self):
         self.assertEqual(wrecks("def _a():\n    return Alpha()\n", "def b():\n    return _a()\n", "def f():\n    b().go()\n"), [])
+
+    def test_bare_name_resolves_to_its_own_modules_factory_first(self):
+        self.assertEqual(wrecks("def _para(x):\n    return Para(x)\n\ndef f(x):\n    _para(x).go()\n",
+                                "def _para(x):\n    return x.para\n"), [])
+
+    def test_own_method_resolves_to_its_own_classs_factory_first(self):
+        self.assertEqual(wrecks(DOCUMENT_BUILDS_PAGES, FAKE_HOLDS_PAGES), [])
+
+    def test_bare_name_in_a_method_resolves_to_its_own_modules_factory_first(self):
+        self.assertEqual(wrecks(METHOD_CALLS_MODULE_FACTORY, "def _para(x):\n    return x.para\n"), [])
+
+    def test_another_objects_method_does_not_resolve_to_the_callers_class(self):
+        self.assertEqual(len(wrecks(DOCUMENT_ASKS_ANOTHER, FAKE_HOLDS_PAGES)), 1)
+
+    def test_method_of_another_object_resolves_among_all_sources(self):
+        self.assertEqual(len(wrecks(DOCUMENT_BUILDS_PAGES, FAKE_HOLDS_PAGES, "def f(doc):\n    doc.page(1).text()\n")), 1)
 
     def test_data_structure_operations_are_not_train_wrecks(self):
         self.assertEqual(wrecks("def f(text): clean(text).strip()"), [])

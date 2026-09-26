@@ -17,6 +17,13 @@ class Scope:
     def location_at(self, line, name):
         return Location(self._path, line, name)
 
+    def home(self):
+        """Tanımın yaşadığı yer: dosya ve sahibi olan sınıf."""
+        return self._path, self._owner
+
+    def module_home(self):
+        return self._path, ""
+
     def inner(self, node):
         return Scope(self._path, self._qualified(node.name))
 

@@ -9,8 +9,8 @@ SNIPPET_PATH = "parca.py"
 class Snippet(SourceFile):
     """Bellekteki kaynak parçası; ilk fonksiyonu ya da ilk sınıfı ölçülecek olandır."""
 
-    def __init__(self, code):
-        super().__init__(SNIPPET_PATH, textwrap.dedent(code))
+    def __init__(self, code, path=SNIPPET_PATH):
+        super().__init__(path, textwrap.dedent(code))
 
     def function(self):
         return self.top_level_functions()[0]
