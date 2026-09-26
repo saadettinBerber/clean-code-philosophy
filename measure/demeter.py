@@ -10,7 +10,8 @@ CHAIN_PREVIEW = 60
 DATA_STRUCTURE_METHODS = frozenset({"items", "keys", "values", "get", "copy", "count", "index", "split", "rsplit",
                                     "splitlines", "strip", "lstrip", "rstrip", "lower", "upper", "replace", "join",
                                     "startswith", "endswith", "format", "removeprefix", "removesuffix", "encode",
-                                    "decode"})
+                                    "decode", "isalnum", "isalpha", "isdigit", "isspace", "isupper", "islower",
+                                    "partition", "rpartition", "find", "rfind", "casefold"})
 
 
 class TrainWrecks(SourceCheck):
