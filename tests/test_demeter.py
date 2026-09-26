@@ -165,11 +165,44 @@ class TrainWrecksTest(unittest.TestCase):
     def test_factory_may_choose_between_two_constructions(self):
         self.assertEqual(wrecks("def _a(x):\n    return Alpha() if x else Beta()\n\ndef f(x):\n    _a(x).go()\n"), [])
 
-    def test_choice_with_one_foreign_branch_is_not_a_factory(self):
-        self.assertEqual(len(wrecks(ONE_FOREIGN_BRANCH)), 1)
-
     def test_procedure_without_return_is_not_a_factory(self):
         self.assertEqual(len(wrecks("def _run(x):\n    x.go()\n\ndef f(x):\n    _run(x).done()\n")), 1)
+
+    def test_data_structure_operations_are_not_train_wrecks(self):
+        self.assertEqual(wrecks("def f(text): clean(text).strip()"), [])
+
+    def test_groups_of_a_match_are_data(self):
+        self.assertEqual(wrecks("def f(rule, line): rule.match(line).group(1)"), [])
+
+    def test_questions_about_a_string_are_data(self):
+        self.assertEqual(wrecks("def f(host): word_before(host).isalnum()"), [])
+
+    def test_pattern_compiled_by_the_standard_library_may_be_called(self):
+        self.assertEqual(wrecks("def f(token, text): re.compile(token).sub('', text)"), [])
+
+    def test_call_on_what_another_objects_compile_returns_is_a_train_wreck(self):
+        self.assertEqual(len(wrecks("def f(compiler, token): compiler.compile(token).sub('')")), 1)
+
+    def test_parser_built_by_an_argument_parser_may_be_called(self):
+        self.assertEqual(wrecks("def f(parser): parser.add_subparsers().add_parser('info').set_defaults(run=go)"), [])
+
+    def test_namespace_built_by_parsing_arguments_is_data(self):
+        self.assertEqual(wrecks("def f(parser, argv): parser.parse_args(argv).run()"), [])
+
+    def test_call_on_what_another_parser_method_returns_is_a_train_wreck(self):
+        self.assertEqual(len(wrecks("def f(parser): parser.get_default('x').render()")), 1)
+
+    def test_methods_are_measured_too(self):
+        self.assertEqual(len(wrecks("class Report:\n    def f(self, ctxt):\n        ctxt.options().dir()\n")), 1)
+
+
+
+class FactoryKnowledgeTest(unittest.TestCase):
+    """Kimin nesne kurduğu: başka modülün fabrikası, çağıranın kapsamında ad çözümü, tablodan seçilen sınıf,
+    bağlam yöneticisi (Bl.6 · The Law of Demeter; Bl.3 · Switch Statements)."""
+
+    def test_choice_with_one_foreign_branch_is_not_a_factory(self):
+        self.assertEqual(len(wrecks(ONE_FOREIGN_BRANCH)), 1)
 
     def test_object_made_by_another_modules_factory_method_may_be_called(self):
         self.assertEqual(wrecks(PROJECT_LOADS_PROGRESS, USES_LOADED_PROGRESS), [])
@@ -248,32 +281,10 @@ class TrainWrecksTest(unittest.TestCase):
     def test_comprehension_over_unknown_items_is_not_a_table_of_classes(self):
         self.assertEqual(len(wrecks("_CARDS = {c.KIND: c for c in CARDS}\ndef f(x): _CARDS[x](x).go()")), 1)
 
-    def test_data_structure_operations_are_not_train_wrecks(self):
-        self.assertEqual(wrecks("def f(text): clean(text).strip()"), [])
 
-    def test_groups_of_a_match_are_data(self):
-        self.assertEqual(wrecks("def f(rule, line): rule.match(line).group(1)"), [])
 
-    def test_questions_about_a_string_are_data(self):
-        self.assertEqual(wrecks("def f(host): word_before(host).isalnum()"), [])
 
-    def test_pattern_compiled_by_the_standard_library_may_be_called(self):
-        self.assertEqual(wrecks("def f(token, text): re.compile(token).sub('', text)"), [])
 
-    def test_call_on_what_another_objects_compile_returns_is_a_train_wreck(self):
-        self.assertEqual(len(wrecks("def f(compiler, token): compiler.compile(token).sub('')")), 1)
-
-    def test_parser_built_by_an_argument_parser_may_be_called(self):
-        self.assertEqual(wrecks("def f(parser): parser.add_subparsers().add_parser('info').set_defaults(run=go)"), [])
-
-    def test_namespace_built_by_parsing_arguments_is_data(self):
-        self.assertEqual(wrecks("def f(parser, argv): parser.parse_args(argv).run()"), [])
-
-    def test_call_on_what_another_parser_method_returns_is_a_train_wreck(self):
-        self.assertEqual(len(wrecks("def f(parser): parser.get_default('x').render()")), 1)
-
-    def test_methods_are_measured_too(self):
-        self.assertEqual(len(wrecks("class Report:\n    def f(self, ctxt):\n        ctxt.options().dir()\n")), 1)
 
 
 SPLIT = "def f(ctxt):\n    options = ctxt.options()\n    options.scratch_dir()\n"
