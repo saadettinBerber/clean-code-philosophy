@@ -21,6 +21,9 @@ class SourceFile:
     def read(cls, path):
         return cls(path, Path(path).read_text(encoding="utf-8"))
 
+    def module_home(self):
+        return self._scope.module_home()
+
     def location(self, line, name):
         return self._scope.location_at(line, name)
 

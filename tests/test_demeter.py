@@ -46,6 +46,10 @@ def f(run):
         run()
     output.getvalue()
 """
+MODULE_TABLE = '_KINDS = {"a": Alpha, "b": Beta}\n'
+LOCAL_TABLE = 'def f(position):\n    kinds = {"top": Top, "none": NoHeader}\n    kinds[position]().go()\n'
+CLASSES_OF_A_COMPREHENSION = '_CARDS = {card.KIND: card for card in (Explain, Contrast)}\n'
+FACTORY_CHOOSING_FROM_A_TABLE = MODULE_TABLE + "def make(data):\n    return _KINDS.get(data, Gamma)(data)\n"
 SOMETIMES_EMPTY = "def _a(x):\n    if x:\n        return Alpha()\n    return\n\ndef f(x):\n    _a(x).go()\n"
 PROJECT_LOADS_PROGRESS = "class Project:\n    def load(self):\n        return Progress(self._path)\n"
 CACHE_LOADS_ITS_FIELD = "class Cache:\n    def load(self):\n        return self._items\n"
@@ -81,7 +85,7 @@ FAKE_HOLDS_PAGES = "class FakeDocument:\n    def page(self, number):\n        re
 def wrecks(*codes):
     """Kaynaklar birlikte ölçülür; fabrika bilgisi hepsinden toplanır."""
     sources = [Snippet(code, f"parca{index}.py") for index, code in enumerate(codes)]
-    constructions = Constructions.among([function for source in sources for function in source.functions()])
+    constructions = Constructions.among(sources)
     return [note.finding.message for source in sources for note in TrainWrecks(source, constructions).notes()]
 
 
@@ -197,6 +201,52 @@ class TrainWrecksTest(unittest.TestCase):
 
     def test_method_of_another_object_resolves_among_all_sources(self):
         self.assertEqual(len(wrecks(DOCUMENT_BUILDS_PAGES, FAKE_HOLDS_PAGES, "def f(doc): doc.page(1).text()")), 1)
+
+    def test_class_chosen_from_a_table_builds_the_object(self):
+        self.assertEqual(wrecks(MODULE_TABLE + "def f(data): _KINDS[data](data).go()"), [])
+
+    def test_factory_choosing_its_class_from_a_table_is_a_factory(self):
+        self.assertEqual(wrecks(FACTORY_CHOOSING_FROM_A_TABLE + "def f(data):\n    make(data).go()\n"), [])
+
+    def test_class_chosen_from_a_local_table_builds_the_object(self):
+        self.assertEqual(wrecks(LOCAL_TABLE), [])
+
+    def test_table_of_classes_built_by_a_comprehension_builds_too(self):
+        self.assertEqual(wrecks(CLASSES_OF_A_COMPREHENSION + "def f(data): _CARDS[data](data).go()"), [])
+
+    def test_table_holding_something_other_than_a_class_is_not_a_constructor(self):
+        self.assertEqual(len(wrecks('_HANDLERS = {"a": Alpha, "b": handle}\ndef f(x): _HANDLERS[x](x).go()')), 1)
+
+    def test_choice_without_a_default_class_may_hand_out_anything(self):
+        self.assertEqual(len(wrecks(MODULE_TABLE + "def f(x): _KINDS.get(x)(x).go()")), 1)
+
+    def test_choice_with_a_default_that_is_not_a_class_may_hand_out_anything(self):
+        self.assertEqual(len(wrecks(MODULE_TABLE + "def f(x, fallback): _KINDS.get(x, fallback)(x).go()")), 1)
+
+    def test_table_passed_in_as_an_argument_is_unknown(self):
+        self.assertEqual(len(wrecks("def f(kinds, x): kinds[x](x).go()")), 1)
+
+    def test_local_name_hides_the_modules_table(self):
+        self.assertEqual(len(wrecks(MODULE_TABLE + "def f(x, other):\n    _KINDS = other\n    _KINDS[x](x).go()\n")), 1)
+
+    def test_table_of_another_module_is_not_seen(self):
+        self.assertEqual(len(wrecks(MODULE_TABLE, "def f(x): _KINDS[x](x).go()")), 1)
+
+    def test_local_name_bound_to_a_table_and_to_something_else_is_unknown(self):
+        code = 'def f(x, other):\n    kinds = {"a": Alpha}\n    kinds = other\n    kinds[x]().go()\n'
+        self.assertEqual(len(wrecks(code)), 1)
+
+    def test_module_name_bound_to_a_table_and_to_something_else_is_unknown(self):
+        self.assertEqual(len(wrecks(MODULE_TABLE + "_KINDS = load()\ndef f(x): _KINDS[x](x).go()")), 1)
+
+    def test_comprehension_over_an_item_that_is_not_a_class_is_not_a_table_of_classes(self):
+        self.assertEqual(len(wrecks("_CARDS = {c.KIND: c for c in (Explain, helper)}\ndef f(x): _CARDS[x](x).go()")), 1)
+
+    def test_only_get_chooses_from_a_table(self):
+        self.assertEqual(len(wrecks(MODULE_TABLE + "def f(x): _KINDS.pick(x, Gamma)(x).go()")), 1)
+
+    def test_comprehension_over_unknown_items_is_not_a_table_of_classes(self):
+        self.assertEqual(len(wrecks("_CARDS = {c.KIND: c for c in CARDS}\ndef f(x): _CARDS[x](x).go()")), 1)
 
     def test_data_structure_operations_are_not_train_wrecks(self):
         self.assertEqual(wrecks("def f(text): clean(text).strip()"), [])

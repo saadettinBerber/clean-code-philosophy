@@ -1,42 +1,39 @@
 """Bir çağrı nesneyi fonksiyonun kendisine mi kuruyor? Demeter'in izni: fonksiyon, kendi kurduğu nesnenin
 metotlarını çağırabilir (Bl.6 · The Law of Demeter)."""
 import ast
-import builtins
 from collections import defaultdict
+from typing import NamedTuple
 
-from measure.syntax import is_class_name, is_self_attribute, last_name
+from measure.callee import Callee
+from measure.syntax import is_name
 
-# `open` tür değildir ama dosya nesnesini kurar; `next`, `max`, `getattr` başkasının tuttuğu nesneyi verir.
-BUILT_IN_CONSTRUCTORS = frozenset(name for name, value in vars(builtins).items() if isinstance(value, type)) | {"open"}
-# `cls(...)` sınıf metodunda sınıfın kendisini kurar.
-CONSTRUCTOR_NAMES = BUILT_IN_CONSTRUCTORS | {"cls"}
-# Standart kütüphane kurucuları: her çağrı yeni bir nesne kurar, var olanın içinde gezinmez. Kitabın kendi çözümü
-# `ctxt.createScratchFileStream(name)` da nesneye yeni bir nesne kurdurur (Bl.6 · Hiding Structure). `parse_args`
-# davranışsız bir veri yapısı (`Namespace`) kurar; veri yapısına Demeter uygulanmaz (Bl.6 · Train Wrecks).
-# `redirect_stdout` ve `redirect_stderr` küçük harfle yazılmış sınıflardır; `with … as` hedefi verilen akıştır.
-# Başka nesnelerde de sık görülen belirsiz adlar (`compile`, `sub`, `match`) yalnız modülüyle nitelenmiş hâliyle girer.
-STANDARD_LIBRARY_CONSTRUCTORS = frozenset({"re.compile", "add_subparsers", "add_parser", "add_argument_group",
-                                           "add_mutually_exclusive_group", "parse_args", "redirect_stdout",
-                                           "redirect_stderr"})
+class Known(NamedTuple):
+    """Ölçülen kaynaklarda bilinenler: fonksiyonlar ve modül düzeyindeki sınıf tabloları (`(modül evi, ad)`)."""
+    functions: tuple = ()
+    tables: frozenset = frozenset()
 
 
 class Constructions:
     """Kurucu sayılan çağrılar: `Sınıf(...)`, `modül.Sınıf(...)`, `Sınıf.fabrika(...)`, Python'un yerleşik
-    türleri (`list(...)`, `super()`), `open(...)`, sınıf metodunda `cls(...)`, standart kütüphane kurucuları ve ölçülen
-    kaynakların fabrikaları. Tür bilgisi yoktur, fabrika ada göre çözülür: o adı taşıyan bütün fonksiyonlar fabrikaysa
-    çağrı kuruluştur; biri bile değilse ad belirsizdir ve kuruluş sayılmaz, alarm insanın okumasına kalır."""
+    türleri (`list(...)`, `super()`), `open(...)`, sınıf metodunda `cls(...)`, standart kütüphane kurucuları, tablodan
+    seçilen sınıfla kurma ve ölçülen kaynakların fabrikaları. Tür bilgisi yoktur, fabrika ada göre çözülür: o adı
+    taşıyan bütün fonksiyonlar fabrikaysa çağrı kuruluştur; biri bile değilse ad belirsizdir ve kuruluş sayılmaz,
+    alarm insanın okumasına kalır."""
 
-    def __init__(self, functions=(), factories=frozenset()):
-        self._by_name = _by_name(functions)
+    def __init__(self, known=Known(), factories=frozenset()):
+        self._by_name = _by_name(known.functions)
+        self._tables = known.tables
         self._factories = factories
 
     @classmethod
-    def among(cls, functions):
+    def among(cls, sources):
         """Fabrikayı çağıran fonksiyon da fabrikadır; küme yeni fabrika çıkmayana dek genişler."""
+        known = Known(tuple(function for source in sources for function in source.functions()),
+                      frozenset(table for source in sources for table in _class_tables_of(source)))
         factories, previous = frozenset(), None
         while factories != previous:
-            previous, factories = factories, cls(functions, factories).factories()
-        return cls(functions, factories)
+            previous, factories = factories, cls(known, factories).factories()
+        return cls(known, factories)
 
     def factories(self):
         functions = [function for named in self._by_name.values() for function in named]
@@ -54,6 +51,10 @@ class Constructions:
     def are_factories(self, functions):
         return bool(functions) and all(function in self._factories for function in functions)
 
+    def has_table(self, place):
+        """`(modül evi, ad)` o modülde yalnız sınıflardan oluşan bir tabloyu mu adlandırıyor?"""
+        return place in self._tables
+
 
 class Sight:
     """Bir fonksiyonun gözünden kuruluşlar. Ad, Python'un çözdüğü gibi önce çağıranın yanında aranır: çıplak ad
@@ -64,8 +65,11 @@ class Sight:
         self._caller = caller
 
     def creates(self, node):
-        return isinstance(node, ast.Call) and (_names_a_class(node.func) or _is_standard_constructor(node.func)
-                                               or self._constructions.are_factories(self._reachable(node.func)))
+        if not isinstance(node, ast.Call):
+            return False
+        callee = Callee(node.func)
+        return (callee.names_a_class() or callee.is_standard_constructor()
+                or self._constructions.are_factories(self._reachable(callee)) or self._chooses_a_class(callee))
 
     def hands_out(self, node):
         """Kuruluş olmayan çağrının sonucu başka birinin verdiği nesnedir: yabancıdır (Bl.6 · The Law of Demeter)."""
@@ -77,15 +81,24 @@ class Sight:
         values = [node.value for node in self._caller.returns()]
         return bool(values) and all(self._is_built(value, built) for value in values)
 
-    def _reachable(self, callee):
-        named = self._constructions.named(last_name(callee))
-        home = self._home_of(callee)
-        return [function for function in named if function.home() == home] or named
+    def _chooses_a_class(self, callee):
+        """Tablodan seçilen sınıfla kurma: `SINIFLAR[tür](veri)` ya da `SINIFLAR.get(tür, Varsayılan)(veri)`.
+        Tek switch fabrikanın dibinde durur ve polimorfik nesne kurar (Bl.3 · Switch Statements)."""
+        table, defaults = callee.table_choice()
+        classes_by_default = all(Callee(default).names_a_class() for default in defaults)
+        return bool(table) and classes_by_default and self._is_class_table(table)
 
-    def _home_of(self, callee):
-        if isinstance(callee, ast.Name):
-            return self._caller.module_home()
-        return self._caller.home() if is_self_attribute(callee) else ()
+    def _is_class_table(self, name):
+        """Ad önce fonksiyonun içinde aranır, orada bağlanmamışsa kendi modülünde (Python'un ad çözümü)."""
+        local = _assigned_values(self._caller.own_nodes(), name)
+        if local:
+            return all(is_class_table(value) for value in local)
+        return self._constructions.has_table((self._caller.module_home(), name))
+
+    def _reachable(self, callee):
+        named = self._constructions.named(callee.name())
+        home = callee.home_seen_from(self._caller)
+        return [function for function in named if function.home() == home] or named
 
     def _is_built(self, value, built):
         """Kurulan nesne; koşullu ifadede iki kol da kurulmuş olmalı."""
@@ -99,21 +112,39 @@ class Sight:
                 for target in node.targets if isinstance(target, ast.Name)}
 
 
+def is_class_table(value):
+    """Değerlerinin hepsi sınıf olan sözlük: sözlük yazımı ya da sınıf listesi üzerinde sözlük kavraması."""
+    if isinstance(value, ast.Dict):
+        return bool(value.values) and all(Callee(item).names_a_class() for item in value.values)
+    return isinstance(value, ast.DictComp) and _comprehends_classes(value)
+
+
+def _comprehends_classes(comprehension):
+    """`{sınıf.KIND: sınıf for sınıf in (A, B)}`: değer, sınıf listesinin öğesidir."""
+    [generator] = comprehension.generators or [None]
+    listed = isinstance(getattr(generator, "iter", None), (ast.Tuple, ast.List))
+    is_element = listed and isinstance(generator.target, ast.Name) and is_name(comprehension.value, generator.target.id)
+    return is_element and all(Callee(item).names_a_class() for item in generator.iter.elts)
+
+
+def _class_tables_of(source):
+    nodes = source.top_level_nodes()
+    names = {target.id for node in nodes if isinstance(node, ast.Assign) for target in node.targets
+             if isinstance(target, ast.Name)}
+    return [(source.module_home(), name) for name in names
+            if all(is_class_table(value) for value in _assigned_values(nodes, name))]
+
+
+def _assigned_values(nodes, name):
+    assignments = [node for node in nodes if isinstance(node, ast.Assign)]
+    return [node.value for node in assignments if any(is_name(target, name) for target in node.targets)]
+
+
 def _by_name(functions):
     by_name = defaultdict(list)
     for function in functions:
         by_name[function.name()].append(function)
     return by_name
-
-
-def _is_standard_constructor(callee):
-    return ast.unparse(callee) in STANDARD_LIBRARY_CONSTRUCTORS or last_name(callee) in STANDARD_LIBRARY_CONSTRUCTORS
-
-
-def _names_a_class(callee):
-    if isinstance(callee, ast.Attribute):
-        return is_class_name(callee.attr) or isinstance(callee.value, ast.Name) and is_class_name(callee.value.id)
-    return isinstance(callee, ast.Name) and (callee.id in CONSTRUCTOR_NAMES or is_class_name(callee.id))
 
 
 def _is_one_of(node, names):

@@ -46,5 +46,5 @@ class Measurement:
         return OneSwitch(self._functions()).notes()
 
     def _demeter_notes(self):
-        constructions = Constructions.among(self._functions())
+        constructions = Constructions.among(self._sources)
         return [note for source in self._sources for note in TrainWrecks(source, constructions).notes()]
