@@ -58,6 +58,15 @@ class TrainWrecksTest(unittest.TestCase):
     def test_call_on_what_a_constant_returns_is_a_train_wreck(self):
         self.assertEqual(len(wrecks("def f(): RULES.get(1).kind()")), 1)
 
+    def test_object_made_by_a_private_class_may_be_called(self):
+        self.assertEqual(wrecks("def f(html): _Parser().feed(html)"), [])
+
+    def test_call_on_what_a_private_function_returns_is_a_train_wreck(self):
+        self.assertEqual(len(wrecks("def f(x): _parse(x).go()")), 1)
+
+    def test_call_on_what_a_private_constant_returns_is_a_train_wreck(self):
+        self.assertEqual(len(wrecks("def f(): _RULES.get(1).kind()")), 1)
+
     def test_object_made_by_a_module_qualified_class_may_be_called(self):
         self.assertEqual(wrecks("def f(path): zipfile.ZipFile(path).read('a')"), [])
 
