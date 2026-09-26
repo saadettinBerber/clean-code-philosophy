@@ -64,6 +64,10 @@ class Sight:
         return isinstance(node, ast.Call) and (_names_a_class(node.func) or _is_standard_constructor(node.func)
                                                or self._constructions.are_factories(self._reachable(node.func)))
 
+    def hands_out(self, node):
+        """Kuruluş olmayan çağrının sonucu başka birinin verdiği nesnedir: yabancıdır (Bl.6 · The Law of Demeter)."""
+        return isinstance(node, ast.Call) and not self.creates(node)
+
     def is_factory(self):
         """Her dönüşü bu fonksiyonda kurulan bir nesne olan fonksiyon."""
         built = self._built_names()

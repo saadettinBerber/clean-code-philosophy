@@ -1,3 +1,4 @@
+import ast
 import unittest
 
 from measure.construction import Constructions
@@ -210,6 +211,147 @@ class TrainWrecksTest(unittest.TestCase):
 
     def test_methods_are_measured_too(self):
         self.assertEqual(len(wrecks("class Report:\n    def f(self, ctxt):\n        ctxt.options().scratch_dir()\n")), 1)
+
+
+SPLIT = "def f(ctxt):\n    options = ctxt.options()\n    options.scratch_dir()\n"
+MAYBE_A_STRANGER = "def f(a, c):\n    if c:\n        x = a.b()\n    else:\n        x = Box()\n    x.c()\n"
+FRIEND_AFTER_THE_BRANCH = "def f(a, c):\n    if c:\n        x = a.b()\n    x = Box()\n    x.c()\n"
+FRIEND_IN_ITS_OWN_BRANCH = "def f(a, c):\n    if c:\n        x = a.b()\n    else:\n        x = Box()\n        x.c()\n"
+NESTED_FUNCTION_BINDS = "def f(a, x):\n    def g():\n        x = a.b()\n        return x\n    x.c()\n"
+FIELD_HOLDS_IT = "class Report:\n    def f(self, a):\n        self.x = a.b()\n        self.x.c()\n"
+CAUGHT = "def f(a):\n    e = a.b()\n    try:\n        a.go()\n    except OSError as e:\n        e.log()\n"
+
+
+class SplitChainTest(unittest.TestCase):
+    """Zinciri ara değişkene bölmek ihlali gidermez (Bl.6 · Train Wrecks, Hiding Structure)."""
+
+    def test_chain_split_through_a_local_name_is_a_train_wreck(self):
+        self.assertEqual(wrecks(SPLIT), ["ara değişkene bölünmüş zincir 'options = ctxt.options()' → "
+                                         "'options.scratch_dir()' (Bl.6 · Train Wrecks; G36)"])
+
+    def test_object_the_function_built_may_be_called_through_a_name(self):
+        self.assertEqual(wrecks("def f(path):\n    text = Path(path)\n    text.read_text()\n"), [])
+
+    def test_argument_rebound_to_a_stranger_is_a_stranger(self):
+        self.assertEqual(len(wrecks("def f(ctxt, other):\n    ctxt = other.child()\n    ctxt.go()\n")), 1)
+
+    def test_rebinding_to_a_construction_makes_a_friend(self):
+        self.assertEqual(wrecks("def f(a):\n    x = a.b()\n    x = Box()\n    x.c()\n"), [])
+
+    def test_call_before_the_binding_talks_to_the_argument(self):
+        self.assertEqual(wrecks("def f(a, x):\n    x.c()\n    x = a.b()\n"), [])
+
+    def test_data_structure_operation_on_a_stranger_is_not_a_train_wreck(self):
+        self.assertEqual(wrecks("def f(a):\n    name = a.b()\n    name.strip()\n"), [])
+
+    def test_annotated_binding_is_followed(self):
+        self.assertEqual(len(wrecks("def f(a):\n    x: Options = a.b()\n    x.c()\n")), 1)
+
+    def test_walrus_binding_is_followed(self):
+        self.assertEqual(len(wrecks("def f(a):\n    if (x := a.b()):\n        x.c()\n")), 1)
+
+    def test_context_handed_out_by_another_object_is_a_stranger(self):
+        self.assertEqual(len(wrecks("def f(a):\n    with a.lock() as held:\n        held.release()\n")), 1)
+
+    def test_opened_file_is_a_friend(self):
+        self.assertEqual(wrecks("def f(path):\n    with open(path) as file:\n        file.read()\n"), [])
+
+    def test_stranger_bound_in_one_branch_may_reach_the_call(self):
+        self.assertEqual(len(wrecks(MAYBE_A_STRANGER)), 1)
+
+    def test_friend_bound_after_the_branch_cuts_the_stranger_off(self):
+        self.assertEqual(wrecks(FRIEND_AFTER_THE_BRANCH), [])
+
+    def test_friend_bound_in_the_callers_own_branch_cuts_the_stranger_off(self):
+        self.assertEqual(wrecks(FRIEND_IN_ITS_OWN_BRANCH), [])
+
+    def test_loop_element_is_collection_access(self):
+        self.assertEqual(wrecks("def f(a, items):\n    x = a.b()\n    for x in items:\n        x.c()\n"), [])
+
+    def test_unpacked_element_is_collection_access(self):
+        self.assertEqual(wrecks("def f(a):\n    first, rest = a.split_off()\n    first.render()\n"), [])
+
+    def test_names_of_a_literal_tuple_are_followed_one_by_one(self):
+        self.assertEqual(len(wrecks("def f(a):\n    x, y = a.b(), Box()\n    x.c()\n    y.c()\n")), 1)
+
+    def test_field_is_a_friend(self):
+        self.assertEqual(wrecks(FIELD_HOLDS_IT), [])
+
+    def test_nested_functions_bindings_do_not_leak(self):
+        self.assertEqual(wrecks(NESTED_FUNCTION_BINDS), [])
+
+    def test_copied_stranger_stays_a_stranger(self):
+        self.assertEqual(len(wrecks("def f(a):\n    x = a.b()\n    y = x\n    y.c()\n")), 1)
+
+    def test_comprehension_names_its_own_elements(self):
+        self.assertEqual(wrecks("def f(a, pages):\n    p = a.b()\n    return [p.render() for p in pages]\n"), [])
+
+    def test_caught_exception_is_a_friend(self):
+        self.assertEqual(wrecks(CAUGHT), [])
+
+    def test_chain_continuing_from_a_split_is_reported_once(self):
+        self.assertEqual(len(wrecks("def f(a):\n    x = a.b()\n    x.c().d()\n")), 1)
+
+    def test_object_made_by_another_modules_factory_may_be_called_through_a_name(self):
+        split = "def f(project):\n    progress = project.load()\n    progress.pages()\n"
+        self.assertEqual(wrecks(PROJECT_LOADS_PROGRESS, split), [])
+
+
+class SplitEqualsChainTest(unittest.TestCase):
+    """Zincirli ve bölünmüş yazılış her zaman aynı kararı verir; iki halkalı zincirde alarm sayısı da aynıdır."""
+
+    def test_every_chain_decides_like_its_split(self):
+        for code in CHAINS:
+            with self.subTest(code=code):
+                self.assertEqual(bool(wrecks(*code)), bool(wrecks(*split_all(code))))
+
+    def test_two_link_chain_counts_like_its_split(self):
+        for code in TWO_LINK_CHAINS:
+            with self.subTest(code=code):
+                self.assertEqual(len(wrecks(*code)), len(wrecks(*split_all(code))))
+
+
+TWO_LINK_CHAINS = [
+    ("def f(ctxt): ctxt.options().scratch_dir()",), ("def f(path): Path(path).read_text()",),
+    ("def f(data): Card.of(data).kind()",), ("def f(deck): deck.of(1).kind()",), ("def f(): RULES.get(1).kind()",),
+    ("def f(html): _Parser().feed(html)",), ("def f(x): _parse(x).go()",), ("def f(path): open(path).read()",),
+    ("def f(path): zipfile.open_zip(path).read('a')",), ("def f(items): next(iter(items)).render()",),
+    ("def f(text): clean(text).strip()",), ("def f(rule, line): rule.match(line).group(1)",),
+    ("def f(token, text): re.compile(token).sub('', text)",), ("def f(parser, argv): parser.parse_args(argv).run()",),
+    (LOCAL_FACTORY,), (LOCAL_HELPER,), (OWN_FACTORY_METHOD,), (OWN_FIELD_METHOD,), (BUILD_THEN_RETURN,),
+    (FACTORY_OF_FACTORY,), (SOMETIMES_EMPTY,), (PROJECT_LOADS_PROGRESS, USES_LOADED_PROGRESS),
+    (PROJECT_LOADS_PROGRESS, CACHE_LOADS_ITS_FIELD, USES_LOADED_PROGRESS), (USES_LOADED_PROGRESS,),
+    (DOCUMENT_BUILDS_PAGES, FAKE_HOLDS_PAGES), (METHOD_CALLS_MODULE_FACTORY, "def _para(x):\n    return x.para\n"),
+]
+CHAINS = TWO_LINK_CHAINS + [("def f(a): a.b().c().d()",), ("def f(klass):\n    klass(1).of(2).go()\n",),
+                            ("def f(parser): parser.add_subparsers().add_parser('info').set_defaults(run=go)",)]
+
+
+def split_all(codes):
+    """Her zincir halkası bir ara değişkene bölünür: `a.b().c()` → `link = a.b()` ve `link.c()`."""
+    return tuple(ast.unparse(_Splitter().visit(ast.parse(code))) for code in codes)
+
+
+class _Splitter(ast.NodeTransformer):
+    """Deyimin değerindeki zinciri, halka halka ara değişkenlere açar."""
+
+    def generic_visit(self, node):
+        super().generic_visit(node)
+        for field in ("body", "orelse"):
+            if isinstance(getattr(node, field, None), list):
+                setattr(node, field, [split for statement in getattr(node, field) for split in self._split(statement)])
+        return node
+
+    @classmethod
+    def _split(cls, statement):
+        call = getattr(statement, "value", None)
+        is_chain = isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute)
+        if not (is_chain and isinstance(call.func.value, ast.Call)):
+            return [statement]
+        link = f"link{id(call)}"
+        before = ast.Assign(targets=[ast.Name(link, ast.Store())], value=call.func.value, lineno=0)
+        call.func.value = ast.Name(link, ast.Load())
+        return cls._split(before) + [statement]
 
 
 if __name__ == "__main__":
