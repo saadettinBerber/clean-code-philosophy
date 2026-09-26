@@ -371,6 +371,7 @@ Maddelerdeki ortak kavramın her dildeki karşılığı. Yeni bir dil bu tabloya
 | Davranış taşıyan enum | `enum.Enum` + metot; üyeler kendi gövdesini taşıyamaz, davranış değerden okunur | `enum` + sabit başına gövdeli soyut metot (s.308-309) |
 | Ham eşleme (Bl.8) | `dict` | `Map` (s.114) |
 | Yerel ada bağlama (Demeter ölçümü) | `x = …`, `x: T = …`, `(x := …)`, `with … as x`; `for` hedefi ve demet açma koleksiyon öğesidir | yerel değişken bildirimi, `try (… x = …)`; ölçüm aracı yok (kitapta yok) |
+| Kurup veren bağlam yöneticisi (Demeter) | `@contextmanager` üreteci, her `yield`i kurulan bir nesneyse fabrikadır: `with açılmış(yol) as sayfa` | kaynak döndüren fabrika ile `try (Sayfa sayfa = Sayfa.aç(yol))` (kitapta yok) |
 | Tablodan seçilen sınıfla kurma (Demeter) | `SINIFLAR[tür](veri)`, `SINIFLAR.get(tür, Varsayılan)(veri)`; tablo sözlük yazımı ya da `{s.KIND: s for s in (A, B)}` | `Map<String, Supplier<T>>` ya da `EnumMap` ile seçip kurmak (kitapta yok) |
 | Yeni nesne kuran standart kütüphane çağrısı (Demeter) | `re.compile`; argparse `add_subparsers`, `add_parser`, `add_argument_group`, `add_mutually_exclusive_group`, `parse_args`; `redirect_stdout`, `redirect_stderr` | `new` her kuruluşu açıkça gösterir; statik fabrikalar (`Pattern.compile`) (kitapta yok) |
 | Gereğinden somut tür (G26) | tür ipucunda `Sequence` ya da `Iterable` yeterken `list` (kitapta yok) | `List` yeterken `ArrayList` (s.301) |
