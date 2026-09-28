@@ -12,7 +12,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 CARDS_SOURCE = HERE / "kitap-disi-kartlar.json"
 MIND_MAP = HERE / "zihin-haritasi.md"
-DEFAULT_READER = Path.home() / "Desktop" / "make_greater" / "Clean Code"
+DEFAULT_READER = Path.home() / "Desktop" / "3-kitap-ceviri" / "Clean Code"
 TARGET_IN_READER = Path("data") / "offbook.js"
 READER_PAGE = "data/pages/page-{}.js"
 HEADER = "// ÜRETİLİR: 'clean code felsefesi/export_cards.py' yazar, elle düzenlenmez. Kaynak: kitap-disi-kartlar.json\n"

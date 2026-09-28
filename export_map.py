@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 SOURCE = Path(__file__).resolve().parent / "zihin-haritasi.md"
-DEFAULT_READER = Path.home() / "Desktop" / "make_greater" / "Clean Code"
+DEFAULT_READER = Path.home() / "Desktop" / "3-kitap-ceviri" / "Clean Code"
 TARGET_IN_READER = Path("data") / "mindmap.js"
 HEADER = "// ÜRETİLİR: 'clean code felsefesi/export_map.py' yazar, elle düzenlenmez. Kaynak: zihin-haritasi.md\n"
 
