@@ -299,6 +299,7 @@ markmap:
     - G14 istisnası: taşımak tasarımı bozuyorsa kıskançlık gerekli kötülüktür (rapor biçimi çalışan sınıfına girmez: SRP, OCP, CCP)
   - **G17 yanlış yerdeki sorumluluk** · G18 uygunsuz static · G19 açıklayıcı değişken
   - G20 ad ne yaptığını söylesin · G21 algoritmayı anla · G22 mantıksal bağımlılığı fiziksel yap
+    - G21: testlerin geçmesi yetmez, kodun nasıl çalıştığı bilinir; yolu, apaçık olana dek yeniden düzenlemektir
   - **G23 switch/if yerine polimorfizm (tek switch kuralı)** · G24 standart gelenekler
   - G25 magic number yerine adlı sabit · G26 kesin ol · G27 gelenek yerine yapı
   - G28 koşulları kapsülle · G29 olumsuz koşuldan kaçın · **G30 fonksiyon tek iş yapar**
