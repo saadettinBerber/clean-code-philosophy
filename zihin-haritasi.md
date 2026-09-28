@@ -312,6 +312,8 @@ markmap:
 - Java: J1 joker import · J2 sabit kalıtılmaz · J3 sabit yerine enum
 - Names: N1 açıklayıcı · N2 doğru soyutlama düzeyi · N3 standart terim · N4 belirsiz olmayan
   - N5 uzun kapsam → uzun ad · N6 kodlama yok · N7 yan etkiyi adda söyle
+    - N1: anlam kayar; adlar her geçişte yeniden değerlendirilir, iyi ad yapıya anlam yükler (score → isStrike tahmin edilir)
+    - N5'in tersi: dar kapsamda uzun ad gürültüdür (beş satırlık döngüde i, rollCount değil)
 - Tests: T1 yetersiz test · T2 kapsam aracı · T3 önemsiz testi atlama · T4 yok sayılan test bir sorudur
   - **T5 sınır koşullarını test et** · **T6 hatanın çevresini sıkı test et** · T7-T8 başarısızlık örüntüleri · T9 hızlı
 - Conclusion: bu liste tam değildir; bir değer sistemi sunar, kural kataloğu değildir
