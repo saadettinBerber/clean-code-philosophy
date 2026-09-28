@@ -316,5 +316,6 @@ markmap:
     - N5'in tersi: dar kapsamda uzun ad gürültüdür (beş satırlık döngüde i, rollCount değil)
 - Tests: T1 yetersiz test · T2 kapsam aracı · T3 önemsiz testi atlama · T4 yok sayılan test bir sorudur
   - **T5 sınır koşullarını test et** · **T6 hatanın çevresini sıkı test et** · T7-T8 başarısızlık örüntüleri · T9 hızlı
+    - T4: derlenemeyen soru yoruma alınmış test olarak kalır; bu yoruma alınmış kod (C5) değil, gereksinime sorulan sorudur
 - Conclusion: bu liste tam değildir; bir değer sistemi sunar, kural kataloğu değildir
 

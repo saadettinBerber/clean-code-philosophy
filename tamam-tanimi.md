@@ -10,6 +10,8 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - Bir dilde karşılığı olmayan madde tabloda "uygulanmaz" diye yazılır ve nedeni verilir; sessizce atlanmaz.
 - Ölçüm aracı yalnız Python için var (`measure_code.py`). Aracı olmayan dilde [ö] maddeler okunarak denetlenir.
 
+**Liste bir değer sistemidir.** Kitabın koku listesi gibi bu liste de tam değildir. Temiz kod bir kurallar listesine uyarak yazılmaz; profesyonellik ve ustalık, disiplinleri süren değerlerden gelir (Bl.17 · Conclusion). Listenin sustuğu yerde karar o değerlere göre verilir.
+
 **Eşik alarmdır, ölçüt değildir.**
 - Fonksiyonda hedef 2-4 satırdır, 20 satır tavandır.
 - 200 satırlık sınıf yalnız bir alarmdır. Kitaptaki SuperDashboard beş metotluk küçük bir sınıftır, ama iki işi vardır. Asıl ölçü sorumluluktur.
@@ -191,7 +193,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] Testte yalnız bellek ve işlemci verimliliği gevşeyebilir; temizlik gevşemez. (Bl.9 · A Dual Standard) [o]
 - [ ] Test başına tek kavram var ve assert sayısı en az. Test adı o kavramı söylüyor. (Bl.9 · One Assert per Test, Single Concept per Test) [ö/o]
 - [ ] F.I.R.S.T. (Bl.9 · F.I.R.S.T.; T9):
-  - Fast: milisaniyede koşar; 100 ms'yi aşan test alarmdır (eşik kitapta yok, bizim alarmımız).
+  - Fast: milisaniyede koşar; 100 ms'yi aşan test alarmdır (eşik kitapta yok, bizim alarmımız). Yavaş test koşulmaz; işler sıkışınca takımdan ilk o düşer (T9).
   - Independent: sıra değişince de geçer.
   - Repeatable: her ortamda koşar; dosya sistemindeki gerçek dosyalara, dış süreçlere, ağa, saate ya da tohumsuz rastgeleliğe bağlı değil.
   - Self-Validating: her testin assert'i var; sonuç konsola yazılıp gözle okunmuyor.
@@ -199,9 +201,10 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 
   [ö]
 - [ ] Testler üretim nesnelerinin özel (private) üyelerine dokunmuyor. Test için erişim düzeyi gevşetmek son çaredir: önce gizliliği koruyan yol aranır, bulunamazsa yalnız aynı paketteki teste açılır. (Bl.10 · Encapsulation) [ö]
-- [ ] Bozulabilecek her şey test edildi. Önemsiz görünen testler atlanmadı. Atlanan her testin gerekçesi, gereksinim hakkında bir soru olarak yazıldı: `@Ignore("soru: …")`. (T1, T3, T4) [ö/o]
-- [ ] Kapsam aracı değişen dosyalarda koştu, çalışmayan dallar incelendi. (T2, T8) [ö]
-- [ ] Sezgiye güvenilmedi: her sınır koşulu, köşe durumu ve istisna arandı; sınırın iki yanı ayrı testlerle sınandı. Bulunan hatanın çevresi sıkı test edildi; başarısızlık örüntüsüne bakıldı. (T5, T6, T7; G3) [o]
+- [ ] Bozulabilecek her şey test edildi. Keşfedilmemiş bir koşul ya da doğrulanmamış bir hesap kaldıkça test takımı yetersizdir; "yeter gibi" bir ölçü değildir. Hiç kullanılmayan fonksiyon testsiz de kalır, önce ölü olup olmadığına bakıldı (Bl.16; F4). Önemsiz görünen testler atlanmadı: yazması kolay, belgeleme değeri maliyetinden yüksek. (T1, T3) [ö/o]
+- [ ] Gereksinim belirsizse soru bir test olarak yazıldı ve çalıştırılmadı. Test derlenebiliyorsa test çatısının gerekçeli atlama işaretiyle (`@Ignore("soru: …")`); henüz var olmayan bir API'ye dayandığı için derlenemiyorsa yoruma alınmış test olarak. Yoruma alınmış test yoruma alınmış kod değil, bir sorudur (C5 alarmı bu gerekçeyle kapanır). Python'da test her zaman derlendiği için atlama işareti yeter. (Bl.16 · `tues`, `thurs`; T4) [ö/o]
+- [ ] Kapsam aracı değişen dosyalarda koştu; yetersiz test edilmiş modül, sınıf ve fonksiyon ile gövdesi hiç çalışmamış `if` ve yakalama blokları incelendi (Bl.16: testler 185 deyimin yalnız 91'ini çalıştırıyordu). Geçen testlerin çalıştırmadığı satır, başarısız testin nedenine ipucudur: hiç çalışmayan satır, hep yanlış olan bir koşulu gösterebilir (Bl.16). Komut Dil eşlemesinde. (T2, T8) [ö]
+- [ ] Sezgiye güvenilmedi: her sınır koşulu, köşe durumu ve istisna arandı; sınırın iki yanı ayrı testlerle sınandı. Algoritmanın ortası çoğu zaman doğrudur, sınırı yanlış hesaplanır. Hatalar küme hâlinde durur: hata bulunan fonksiyon kapsamlı test edildi; daha önce onarılmış kardeş fonksiyonlar da (Bl.16). Test durumları eksiksiz ve makul bir sırada; başarısızlık örüntüsüne bakıldı (Bl.16: yalnız en yakın gün gelecekteyse başarısız). (T5, T6, T7; G3) [o]
 - [ ] Bütün testler tek komutla koşuyor; komut Dil eşlemesinde. (E2) [ö]
 
 ## 10 · Sınıflar (Bl.10)
@@ -407,6 +410,7 @@ Maddelerdeki ortak kavramın her dildeki karşılığı. Yeni bir dil bu tabloya
 | Beklenen istisna testi | `assertRaises` | `@Test(expected = ...)` (s.105) |
 | Gerekçeli atlama | `@unittest.skip("…")` | `@Ignore("…")` (s.58, 313) |
 | Bütün testler tek komutla (E2) | `python3 -m unittest discover -s tests -t .` | `mvn test` ya da `gradle test` (kitapta yok) |
+| Kapsam aracı (T2) | `coverage run -m unittest discover -s tests -t .` ve `coverage report -m`; `coverage` ayrıca kurulur (kitapta yok) | Clover (s.268); bugün JaCoCo (kitapta yok) |
 | Konsola yazma (Self-Validating) | `print` | `System.out.println` |
 | Ölçüm aracı | `measure_code.py` | Yok. [ö] maddeler okunarak denetlenir. |
 
