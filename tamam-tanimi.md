@@ -69,9 +69,9 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 **Boyut ve yapı**
 - [ ] Fonksiyon küçük: hedef 2-4 satır. 4'ü aşan fonksiyona bakılır, 20 satır tavandır. (Bl.3 · Small!) [ö]
 - [ ] `if`, `else` ve `while` blokları tek satır; o satır adı iyi seçilmiş bir çağrı. Girinti en fazla 1-2 düzey. (Bl.3 · Blocks and Indenting) [ö]
-- [ ] Fonksiyon tek iş yapıyor. İçinden, uygulamasını yeniden söylemekten öte bir ad taşıyan başka bir fonksiyon çıkarılamıyor. "TO paragrafı" testinden geçiyor. (Bl.3 · Do One Thing; G30) [o]
+- [ ] Fonksiyon tek iş yapıyor. İçinden, uygulamasını yeniden söylemekten öte bir ad taşıyan başka bir fonksiyon çıkarılamıyor. "TO paragrafı" testinden geçiyor. Döngü, koşul ve iş ayrı fonksiyonlarda: `pay` → `payIfNecessary` → `calculateAndDeliverPay`. Sıkıştıran fonksiyon biçimlemez, biçimleyen fonksiyon sıkıştırmaz (Bl.15 · `compact`). (Bl.3 · Do One Thing; G30) [o]
 - [ ] Gövde boş satırla ya da başlık yorumuyla bölümlere ayrılmıyor. (Bl.3 · Sections within Functions) [ö]
-- [ ] Tek soyutlama düzeyi: `getHtml()` ile `.append("\n")` aynı fonksiyonda değil. (Bl.3 · One Level of Abstraction; G34, G6) [o]
+- [ ] Tek soyutlama düzeyi: `getHtml()` ile `.append("\n")` aynı fonksiyonda değil. Fonksiyondaki deyimler adının söylediği işin bir düzey altında: `render()` bir HR etiketi kurar, HTML sözdizimini `HtmlTag` bilir. Düzeyleri ayırmak çoğu zaman yeni bir düzey çizgisi ortaya çıkarır (boyutun yorumlanması `hrSize`'a gider); ayırma o çizgide de sürdü. Yol dizgesini noktalar, eğik çizgiler ve dosya uzantısıyla kuran kod, çevresindeki kodla karışmıyor (Bl.6). (Bl.3 · One Level of Abstraction; G34, G6) [o]
 - [ ] Stepdown kuralı: çağıran üstte, çağrılan hemen altında; kod yukarıdan aşağı bir hikâye gibi okunuyor. (Bl.3 · The Stepdown Rule; Bl.5 · Vertical Ordering; G10) [ö]
 - [ ] Ad ne yaptığını söylüyor; modüldeki adlar tutarlı bir hikâye kuruyor. Ad, birimi ve nesneyi değiştirip değiştirmediğini de söylüyor: `date.add(5)` değil; yerinde değiştiren `addDaysTo`, yeni değer döndüren `daysLater` ya da `plusDays` (Bl.16). Ne yaptığını anlamak için gövdeye ya da belgeye bakmak gerekiyorsa ad değişti ya da iş daha iyi adlı fonksiyonlara bölündü. (Bl.3 · Use Descriptive Names; G20) [o]
 
@@ -89,7 +89,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] Fonksiyon adı argümanla bir fiil/isim çifti kuruyor (`writeField(name)`). Sıra belirsizse argümanların adı fonksiyon adına yazılıyor: anahtar sözcük biçimi (`assertExpectedEqualsActual(expected, actual)`). (Bl.3 · Verbs and Keywords) [o]
 
 **Yan etki, CQS, hata**
-- [ ] Adın söylemediği bir yan etki yok. Zamansal bağ kaçınılmazsa hem adda hem argüman zincirinde görünüyor. (Bl.3 · Have No Side Effects; N7, G31) [ö/o]
+- [ ] Adın söylemediği bir yan etki yok. Zamansal bağ kaçınılmazsa gizli değil, adda ve yapıda görünüyor. Sıra ya kova zinciriyle zorlanıyor, her fonksiyon bir sonrakinin girdisini üretiyor (`saturateGradient()` → `reticulateSplines(gradient)` → `diveForMoog(splines, reason)`); ya da sonraki adım öncekini kendisi çağırıyor (Bl.15 · `findCommonPrefixAndSuffix` önce `findCommonPrefix`'i çağırır). Sırayı zorlayıp nedenini anlatmayan argüman keyfidir (G32). (Bl.3 · Have No Side Effects; N7, G31) [ö/o]
 - [ ] Çıktı argümanı yok: argümanın alanına atanmıyor, içine öğe eklenmiyor. Durum değişecekse bu, sahibi olan nesnenin metodudur: `appendFooter(report)` değil `report.appendFooter()`. (Bl.3 · Output Arguments; F2) [ö]
 - [ ] Komut ile sorgu ayrı: bir fonksiyon hem durum değiştirip hem değer döndürmüyor. (Bl.3 · Command Query Separation) [ö]
 - [ ] Hata kodu ya da başarı bool'u döndürülmüyor, istisna fırlatılıyor. (Bl.3 · Prefer Exceptions to Returning Error Codes) [ö]
@@ -133,7 +133,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] Aynı işin türevlerini yapan fonksiyonlar yan yana duruyor. (Bl.5 · Conceptual Affinity) [ö/o]
 - [ ] Satırlar kısa: 100-120 karakter kabul edilebilir, ötesi özensizliktir. (Bl.5 · Horizontal Formatting) [ö]
 - [ ] Sütun hizası yok; hizalanmak istenen uzun liste, sınıfın bölünmesi gerektiğini gösterir. Kapsam tek satıra sıkıştırılmıyor: `if` ya da fonksiyon gövdesi başlığıyla aynı satırda değil. Boş gövde kendi satırında ve girintili. (Bl.5 · Horizontal Alignment, Breaking Indentation, Dummy Scopes) [ö]
-- [ ] Bilinen bir sabit alt düzeye gömülmemiş; bilindiği yerden argümanla aşağı iniyor. (G35) [ö/o]
+- [ ] Bilinen bir sabit alt düzeye gömülmemiş; bilindiği yerden argümanla aşağı iniyor (`"FrontPage"`). Varsayılan ve ayar değerleri üst düzeyde, kolay değişecekleri tek bir yerde (`Arguments` sınıfının başı); alt düzey bu değerlerin sahibi değil. Alt düzeyde `if (arguments.port == 0) // use 80 by default` yok. (G35) [ö/o]
 
 ## 6 · Nesneler ve Veri Yapıları (Bl.6, G14, G36)
 - [ ] Beklenen değişiklik adlandırıldı ve biçim buna göre seçildi:
@@ -146,7 +146,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
   - **Açık durum (A):** dışa açık alan, yalnız alanı döndüren erişimci (getter ya da property), yalnız alana atayan değiştirici (setter). Bağımlılık enjeksiyonu setter'ı sayılmaz: atadığı alan başka metotlarda işbirlikçi olarak çağrılıyor ve onu döndüren bir erişimci yok. Böyle bir setter durumu dışarı açmaz, işbirlikçiyi içeri alır.
   - **Anlamlı davranış (B):** erişimci olmayan, bir deyimden uzun ya da başkasını çağıran ya da durum değiştiren public metot. Dilin protokol metotları ve adlı kurucular sayılmaz.
   - **Kural:** A > 0 ve B > 0 ise melez adayıdır. Başka modüller bu sınıfın alanlarını okuyup karar veriyorsa melezlik gerçektir.
-- [ ] Demeter: metot yalnız dört şeyle konuşuyor: kendi nesnesi, kendi kurduğu nesne, argümanı ve kendi alanı. Bir çağrının dönen değeri üzerinde yeni bir çağrı yapmıyor. (Bl.6 · The Law of Demeter; G36) [ö]
+- [ ] Demeter: metot yalnız dört şeyle konuşuyor: kendi nesnesi, kendi kurduğu nesne, argümanı ve kendi alanı. Bir çağrının dönen değeri üzerinde yeni bir çağrı yapmıyor. Yakın ortak, gereken hizmeti kendisi sunuyor (`myCollaborator.doSomething()`); modüller sistemin gezinme haritasını bilmiyor, yoksa B ile C arasına bir Q koymak her zinciri değiştirmeyi gerektirir. (Bl.6 · The Law of Demeter; G36) [ö]
 - [ ] Tren kazası yok (`a.b().c().d()`). Zinciri ara değişkenlere bölmek ihlali gidermez; iş nesneye taşınır: `ctxt.createScratchFileStream(classFileName)`. Demeter veri yapılarına uygulanmaz. (Bl.6 · Train Wrecks, Hiding Structure) [ö/o]
   - **Ölçüm nesnenin kökenine bakar.** Başka birinin döndürdüğü nesne, ister zincirde ister yerel bir adda dursun, yabancıdır. İki yazılış her zaman aynı kararı alır.
   - **Dost sayılan kurulan nesneler:**
@@ -264,7 +264,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] Yeni bir tür eklemek yalnız yeni sınıf ve fabrikada bir dal gerektiriyor. Her yeni tür N ayrı yere dokunmayı gerektirmeye başlayınca özellik eklemek durduruldu, önce yeniden düzenlendi. (Bl.14 · So I Stopped) [ö/o]
 - [ ] Eski ve yeni yapı bir süre yan yana yaşatıldı, eskiler tek tek silindi. (Bl.14) [o]
 - [ ] Yeniden düzenleme sırasında gerekirse bir önceki adım geri alındı; yeniden düzenleme deneme-yanılmayla yakınsar. (Bl.15) [o]
-- [ ] +1/-1 hesabı tek bir adlı değişkende (G33). Koşul mümkünse olumlu: `!buffer.shouldNotCompact()` değil `buffer.shouldCompact()` (G29). `if` ya da `while` içindeki bool mantığı niyetini söyleyen bir fonksiyona çıktı: `timer.hasExpired() && !timer.isRecurrent()` değil `shouldBeDeleted(timer)` (G28). (Bl.15 · `compact`) [ö]
+- [ ] +1/-1 hesabı tek bir adlı değişkende: `level + 1` iki kez yazılmaz, `nextLevel` olur. Kodda sürü hâlinde +1 varsa değişkenin anlamı yanlış olabilir: 1 tabanlı `suffixIndex` gerçek bir uzunluğa (`suffixLength`) çevrildi (G33). Koşul mümkünse olumlu: `!buffer.shouldNotCompact()` değil `buffer.shouldCompact()` (G29). `if` ya da `while` içindeki bool mantığı niyetini söyleyen bir fonksiyona çıktı: `timer.hasExpired() && !timer.isRecurrent()` değil `shouldBeDeleted(timer)` (G28). (Bl.15 · `compact`) [ö]
 - [ ] Taban sınıf türevlerini tanımıyor (G7); türev yaratma işi fabrikada. Tek istisna, türev sayısının kesin sabit olduğu durumdur (sonlu durum makinesi); o zaman taban ve türevler aynı dağıtım biriminde durur. Sabit grupları davranış taşıyan bir enum'a dönüştü (J3). [ö]
 - [ ] Yalnız testlerin çağırdığı üretim kodu, testiyle birlikte silindi. (Bl.16) [ö]
 - [ ] Kod küçüldüğü için düşen kapsam yüzdesi gerileme sanılmadı. (Bl.16) [o]
@@ -287,7 +287,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] G24: Ekip standardı yaygın sektör normlarına dayanıyor ve yalnız biçimi değil, örnek değişkenin nerede bildirildiğini ve sınıf, metot, değişken adlandırmasını da kapsıyor. Standart ayrı bir belgeden değil koddan öğreniliyor; ekipteki herkes ona uyuyor. Soyut metotlar sınıfın başında (Bl.16). [o]
 - [ ] G25: Ham sayı adlı bir sabitin arkasında (`86400` → `SECONDS_PER_DAY`, sayfa başına `55` satır → `LINES_PER_PAGE`, `1` → `Month.JANUARY.toInt()` (Bl.16)). Sihirli değer yalnız sayı değil, kendini anlatmayan her simgedir: testteki `"John Doe"` → `HOURLY_EMPLOYEE_NAME`. İstisna: kendini anlatan formülde çok iyi bilinen sabit ham kalabilir (`feetWalked / 5280.0`, `hourlyRate * 8`, `radius * Math.PI * 2`). Yanlış yazılmaya açık uzun sabit ise (π) her zaman adlıdır. [ö/o]
 - [ ] G27: Karar gelenekle değil yapıyla zorlanıyor: adlandırılmış enum üzerinde switch yerine soyut metotlu taban sınıf. [o]
-- [ ] G32: Yapı keyfi değil; dışarıdan kullanılan sınıf başka bir sınıfın içine gömülmemiş. [ö/o]
+- [ ] G32: Yapının bir nedeni var ve yapı bu nedeni kendisi söylüyor. Keyfi görünen yapıyı başkaları değiştirir; sistem boyunca tutarlı yapıyı korurlar. Başka bir sınıfın yardımcısı olmayan açık sınıf, o sınıfın içine gömülmemiş, paketin en üst düzeyinde. Yalnız çağrı sırasını zorlamak için eklenmiş ama gereğini anlatmayan argüman da keyfidir (Bl.15 · `prefixIndex`). [ö/o]
 - [ ] J1: İçe aktarma listesi, birlikte çalışılan paketlerin kısa bir beyanı. Aynı paketten iki ya da daha fazla sınıf kullanılıyorsa sınıflar tek tek değil, paket olarak içe aktarılıyor; dile göre biçimi Dil eşlemesinde. J2: Sabitler kalıtımla alınmıyor. J3: Anlamlı sabit grupları davranış taşıyan enum. [ö]
 - [ ] E1: Depo tek komutla alınıyor, proje tek komutla kuruluyor. Elle aranacak ek kütüphane ya da dosya, sırayla çalıştırılacak gizemli komut dizisi yok. Komut Dil eşlemesinde. [ö]
 

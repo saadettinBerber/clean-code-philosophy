@@ -306,7 +306,9 @@ markmap:
     - G25: sihirli değer kendini anlatmayan her simgedir ("John Doe"); iyi bilinen sabit açık formülde ham kalabilir (5280), hataya açık uzun sabit (π) adlıdır
   - G28 koşulları kapsülle · G29 olumsuz koşuldan kaçın · **G30 fonksiyon tek iş yapar**
   - G31 gizli zamansal bağ · G32 keyfi olma · **G33 sınır koşullarını kapsülle**
+    - G31: sıra gizlenmez; kova zinciri (her adım sonrakinin girdisini üretir) ya da öncekini kendisi çağıran adım. Sırayı zorlayıp nedenini anlatmayan argüman keyfidir (G32)
   - **G34 tek soyutlama düzeyi** · G35 ayarlar üst düzeyde durur · G36 geçişli gezinmeden kaçın
+    - G34: deyimler adın bir düzey altında; düzeyleri ayırmak yeni düzey çizgileri ortaya çıkarır, ayırma sürer
 - Java: J1 joker import · J2 sabit kalıtılmaz · J3 sabit yerine enum
 - Names: N1 açıklayıcı · N2 doğru soyutlama düzeyi · N3 standart terim · N4 belirsiz olmayan
   - N5 uzun kapsam → uzun ad · N6 kodlama yok · N7 yan etkiyi adda söyle
