@@ -55,8 +55,10 @@ Haritaya yeni bir ◇ kalıp eklenirse kartı da yazılır; biri eksikse aktarı
 curl -s -X POST http://127.0.0.1:9621/query -H 'Content-Type: application/json' -d '{"query":"...","mode":"hybrid"}'
 ```
 
-  - İndeks yalnız 1-12. bölümleri içerir. 12. bölüm (Emergence) indekste 94 kelimede kesilmiştir, Beck'in kuralları PDF'ten (s.171-176) okunmalı.
-  - 13-17. bölümler için de PDF kullanılır. Bölüm başlangıç sayfaları: 13 → 177, 14 → 193, 17 → 285.
+  - İndeks bütün kitabı içerir: 1-17. bölümler ve ekler (s.1-412). Dizin (s.413-431) bilerek dışarıdadır.
+  - Girdi, okuyucunun çevrilmiş sayfalarındaki İngilizce metinden okuyucu reposundaki `tools/girdi_hazirla/hazirla.py` ile üretilir; kullanımı o klasörün README'sinde.
+  - 12. bölüm ve sonrası kod listeleriyle, 1-11. bölümler kodsuz indekslidir. Bir kod listesinin kendisi gerekiyorsa 1-11. bölümler için PDF'e bakılır. 1-11'in kodlarıyla yeniden indekslenmesi sonraya bırakıldı.
+  - Bölüm başlangıç sayfaları okuyucunun `progress.json` → `chapters` tablosundadır.
 
 ## Haritayı güncelleme kuralı
 
