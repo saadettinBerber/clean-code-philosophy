@@ -292,6 +292,7 @@ markmap:
   - G1 bir kaynak dosyada birden çok dil · G2 bariz davranış eksik · **G3 sınırlarda yanlış davranış** · G4 aşılmış güvenlik önlemleri
   - **G5 tekrar** · G6 yanlış soyutlama düzeyi · G7 taban sınıfın türeve bağımlı olması
     - G5'in üç biçimi: birebir aynı kod → metot; aynı switch/if zinciri → polimorfizm; benzer algoritma → TEMPLATE METHOD ya da STRATEGY
+    - G6 ayrımı tamdır: yanlış düzeydeki soyutlama sahte değerle kapatılmaz (sınırsız yığında percentFull → 0 yalandır)
     - G7 istisnası: türev sayısı kesin sabitse (sonlu durum makinesi) taban türevleri bilebilir, o zaman ikisi aynı dağıtım biriminde durur
   - G8 fazla bilgi · G9 ölü kod · G10 dikey ayrılık · G11 tutarsızlık · G12 karmaşa
   - G13 yapay bağ · **G14 feature envy** · **G15 seçici argüman** · G16 gizli niyet

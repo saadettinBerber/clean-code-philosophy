@@ -201,7 +201,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] Testler üretim nesnelerinin özel (private) üyelerine dokunmuyor. Test için erişim düzeyi gevşetmek son çaredir: önce gizliliği koruyan yol aranır, bulunamazsa yalnız aynı paketteki teste açılır. (Bl.10 · Encapsulation) [ö]
 - [ ] Bozulabilecek her şey test edildi. Önemsiz görünen testler atlanmadı. Atlanan her testin gerekçesi, gereksinim hakkında bir soru olarak yazıldı: `@Ignore("soru: …")`. (T1, T3, T4) [ö/o]
 - [ ] Kapsam aracı değişen dosyalarda koştu, çalışmayan dallar incelendi. (T2, T8) [ö]
-- [ ] Sınırın iki yanı ayrı testlerle sınandı. Bulunan hatanın çevresi sıkı test edildi; başarısızlık örüntüsüne bakıldı. (T5, T6, T7; G3) [o]
+- [ ] Sezgiye güvenilmedi: her sınır koşulu, köşe durumu ve istisna arandı; sınırın iki yanı ayrı testlerle sınandı. Bulunan hatanın çevresi sıkı test edildi; başarısızlık örüntüsüne bakıldı. (T5, T6, T7; G3) [o]
 - [ ] Bütün testler tek komutla koşuyor; komut Dil eşlemesinde. (E2) [ö]
 
 ## 10 · Sınıflar (Bl.10)
@@ -244,6 +244,9 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
   - Uygulama tekrarı kaldırıldı: aynı gerçeği iki durum izlemiyor (`isEmpty` / `size`).
   - Çıkarılan küçük yardımcı başka bir sınıfa aitse oraya taşındı.
   - Aynı iskelet tek adımda ayrışıyorsa iskelet tek yerde.
+  - Aynı koşulları sınayan `switch`/`if` zinciri birden çok yerde tekrarlanmıyor; yerini polimorfizm aldı (G23).
+  - Satırları değil algoritması benzeyen modüller TEMPLATE METHOD ya da STRATEGY ile ortaklaştı.
+  - Her fonksiyonda tekrarlanan geçerlilik denetimi, değeri taşıyan bir türle (enum) kalktı (Bl.16 · `Month`).
 
   (Bl.12 · No Duplication; G5) [ö/o]
 - [ ] **Kural 3:** Niyet açık: iyi adlar, küçük fonksiyon ve sınıflar, standart kalıp adları, örnekle belgeleyen testler. İkinci bir okuma yapıldı. (Bl.12 · Expressive) [o]
@@ -267,10 +270,10 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] Kod küçüldüğü için düşen kapsam yüzdesi gerileme sanılmadı. (Bl.16) [o]
 
 ## 17 · Kalan koku kodları (başka bölümde geçmeyenler)
-- [ ] G1: Kaynak dosyadaki ikinci dil (HTML, CSS, SQL) en az ve en dar yerde. Her kaynak dosya için geçerli; kitabın örnekleri Java dosyasına gömülü XML, HTML, YAML ve JavaScript'tir. [ö]
-- [ ] G2: Adından beklenen bariz davranış uygulanmış. [o]
-- [ ] G4: Emniyet kapatılmamış: derleyici, tür denetleyici ya da linter uyarısı susturulmamış; başarısız test kapatılmamış ya da silinmemiş. Emniyeti elle yöneten ayar (Java `serialVersionUID`) gerekçeli. [ö]
-- [ ] G6: Kod doğru soyutlama düzeyinde; taban sınıfta ayrıntı yok. [o]
+- [ ] G1: İdeal olan, kaynak dosyada tek dil. Kaçınılmaz ikinci dil (HTML, CSS, SQL) hem sayıca hem kapladığı yerce en az. Her kaynak dosya için geçerli; kitabın örnekleri Java dosyasına gömülü XML, HTML, YAML ve JavaScript'tir. Belge yorumundaki HTML de ikinci dildir (Bl.16). [ö]
+- [ ] G2: Başka bir programcının makul olarak bekleyeceği davranış uygulanmış (en az sürpriz ilkesi): gün adını çeviren fonksiyon kısaltmayı da tanır, büyük-küçük harfe bakmaz. Bariz olduğu belli olmayan beklenti (`tues`, `thurs`) uygulanmadı, soru olarak bırakıldı. (Bl.16) [o]
+- [ ] G4: Emniyet kapatılmamış: derleyici, tür denetleyici ya da linter uyarısı susturulmamış; başarısız test kapatılmamış ya da silinmemiş. Emniyeti elle yönetmek her zaman risklidir: otomatik denetim varsa o seçildi, elle yönetilen ayar (Java `serialVersionUID`) gerekçeli. (Bl.16) [ö]
+- [ ] G6: Üst ve alt düzey kavramların ayrımı tam. Yalnız bir gerçekleştirmeye ait sabit, değişken ve yardımcı fonksiyon türevde; gerçekleştirmeye bağlı olmayan kod tabanda. Aynısı dosya, modül ve bileşen için de geçerli. Yanlış düzeydeki soyutlama sahte değerle kapatılmadı: sınırsız bir yığında `percentFull()` 0 döndürmez, metot ayrı bir arayüze (`BoundedStack`) gider. (Bl.16) [o]
 - [ ] G8: Arayüz dar: public üye, alan ve sabit sayısı az. Alt sınıflar için çok sayıda protected alan ve fonksiyon açılmamış. Fonksiyonun bildiği değişken sayısı az. [ö]
 - [ ] G9 ve G12: Ölü kod yok: hiç fırlatmayan `try`'ın yakalama bloğu, gerçekleşmeyen koşulun dalı, çağrılmayan fonksiyon. Kullanılmayan import ya da değişken, boş varsayılan yapıcı, değer katmayan niteleyici (Java'da argüman ve yerel değişkendeki `final`) yok. [ö]
 - [ ] G13: Genel bir sabit ya da enum kolaylık olsun diye özel bir sınıfa gömülmemiş. [o]
