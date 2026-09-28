@@ -296,6 +296,7 @@ markmap:
     - G7 istisnası: türev sayısı kesin sabitse (sonlu durum makinesi) taban türevleri bilebilir, o zaman ikisi aynı dağıtım biriminde durur
   - G8 fazla bilgi · G9 ölü kod · G10 dikey ayrılık · G11 tutarsızlık · G12 karmaşa
   - G13 yapay bağ · **G14 feature envy** · **G15 seçici argüman** · G16 gizli niyet
+    - G14 istisnası: taşımak tasarımı bozuyorsa kıskançlık gerekli kötülüktür (rapor biçimi çalışan sınıfına girmez: SRP, OCP, CCP)
   - **G17 yanlış yerdeki sorumluluk** · G18 uygunsuz static · G19 açıklayıcı değişken
   - G20 ad ne yaptığını söylesin · G21 algoritmayı anla · G22 mantıksal bağımlılığı fiziksel yap
   - **G23 switch/if yerine polimorfizm (tek switch kuralı)** · G24 standart gelenekler
