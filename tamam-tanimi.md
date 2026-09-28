@@ -34,7 +34,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 
 ## 1 · Temiz Kod (Bl.1)
 - [ ] Dokunulan her dosya bulunduğundan biraz daha temiz bırakıldı: bir ad iyileşti, bir fonksiyon bölündü, küçük bir tekrar kalktı ya da bir bileşik `if` sadeleşti. Önceki ölçümlere göre hiçbir değer kötüleşmedi. (Bl.1 · The Boy Scout Rule) [ö]
-- [ ] Bilet numarası taşımayan TODO/FIXME yok. (Bl.1 · Bad Code; Bl.4 · TODO Comments) [ö]
+- [ ] Her TODO/FIXME tarandı ve yapılabilen kapatıldı. Kalan TODO, işin neden şimdi yapılamadığını ve kodun ne olacağını söylüyor. TODO, kötü kodu bırakmanın bahanesi değildir; "sonra" hiç gelmez. (Bl.1 · Bad Code; Bl.4 · TODO Comments) [ö]
 - [ ] "Zaten kötüydü" diye bırakılan kırık cam yok. (Bl.1 · What Is Clean Code? — Stroustrup) [o]
 - [ ] Her üretim modülünün ya da sınıfının testi var; testi olmayan kod temiz değildir. Bir işi yapmanın tek yolu var, API en küçük hâlinde. (Bl.1 · Dave Thomas) [ö/o]
 - [ ] Birden çok yerde yapılan aynı iş, küçük ve basit bir soyutlamaya sarıldı. Genel bir API kurulmadı, yalnız gereken biçimler sunuldu. (Bl.1 · Jeffries) [o]
@@ -109,20 +109,20 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
   - NEDEN'i anlatan niyet açıklaması (Explanation of Intent),
   - değiştirilemeyen koddaki belirsizliğin açıklaması, doğruluğu ayrıca denetlenmiş olarak (Clarification),
   - sonuç uyarısı (Warning of Consequences),
-  - bilet numaralı TODO,
+  - nedenini ve kodun ne olacağını söyleyen TODO (TODO Comments),
   - önemsiz görünen ama önemli bir ayrıntıyı vurgulama (Amplification).
 
   (Bl.4 · Good Comments) [o]
 - [ ] Uyarı yapıya çevrilebiliyorsa çevrildi: yorumla kapatılmış test yerine test çatısının gerekçeli atlama işareti (`@Ignore("neden")`). (Bl.4 · Warning of Consequences; G27) [ö]
 - [ ] Gerekli yorum yazılmış değil: bariz olanı tekrarlayan ya da yalnız imzayı sayan yorum ve belge yorumu yok. (Bl.4 · Redundant, Noise, Mandated Comments; C3) [ö]
-- [ ] Yorumda değişiklik günlüğü, yazar ya da tarih yok; bunlar sürüm kontrolünün işi. (Bl.4 · Journal Comments, Attributions and Bylines; C1) [ö]
+- [ ] Yorumda başka bir kayıt sisteminin bilgisi yok: değişiklik günlüğü, yazar, son değişiklik tarihi, hata kaydı numarası. Bunlar sürüm kontrolünün ve hata takip sisteminin işi. Yorum, kod ve tasarım üzerine teknik nottur. Lisans ve telif yorumu kalır. (Bl.4 · Journal Comments, Attributions and Bylines; Bl.16; C1) [ö]
 - [ ] Yoruma alınmış kod yok. (Bl.4 · Commented-Out Code; C5) [ö]
 - [ ] `// Actions //////` gibi afiş yorumu, `} // while` gibi kapanış yorumu ya da yorumda HTML yok. (Bl.4 · Position Markers, Closing Brace Comments, HTML Comments) [ö]
 - [ ] Yorum yalnız yanındaki kodu anlatıyor: sistemin uzak bir yerini, tarihçeyi ya da ilgisiz ayrıntıyı anlatmıyor. Yorumla kod arasındaki bağ açık. (Bl.4 · Nonlocal Information, Too Much Information, Inobvious Connection) [o]
 - [ ] Anlamı için başka modüle bakmak gerektiren yorum yok. Gövdesi boş ya da yalnız yorum olan yakalama bloğu yok; bu aynı zamanda yutulan istisnadır. (Bl.4 · Mumbling) [ö]
 - [ ] Dışa açık API'nin belge yorumu iyi. Dışa açık olmayan iç fonksiyonlarda `@param`/`@return` gibi biçimsel belge yorumu yok. (Bl.4 · Javadocs in Public APIs / in Nonpublic Code, Function Headers) [ö]
-- [ ] Değişen kodun yanındaki yorum hâlâ doğru; yanlış yorum, hiç yorum olmamasından kötüdür. (Bl.4 · Misleading Comments; C2) [o]
-- [ ] Yazmaya değen yorum kısa, dilbilgisi doğru ve bariz olmayanı söylüyor. (C4) [o]
+- [ ] Değişen kodun yanındaki yorum hâlâ doğru; eskiyen yorum hemen güncellendi ya da silindi. Kodun değişecek ayrıntısını anlatan, eskimeye yatkın yorum hiç yazılmadı. Yanlış yorum, hiç yorum olmamasından kötüdür. (Bl.4 · Misleading Comments; Bl.16; C2) [o]
+- [ ] Yazmaya değen yorum iyi yazılmış: kısa, dolaşmadan, dilbilgisi ve noktalaması doğru, bariz olmayanı söylüyor. (C4) [o]
 
 ## 5 · Biçimlendirme (Bl.5, G10, G24)
 - [ ] Biçim kuralı bir araçla uygulanıyor; ekibin tek bir kuralı var. **Bu depoda henüz bir araç yapılandırması yok.** (Bl.5 · Team Rules; G24) [ö]

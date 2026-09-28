@@ -9,7 +9,7 @@ from measure.source_check import SourceCheck
 from measure.syntax import FUNCTION_NODES, is_string_literal
 
 TODO = re.compile(r"\b(TODO|FIXME|XXX)\b")
-TICKET = re.compile(r"\b[A-Z][A-Z0-9]+-\d+\b|#\d+")
+TODO_ALARM = "TODO: yapılabiliyorsa kapat; kalıyorsa nedenini ve kodun ne olacağını söylesin (Bl.4 · TODO Comments)"
 TRIVIAL_EXPRESSIONS = (ast.Name, ast.Constant, ast.Attribute)
 MIN_CARRIERS = 3
 PROCEDURAL_DECLARATION = "Prosedürel (Bl.6):"
@@ -40,14 +40,12 @@ def _is_trivial(statement):
     return isinstance(statement, ast.Expr) and isinstance(statement.value, TRIVIAL_EXPRESSIONS)
 
 
-class TodosWithoutTicket(CommentCheck):
-    def notes(self):
-        return [Note(comment.location, alarm("bilet numarasız TODO (Bl.4 · TODO Comments)"))
-                for comment in self._comments.all() if self._lacks_ticket(comment.text)]
+class Todos(CommentCheck):
+    """Her TODO bir alarmdır: düzenli taranır, yapılabilen kapatılır."""
 
-    @staticmethod
-    def _lacks_ticket(text):
-        return bool(TODO.search(text)) and not TICKET.search(text)
+    def notes(self):
+        return [Note(comment.location, alarm(TODO_ALARM))
+                for comment in self._comments.all() if TODO.search(comment.text)]
 
 
 class CarriedArguments(SourceCheck):
@@ -91,4 +89,4 @@ class DispatchTables(SourceCheck):
         return keys_are_types and all(isinstance(value, ast.Name) and value.id in functions for value in table.values)
 
 
-SOURCE_CHECKS = (CommentedOutCode, TodosWithoutTicket, CarriedArguments, DispatchTables)
+SOURCE_CHECKS = (CommentedOutCode, Todos, CarriedArguments, DispatchTables)

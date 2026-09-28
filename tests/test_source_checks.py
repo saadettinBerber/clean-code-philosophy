@@ -1,6 +1,6 @@
 import unittest
 
-from measure.source_checks import MIN_CARRIERS, CarriedArguments, CommentedOutCode, DispatchTables, TodosWithoutTicket
+from measure.source_checks import MIN_CARRIERS, CarriedArguments, CommentedOutCode, DispatchTables, Todos
 from tests.snippets import Snippet, names
 
 
@@ -44,15 +44,15 @@ class CommentedOutCodeTest(unittest.TestCase):
         self.assertEqual(CommentedOutCode(Snippet("x = 1  # type: int\n")).notes(), [])
 
 
-class TodosWithoutTicketTest(unittest.TestCase):
-    def test_todo_without_ticket_raises_an_alarm(self):
-        self.assertEqual(lines_of(TodosWithoutTicket(Snippet("# TODO kartları sırala\n")).notes()), [1])
+class TodosTest(unittest.TestCase):
+    def test_every_todo_raises_an_alarm(self):
+        self.assertEqual(lines_of(Todos(Snippet("# TODO kartları sırala\nx = 1  # FIXME sınır\n")).notes()), [1, 2])
 
-    def test_todo_with_ticket_is_fine(self):
-        self.assertEqual(TodosWithoutTicket(Snippet("# TODO KC-12 kartları sırala\n")).notes(), [])
+    def test_plain_comment_is_not_a_todo(self):
+        self.assertEqual(Todos(Snippet("# Kartlar sıralı gelir.\n")).notes(), [])
 
     def test_todo_inside_a_string_is_not_a_comment(self):
-        self.assertEqual(TodosWithoutTicket(Snippet('PATTERN = "# TODO"\n')).notes(), [])
+        self.assertEqual(Todos(Snippet('PATTERN = "# TODO"\n')).notes(), [])
 
 
 class CarriedArgumentsTest(unittest.TestCase):
