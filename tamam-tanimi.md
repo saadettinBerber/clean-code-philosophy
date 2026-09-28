@@ -100,7 +100,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] Çağrılmayan fonksiyon silindi; sürüm kontrolü onu hatırlar, silmekten korkulmaz. Kullanılmadığı "Find Usages" gibi bir araçla görülür. Yalnız ikizinin çağırdığı fonksiyon onunla birleştirildi (`getMonths`). (Bl.16; F4) [ö]
 
 **Tür dallanması**
-- [ ] Bir tür için tek switch var: `switch`, `if/else` zinciri, tür sınaması zinciri ya da tabloyla dağıtım. O da fabrikanın dibinde durup polimorfik nesne üretiyor. Aynı ayırıcıya bakan ikinci bir dallanma alarmdır. (Bl.3 · Switch Statements; G23) [ö]
+- [ ] Bir tür için tek switch var: `switch`, `if/else` zinciri, tür sınaması zinciri ya da tabloyla dağıtım. O da fabrikanın dibinde durup polimorfik nesne üretiyor. Aynı ayırıcıya bakan ikinci bir dallanma alarmdır. Her switch şüphelidir: yazmadan önce polimorfizm düşünüldü. Bl.6'daki istisna, yani işlemlerin türlerden sık değiştiği yer, nadirdir. Kitaptaki uygulamalar: `setArgument`'taki tür dallanması `ArgumentMarshaler.set` çağrısına indi (Bl.14); `isInRange`'deki switch'in durumları `DateInterval` enum'una taşındı (Bl.16). (Bl.3 · Switch Statements; G23) [ö]
 
 ## 4 · Yorumlar (Bl.4, C1-C5)
 - [ ] Her yorumdan önce kodla anlatmak denendi: yorumlanan koşul niyet gösteren bir fonksiyona, yorumlanan ifade açıklayıcı bir ara değişkene dönüştü. (Bl.4 · Explain Yourself in Code; Don't Use a Comment When You Can Use a Function or a Variable; G19, G28) [ö/o]
@@ -264,7 +264,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] Yeni bir tür eklemek yalnız yeni sınıf ve fabrikada bir dal gerektiriyor. Her yeni tür N ayrı yere dokunmayı gerektirmeye başlayınca özellik eklemek durduruldu, önce yeniden düzenlendi. (Bl.14 · So I Stopped) [ö/o]
 - [ ] Eski ve yeni yapı bir süre yan yana yaşatıldı, eskiler tek tek silindi. (Bl.14) [o]
 - [ ] Yeniden düzenleme sırasında gerekirse bir önceki adım geri alındı; yeniden düzenleme deneme-yanılmayla yakınsar. (Bl.15) [o]
-- [ ] +1/-1 hesabı tek bir adlı değişkende (G33). Olumsuz koşul yok (G29). Karmaşık koşul adlı bir fonksiyona çıktı (G28). [ö]
+- [ ] +1/-1 hesabı tek bir adlı değişkende (G33). Koşul mümkünse olumlu: `!buffer.shouldNotCompact()` değil `buffer.shouldCompact()` (G29). `if` ya da `while` içindeki bool mantığı niyetini söyleyen bir fonksiyona çıktı: `timer.hasExpired() && !timer.isRecurrent()` değil `shouldBeDeleted(timer)` (G28). (Bl.15 · `compact`) [ö]
 - [ ] Taban sınıf türevlerini tanımıyor (G7); türev yaratma işi fabrikada. Tek istisna, türev sayısının kesin sabit olduğu durumdur (sonlu durum makinesi); o zaman taban ve türevler aynı dağıtım biriminde durur. Sabit grupları davranış taşıyan bir enum'a dönüştü (J3). [ö]
 - [ ] Yalnız testlerin çağırdığı üretim kodu, testiyle birlikte silindi. (Bl.16) [ö]
 - [ ] Kod küçüldüğü için düşen kapsam yüzdesi gerileme sanılmadı. (Bl.16) [o]
@@ -283,7 +283,9 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] G18: Statik metot yalnız polimorfik olma ihtimali olmayan, bütün verisini argümandan alan fonksiyonda kullanılmış (`Math.max`); şüphede örnek metodu seçilmiş. Bütün verisini argümandan alsa bile farklı algoritmalarla çalışma ihtimali olan fonksiyon (`HourlyPayCalculator.calculatePay(employee, overtimeRate)`) örnek metodudur. Sınıfın kendi verisiyle çalışan fonksiyon static değil (Bl.16 · `addDays`). Bilinçli prosedürel sınıf dışı fonksiyon bu kokuya girmez. [ö]
 - [ ] G21: Algoritma anlaşıldı; `if` ve bayrak yamasıyla "çalışır" hâle getirilmedi. Deneyerek çalıştırmak serbest, ama iş bitmeden nasıl çalıştığı bilindi: testlerin geçmesi yetmez. Algoritmanın uygun olup olmadığından emin olamamak olağandır; kodun ne yaptığını bilmemek tembelliktir. Anlamanın yolu, fonksiyonu nasıl çalıştığı apaçık olana dek yeniden düzenlemektir. (Bl.16 · `getPreviousDayOfWeek`) [o]
 - [ ] G22: Mantıksal bağımlılık fiziksel: gereken bilgi açıkça isteniyor, hakkında varsayım yapılmıyor. `HourlyReporter` sayfa boyunu (`PAGE_SIZE = 55`) kendi bilmez, biçimleyiciye sorar (`formatter.getMaxPageSize()`); bu aynı zamanda yanlış yerdeki sorumluluktur (G17). Gerçekleştirmenin bir ayrıntısına örtük dayanan genel algoritma, o ayrıntıyı soyut bir metotla ister (Bl.16 · `getDayOfWeekForOrdinalZero`). [o]
-- [ ] G26: Kesin: para için kayan noktalı sayı yok, "ilk eşleşme tektir" varsayımı yok. Boş dönebilecek çağrı denetlenmiş. Eşzamanlı güncelleme olasıysa kilit var. Değişken gereğinden somut türle bildirilmemiş (`List` yeterken `ArrayList`); erişim de gereğinden geniş değil. [ö/o]
+- [ ] G26: Kesin: her karar bilerek verildi; nedeni ve istisnaların nasıl ele alınacağı biliniyor. Koddaki belirsizlik ya anlaşmazlıktan ya tembellikten doğar, giderilir. Para için kayan noktalı sayı yok, "ilk eşleşme tektir" varsayımı yok. Boş dönebilecek çağrı denetlenmiş. Eşzamanlı güncelleme olasıysa kilit var. Değişken gereğinden somut türle bildirilmemiş (`List` yeterken `ArrayList`); erişim de gereğinden geniş değil. [ö/o]
+- [ ] G24: Ekip standardı yaygın sektör normlarına dayanıyor ve yalnız biçimi değil, örnek değişkenin nerede bildirildiğini ve sınıf, metot, değişken adlandırmasını da kapsıyor. Standart ayrı bir belgeden değil koddan öğreniliyor; ekipteki herkes ona uyuyor. Soyut metotlar sınıfın başında (Bl.16). [o]
+- [ ] G25: Ham sayı adlı bir sabitin arkasında (`86400` → `SECONDS_PER_DAY`, sayfa başına `55` satır → `LINES_PER_PAGE`, `1` → `Month.JANUARY.toInt()` (Bl.16)). Sihirli değer yalnız sayı değil, kendini anlatmayan her simgedir: testteki `"John Doe"` → `HOURLY_EMPLOYEE_NAME`. İstisna: kendini anlatan formülde çok iyi bilinen sabit ham kalabilir (`feetWalked / 5280.0`, `hourlyRate * 8`, `radius * Math.PI * 2`). Yanlış yazılmaya açık uzun sabit ise (π) her zaman adlıdır. [ö/o]
 - [ ] G27: Karar gelenekle değil yapıyla zorlanıyor: adlandırılmış enum üzerinde switch yerine soyut metotlu taban sınıf. [o]
 - [ ] G32: Yapı keyfi değil; dışarıdan kullanılan sınıf başka bir sınıfın içine gömülmemiş. [ö/o]
 - [ ] J1: İçe aktarma listesi, birlikte çalışılan paketlerin kısa bir beyanı. Aynı paketten iki ya da daha fazla sınıf kullanılıyorsa sınıflar tek tek değil, paket olarak içe aktarılıyor; dile göre biçimi Dil eşlemesinde. J2: Sabitler kalıtımla alınmıyor. J3: Anlamlı sabit grupları davranış taşıyan enum. [ö]
@@ -371,6 +373,7 @@ Maddelerdeki ortak kavramın her dildeki karşılığı. Yeni bir dil bu tabloya
 | Test için gevşetilmiş erişim | uygulanmaz: paket düzeyi yok; test `_` önekli üyelere dokunmaz | `protected` ya da paket düzeyi, yalnız aynı paketteki test için (s.136) |
 | Protected alan | alt sınıfın başka dosyada eriştiği `_` önekli alan | `protected` (s.80, 292) |
 | Arayüz | `Protocol` ya da `ABC` | `interface` (s.149) |
+| Kodlama standardı (G24) | PEP 8 (kitapta yok) | Yaygın Java gelenekleri (kitapta yok); yazarınki Listing B-7 – B-14 (s.394) |
 | Yapıyla zorlama (G27) | `ABC` + `@abstractmethod` örnekleme anında zorlar; yalnız `Protocol` tür denetleyicide zorlar, çalışma anında değil | `abstract` metot derleme anında zorlar (s.301) |
 | Davranış taşıyan enum | `enum.Enum` + metot; üyeler kendi gövdesini taşıyamaz, davranış değerden okunur | `enum` + sabit başına gövdeli soyut metot (s.308-309) |
 | Ham eşleme (Bl.8) | `dict` | `Map` (s.114) |

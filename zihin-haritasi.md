@@ -301,7 +301,9 @@ markmap:
   - G20 ad ne yaptığını söylesin · G21 algoritmayı anla · G22 mantıksal bağımlılığı fiziksel yap
     - G21: testlerin geçmesi yetmez, kodun nasıl çalıştığı bilinir; yolu, apaçık olana dek yeniden düzenlemektir
   - **G23 switch/if yerine polimorfizm (tek switch kuralı)** · G24 standart gelenekler
+    - G23: her switch şüphelidir; Bl.6'daki istisna (işlemler türlerden sık değişir) nadirdir
   - G25 magic number yerine adlı sabit · G26 kesin ol · G27 gelenek yerine yapı
+    - G25: sihirli değer kendini anlatmayan her simgedir ("John Doe"); iyi bilinen sabit açık formülde ham kalabilir (5280), hataya açık uzun sabit (π) adlıdır
   - G28 koşulları kapsülle · G29 olumsuz koşuldan kaçın · **G30 fonksiyon tek iş yapar**
   - G31 gizli zamansal bağ · G32 keyfi olma · **G33 sınır koşullarını kapsülle**
   - **G34 tek soyutlama düzeyi** · G35 ayarlar üst düzeyde durur · G36 geçişli gezinmeden kaçın
