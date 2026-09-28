@@ -3,7 +3,8 @@
 Bir görev, bu listedeki bütün maddeler işaretlendiğinde biter. Bitince commit atılır ve push edilir.
 Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkanlığa göre gevşetilmez, istisna yalnız kitabın kendi verdiği istisnadır. Kitap 2026-09-25'te PDF ve LightRAG üzerinden, dört alt ajanla bölüm bölüm okundu. Madde sonundaki parantez maddenin kaynağını verir: bölüm ve kitaptaki başlık adı, varsa Bl.17'deki koku kodu.
 
-- **[ö] Ölçülebilir:** AST ya da bir araçla mekanik olarak denetlenir (`measure_code.py`). Sonuç yalnız bir **alarmdır**, her alarm okunarak karara bağlanır.
+- **[ö] Ölçülüyor:** `measure_code.py` ya da Dil eşlemesinde adı verilen bir komut (test, kapsam, kurulum) mekanik olarak denetler. Sonuç yalnız bir **alarmdır**, her alarm okunarak karara bağlanır. Ölçüm maddenin yalnız bir kısmını kapsıyorsa kalanı okunur.
+- **[ö-] Ölçülebilir, aracı yok:** AST ya da basit bir araçla mekanik denetime uygun, ama bugün hiçbir araç ölçmüyor; okunarak denetlenir. Araç eklenince [ö] olur.
 - **[o] Okuma:** Kararı yargı verir; kod okunarak cevaplanır.
 
 **Dil.** Liste nesne yönelimli diller içindir; şimdilik Python ve Java. Maddeler bu dillerin ortak sözcükleriyle yazılır: sınıf, nesne, alan, yapıcı, erişim düzeyi, arayüz, istisna, null. Örnek adlar kitabın Java yazımıyla verilir ki kaynağa dönülebilsin. Her kavramın dildeki karşılığı sondaki **Dil eşlemesi** tablosundadır. Yeni bir dil o tabloya sütun olarak girer, maddeler değişmez. Kitap her dilde standarttır.
@@ -25,7 +26,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 3. [ ] Değişiklik küçük adımlarla yapıldı, her adımdan sonra bütün takım yeşildi. Büyük yeniden tasarım yapılmadı. (Bl.14 · On Incrementalism; Bl.1 · The Grand Redesign in the Sky)
 4. [ ] "Çalışıyor" noktasında durulmadı. Karmaşa oluştuğu anda temizlendi, "sonra"ya bırakılmadı: sonra, hiç demektir. (Bl.1 · Bad Code; Bl.10 · SRP; Bl.14 · Conclusion)
 5. [ ] Geçici eklenip çıkarılan kod kalıntı bırakmadı. (Bl.14 · Rubik küpü; G9, F4)
-6. [ ] Ölçüm aracı değişen dosyalarda çalıştı. Her ALARM "gerçek, düzeltildi" ya da "yanlış pozitif, çünkü…" diye karara bağlandı. Aracı olmayan dilde [ö] maddeler tek tek okundu. [ö]
+6. [ ] Ölçüm aracı değişen dosyalarda çalıştı. Her ALARM "gerçek, düzeltildi" ya da "yanlış pozitif, çünkü…" diye karara bağlandı. Aracı olmayan dilde [ö] maddeler, her dilde de [ö-] maddeler tek tek okundu. [ö]
 7. [ ] Aşağıdaki bölümler okundu; bulgular haritadaki başlık adıyla yazıldı.
 8. [ ] Davranış değiştiyse gerçek çıktı (ör. EPUB) üretildi ve beklenen fark görüldü. Yeniden düzenlemeyse eski kodla karşılaştırıldı, fark çıkmadı. Fark çıktıysa önce o farkı gösteren birim testi yazıldı. (CLAUDE.md; T6)
 9. [ ] Commit atomik: tek değişiklik, tek cümlelik Türkçe mesaj, gövde yok. Mesaja "ve" giriyorsa commit bölündü. Boy Scout temizliği ayrı bir commit oldu.
@@ -35,35 +36,35 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 ---
 
 ## 1 · Temiz Kod (Bl.1)
-- [ ] Dokunulan her dosya bulunduğundan biraz daha temiz bırakıldı: bir ad iyileşti, bir fonksiyon bölündü, küçük bir tekrar kalktı ya da bir bileşik `if` sadeleşti. Önceki ölçümlere göre hiçbir değer kötüleşmedi. (Bl.1 · The Boy Scout Rule) [ö]
+- [ ] Dokunulan her dosya bulunduğundan biraz daha temiz bırakıldı: bir ad iyileşti, bir fonksiyon bölündü, küçük bir tekrar kalktı ya da bir bileşik `if` sadeleşti. Önceki ölçümlere göre hiçbir değer kötüleşmedi. (Bl.1 · The Boy Scout Rule) [ö-]
 - [ ] Her TODO/FIXME tarandı ve yapılabilen kapatıldı. Kalan TODO, işin neden şimdi yapılamadığını ve kodun ne olacağını söylüyor. TODO, kötü kodu bırakmanın bahanesi değildir; "sonra" hiç gelmez. (Bl.1 · Bad Code; Bl.4 · TODO Comments) [ö]
 - [ ] "Zaten kötüydü" diye bırakılan kırık cam yok. (Bl.1 · What Is Clean Code? — Stroustrup) [o]
-- [ ] Her üretim modülünün ya da sınıfının testi var; testi olmayan kod temiz değildir. Bir işi yapmanın tek yolu var, API en küçük hâlinde. (Bl.1 · Dave Thomas) [ö/o]
+- [ ] Her üretim modülünün ya da sınıfının testi var; testi olmayan kod temiz değildir. Bir işi yapmanın tek yolu var, API en küçük hâlinde. (Bl.1 · Dave Thomas) [ö-/o]
 - [ ] Birden çok yerde yapılan aynı iş, küçük ve basit bir soyutlamaya sarıldı. Genel bir API kurulmadı, yalnız gereken biçimler sunuldu. (Bl.1 · Jeffries) [o]
 - [ ] Her rutin "aşağı yukarı beklendiği gibi" çıkıyor; kod düzyazı gibi okunuyor, spekülatif kod yok. (Bl.1 · Cunningham, Booch) [o]
 - [ ] Kitaptan bilerek sapılan yer varsa gerekçesi CLAUDE.md'de yazılı. (Bl.1 · Schools of Thought) [o]
 - [ ] Okuyucu için yazıldı; okuma/yazma oranı 10:1'den büyüktür. (Bl.1 · We Are Authors) [o]
 
 ## 2 · Anlamlı İsimler (Bl.2, N1-N7)
-- [ ] Her ad neden var olduğunu, ne yaptığını ve nasıl kullanıldığını söylüyor; yorum istemiyor. Ölçü birimi adda (`elapsedTimeInDays`). Ad aceleyle seçilmedi; yazılım geliştikçe anlam kaydığı için adlar her geçişte yeniden değerlendirildi (Bl.16: `serial` → `ordinal`, `compare` → `daysSince`). İyi adlar kodun yapısına anlam yükler: `score()` okununca `isStrike()`'ın gövdesi tahmin edilir. (Bl.2 · Use Intention-Revealing Names; N1) [o] Satır sonu yorumlu atamalar [ö] ile yakalanır.
+- [ ] Her ad neden var olduğunu, ne yaptığını ve nasıl kullanıldığını söylüyor; yorum istemiyor. Ölçü birimi adda (`elapsedTimeInDays`). Ad aceleyle seçilmedi; yazılım geliştikçe anlam kaydığı için adlar her geçişte yeniden değerlendirildi (Bl.16: `serial` → `ordinal`, `compare` → `daysSince`). İyi adlar kodun yapısına anlam yükler: `score()` okununca `isStrike()`'ın gövdesi tahmin edilir. (Bl.2 · Use Intention-Revealing Names; N1) [o] Satır sonu yorumlu atamalar [ö-] ile yakalanır.
 - [ ] Anlamlı indis ya da değer (`x[0] == 4`) adlı bir sabite ya da niyet gösteren bir metoda (`cell.isFlagged()`) dönüştü. (Bl.2 · Use Intention-Revealing Names; G25) [ö]
-- [ ] Yanıltıcı ad yok: `accountList` gerçekten bir liste. Kap türü ada yazılmıyor. `l`, `O` ve `I` tek başına ad olarak kullanılmıyor. Az farkla benzeyen ad çiftleri yok. (Bl.2 · Avoid Disinformation) [ö]
-- [ ] Yalnız derleyiciyi ya da yorumlayıcıyı susturmak için yapılmış ayrım yok: `a1/a2`, `klass`, gürültü sözcükler (`Info`, `Data`, `Object`, `theZork`, `NameString`). Hangisinin çağrılacağı belirsiz kardeşler yok (`getActiveAccount` / `getActiveAccounts` / `getActiveAccountInfo`). (Bl.2 · Make Meaningful Distinctions) [ö]
+- [ ] Yanıltıcı ad yok: `accountList` gerçekten bir liste. Kap türü ada yazılmıyor. `l`, `O` ve `I` tek başına ad olarak kullanılmıyor. Az farkla benzeyen ad çiftleri yok. (Bl.2 · Avoid Disinformation) [ö-]
+- [ ] Yalnız derleyiciyi ya da yorumlayıcıyı susturmak için yapılmış ayrım yok: `a1/a2`, `klass`, gürültü sözcükler (`Info`, `Data`, `Object`, `theZork`, `NameString`). Hangisinin çağrılacağı belirsiz kardeşler yok (`getActiveAccount` / `getActiveAccounts` / `getActiveAccountInfo`). (Bl.2 · Make Meaningful Distinctions) [ö-]
 - [ ] Ad sesli okunup tartışılabiliyor. (Bl.2 · Use Pronounceable Names) [o]
 - [ ] Ad uzunluğu kapsamla orantılı. Tek harfli ad yalnız kapsamı 5 satırı aşmayan yerel değişkende kullanılıyor; alanda, sabitte, modül düzeyinde ve parametrede kullanılmıyor. Aranacak her sabit adlı. Tersi de geçerli: dar kapsamda uzun ad gürültüdür; beş satırlık döngüde `i` yerine `rollCount`, iki satırlık fonksiyonda `am` yerine `argumentMarshaller` yazılmaz (Bl.14). (Bl.2 · Use Searchable Names; N5, G25) [ö]
-- [ ] Adda kodlama yok: tür adı ya da Hungarian (`phoneString`, `strName`), üye öneki (`m_`, `f`; Bl.15), `I` önekli arayüz, alt sistem öneki. Bir şey kodlanacaksa arayüz değil uygulama kodlanır. (Bl.2 · Avoid Encodings; N6) [ö]
-- [ ] Okuyucu hiçbir adı zihninde başka bir şeye çevirmek zorunda değil. Döngü sayacı dışında tek harfli ad yok. (Bl.2 · Avoid Mental Mapping) [ö]
-- [ ] Sınıf adı bir isim ya da isim öbeği. Adında `Manager`, `Processor`, `Data`, `Info` ya da `Super` yok; kısa ve kesin bir ad verilemiyorsa sınıf büyüktür. (Bl.2 · Class Names; Bl.10) [ö]
-- [ ] Metot adı bir fiil ya da fiil öbeği. `is`, `has` ve `can` ile başlayan adlar bool döndürüyor. Birden çok kurucu biçimi gerekiyorsa argümanı anlatan adlı bir statik fabrika metodu var (`Complex.FromRealNumber(23.0)`); dil izin veriyorsa karşılık gelen yapıcılar gizlenerek fabrika zorunlu kılındı. (Bl.2 · Method Names; G20) [ö]
+- [ ] Adda kodlama yok: tür adı ya da Hungarian (`phoneString`, `strName`), üye öneki (`m_`, `f`; Bl.15), `I` önekli arayüz, alt sistem öneki. Bir şey kodlanacaksa arayüz değil uygulama kodlanır. (Bl.2 · Avoid Encodings; N6) [ö-]
+- [ ] Okuyucu hiçbir adı zihninde başka bir şeye çevirmek zorunda değil. Döngü sayacı dışında tek harfli ad yok. (Bl.2 · Avoid Mental Mapping) [ö-]
+- [ ] Sınıf adı bir isim ya da isim öbeği. Adında `Manager`, `Processor`, `Data`, `Info` ya da `Super` yok; kısa ve kesin bir ad verilemiyorsa sınıf büyüktür. (Bl.2 · Class Names; Bl.10) [ö-]
+- [ ] Metot adı bir fiil ya da fiil öbeği. `is`, `has` ve `can` ile başlayan adlar bool döndürüyor. Birden çok kurucu biçimi gerekiyorsa argümanı anlatan adlı bir statik fabrika metodu var (`Complex.FromRealNumber(23.0)`); dil izin veriyorsa karşılık gelen yapıcılar gizlenerek fabrika zorunlu kılındı. (Bl.2 · Method Names; G20) [ö-]
 - [ ] Espri, argo ya da kültüre bağlı ad yok. (Bl.2 · Don't Be Cute) [o]
-- [ ] Bir kavram için tek sözcük kullanılıyor: `get`, `fetch`, `retrieve`, `load` bir arada değil. `manager` ile `controller` da öyle. (Bl.2 · Pick One Word per Concept; G11) [ö]
+- [ ] Bir kavram için tek sözcük kullanılıyor: `get`, `fetch`, `retrieve`, `load` bir arada değil. `manager` ile `controller` da öyle. (Bl.2 · Pick One Word per Concept; G11) [ö-]
 - [ ] Aynı sözcük iki anlamda kullanılmıyor: değer birleştiren `add` başka, koleksiyona öğe koyan `append`/`insert` başka. (Bl.2 · Don't Pun) [o]
 - [ ] Teknik kavramda çözüm alanının adı (algoritma, kalıp: `AccountVisitor`, `JobQueue`), alan kavramında problem alanının adı kullanılıyor. Projenin ortak dili adlarda görünüyor. Yerleşik ad varken yenisi icat edilmedi: dilin gelenekleri (`toString`), kalıp adları (`AutoHangupModemDecorator`), alanın terimleri (Bl.16: aralık sabitleri matematikteki `CLOSED`, `CLOSED_LEFT`, `CLOSED_RIGHT`, `OPEN` adlarını aldı). (Bl.2 · Use Solution/Problem Domain Names; N3) [o]
 - [ ] Tek başına eksik kalan ad (`state`, `number`) bir sınıfın ya da modülün içine yerleşerek bağlam kazandı. Önek eklemek son çaredir. Uzun bir fonksiyonda birlikte gezen değişkenler bir sınıfın alanları oldu. (Bl.2 · Add Meaningful Context) [o/ö]
-- [ ] Gereksiz bağlam yok: her sınıfa proje öneki eklenmiyor, paket adı sınıf adında tekrar etmiyor. (Bl.2 · Don't Add Gratuitous Context; N6) [ö]
+- [ ] Gereksiz bağlam yok: her sınıfa proje öneki eklenmiyor, paket adı sınıf adında tekrar etmiyor. (Bl.2 · Don't Add Gratuitous Context; N6) [ö-]
 - [ ] Ad uygulamayı değil soyutlama düzeyini söylüyor: `dial(phoneNumber)` yerine `connect(locator)`. Soyut sınıfın adı gerçekleştirmeyi ima etmiyor (Bl.16: `SerialDate` → `DayDate`). Her geçişte fazla alt düzeyde kalmış bir ad bulunur ve o an değiştirilir. (N2) [o]
 - [ ] Adlar farkı belirsizliksiz söylüyor. İç içe iki fonksiyonun adı farkı anlatıyor: `doRename` içinde `renamePage` değil, `renamePageAndOptionallyAllReferences`; tek yerden çağrılan fonksiyonda uzun adın açıklama değeri uzunluğundan ağır basar. Yerel değişken alanla aynı adı taşımıyor (Bl.15: `compactExpected`). Nesneyi değiştirip değiştirmediği belirsiz ad (`addDays`) belirginleştirildi (Bl.16: `plusDays`). (N4) [o]
-- [ ] Ad, fonksiyonun, değişkenin ya da sınıfın olduğu ve yaptığı her şeyi söylüyor; basit bir eylemden fazlasını yapan fonksiyon basit bir fiille adlanmadı. Nesneyi yaratıp döndüren fonksiyon `getOos` değil `createOrReturnOos`. Hata denetimi yapıp biçimlenmiş ileti döndüren fonksiyon `compact` değil `formatCompactedComparison` (Bl.15). (N7) [ö] `get`/`is` ile başlayıp atama ya da G/Ç yapan fonksiyonlar aranır.
+- [ ] Ad, fonksiyonun, değişkenin ya da sınıfın olduğu ve yaptığı her şeyi söylüyor; basit bir eylemden fazlasını yapan fonksiyon basit bir fiille adlanmadı. Nesneyi yaratıp döndüren fonksiyon `getOos` değil `createOrReturnOos`. Hata denetimi yapıp biçimlenmiş ileti döndüren fonksiyon `compact` değil `formatCompactedComparison` (Bl.15). (N7) [ö-] `get`/`is` ile başlayıp atama ya da G/Ç yapan fonksiyonlar aranır.
 - [ ] Daha iyi bir ad bulununca değiştirildi. (Bl.2 · Final Words) [o]
 
 ## 3 · Fonksiyonlar (Bl.3, F1-F4)
@@ -72,9 +73,9 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] Fonksiyon küçük: hedef 2-4 satır. 4'ü aşan fonksiyona bakılır, 20 satır tavandır. (Bl.3 · Small!) [ö]
 - [ ] `if`, `else` ve `while` blokları tek satır; o satır adı iyi seçilmiş bir çağrı. Girinti en fazla 1-2 düzey. (Bl.3 · Blocks and Indenting) [ö]
 - [ ] Fonksiyon tek iş yapıyor. İçinden, uygulamasını yeniden söylemekten öte bir ad taşıyan başka bir fonksiyon çıkarılamıyor. "TO paragrafı" testinden geçiyor. Döngü, koşul ve iş ayrı fonksiyonlarda: `pay` → `payIfNecessary` → `calculateAndDeliverPay`. Sıkıştıran fonksiyon biçimlemez, biçimleyen fonksiyon sıkıştırmaz (Bl.15 · `compact`). (Bl.3 · Do One Thing; G30) [o]
-- [ ] Gövde boş satırla ya da başlık yorumuyla bölümlere ayrılmıyor. (Bl.3 · Sections within Functions) [ö]
+- [ ] Gövde boş satırla ya da başlık yorumuyla bölümlere ayrılmıyor. (Bl.3 · Sections within Functions) [ö-]
 - [ ] Tek soyutlama düzeyi: `getHtml()` ile `.append("\n")` aynı fonksiyonda değil. Fonksiyondaki deyimler adının söylediği işin bir düzey altında: `render()` bir HR etiketi kurar, HTML sözdizimini `HtmlTag` bilir. Düzeyleri ayırmak çoğu zaman yeni bir düzey çizgisi ortaya çıkarır (boyutun yorumlanması `hrSize`'a gider); ayırma o çizgide de sürdü. Yol dizgesini noktalar, eğik çizgiler ve dosya uzantısıyla kuran kod, çevresindeki kodla karışmıyor (Bl.6). (Bl.3 · One Level of Abstraction; G34, G6) [o]
-- [ ] Stepdown kuralı: çağıran üstte, çağrılan hemen altında; kod yukarıdan aşağı bir hikâye gibi okunuyor. (Bl.3 · The Stepdown Rule; Bl.5 · Vertical Ordering; G10) [ö]
+- [ ] Stepdown kuralı: çağıran üstte, çağrılan hemen altında; kod yukarıdan aşağı bir hikâye gibi okunuyor. (Bl.3 · The Stepdown Rule; Bl.5 · Vertical Ordering; G10) [ö-]
 - [ ] Ad ne yaptığını söylüyor; modüldeki adlar tutarlı bir hikâye kuruyor. Ad, birimi ve nesneyi değiştirip değiştirmediğini de söylüyor: `date.add(5)` değil; yerinde değiştiren `addDaysTo`, yeni değer döndüren `daysLater` ya da `plusDays` (Bl.16). Ne yaptığını anlamak için gövdeye ya da belgeye bakmak gerekiyorsa ad değişti ya da iş daha iyi adlı fonksiyonlara bölündü. (Bl.3 · Use Descriptive Names; G20) [o]
 
 **Argümanlar**
@@ -84,28 +85,28 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
   - dönüştürür (girdi aynı kalsa bile yeni değer döndürür),
   - olaydır (değer döndürmez ve bunu adından belli eder).
 
-  (Bl.3 · Common Monadic Forms) [ö/o]
+  (Bl.3 · Common Monadic Forms) [o]
 - [ ] Bayrak argümanı yok: bool parametre fonksiyonu ikiye böler. Davranış seçen dizge, tamsayı ya da enum argümanı da aynı koku; çok sayıda fonksiyon, davranış seçen tek fonksiyondan iyidir. Çıktı biçimini seçen bayrak da ayrı fonksiyonlara bölündü (Bl.16 · `monthCodeToString` → `toString`, `toShortString`). (Bl.3 · Flag Arguments; F3, G15) [ö]
 - [ ] İki argümanın doğal bir sırası ve uyumu var (`Point(x, y)`). Yoksa bir argüman düşürüldü. Kitap bunun üç yolunu verir: fonksiyonu argümanın metodu yapmak, argümanı alana çevirmek ya da argümanı yapıcıda alan bir sınıf çıkarmak (`FieldWriter`). (Bl.3 · Dyadic Functions) [o]
-- [ ] Birlikte gezen argümanlar, adını hak eden bir kavrama sarıldı (`makeCircle(Point center, double radius)`). Aynı parametre çifti iki ya da daha fazla fonksiyonda geçiyorsa bu bir adaydır. (Bl.3 · Argument Objects) [ö]
+- [ ] Birlikte gezen argümanlar, adını hak eden bir kavrama sarıldı (`makeCircle(Point center, double radius)`). Aynı parametre çifti iki ya da daha fazla fonksiyonda geçiyorsa bu bir adaydır. (Bl.3 · Argument Objects) [ö-]
 - [ ] Fonksiyon adı argümanla bir fiil/isim çifti kuruyor (`writeField(name)`). Sıra belirsizse argümanların adı fonksiyon adına yazılıyor: anahtar sözcük biçimi (`assertExpectedEqualsActual(expected, actual)`). (Bl.3 · Verbs and Keywords) [o]
 
 **Yan etki, CQS, hata**
-- [ ] Adın söylemediği bir yan etki yok. Zamansal bağ kaçınılmazsa gizli değil, adda ve yapıda görünüyor. Sıra ya kova zinciriyle zorlanıyor, her fonksiyon bir sonrakinin girdisini üretiyor (`saturateGradient()` → `reticulateSplines(gradient)` → `diveForMoog(splines, reason)`); ya da sonraki adım öncekini kendisi çağırıyor (Bl.15 · `findCommonPrefixAndSuffix` önce `findCommonPrefix`'i çağırır). Sırayı zorlayıp nedenini anlatmayan argüman keyfidir (G32). (Bl.3 · Have No Side Effects; N7, G31) [ö/o]
+- [ ] Adın söylemediği bir yan etki yok. Zamansal bağ kaçınılmazsa gizli değil, adda ve yapıda görünüyor. Sıra ya kova zinciriyle zorlanıyor, her fonksiyon bir sonrakinin girdisini üretiyor (`saturateGradient()` → `reticulateSplines(gradient)` → `diveForMoog(splines, reason)`); ya da sonraki adım öncekini kendisi çağırıyor (Bl.15 · `findCommonPrefixAndSuffix` önce `findCommonPrefix`'i çağırır). Sırayı zorlayıp nedenini anlatmayan argüman keyfidir (G32). (Bl.3 · Have No Side Effects; N7, G31) [o]
 - [ ] Çıktı argümanı yok: argümanın alanına atanmıyor, içine öğe eklenmiyor. Durum değişecekse bu, sahibi olan nesnenin metodudur: `appendFooter(report)` değil `report.appendFooter()`. (Bl.3 · Output Arguments; F2) [ö]
 - [ ] Komut ile sorgu ayrı: bir fonksiyon hem durum değiştirip hem değer döndürmüyor. (Bl.3 · Command Query Separation) [ö]
-- [ ] Hata kodu ya da başarı bool'u döndürülmüyor, istisna fırlatılıyor. (Bl.3 · Prefer Exceptions to Returning Error Codes) [ö]
-- [ ] `try` gövdesi ve yakalama bloğu ayrı fonksiyonlarda. Hatayı yöneten fonksiyon başka iş yapmıyor: `try` ilk deyim, yakalama ve `finally` bloklarından sonra bir şey yok. (Bl.3 · Extract Try/Catch Blocks; Error Handling Is One Thing) [ö]
-- [ ] Herkesin içe aktardığı merkezi bir hata kodu enum'u yok; yeni hata, yeni bir istisna alt sınıfıdır. (Bl.3 · The Error.java Dependency Magnet) [ö]
-- [ ] Tekrar yok. (Bl.3 · Don't Repeat Yourself; G5) [ö]
-- [ ] Küçük fonksiyonda erken `return` serbest; tek giriş-tek çıkış ancak büyük fonksiyonda aranır. (Bl.3 · Structured Programming) [ö]
-- [ ] Çağrılmayan fonksiyon silindi; sürüm kontrolü onu hatırlar, silmekten korkulmaz. Kullanılmadığı "Find Usages" gibi bir araçla görülür. Yalnız ikizinin çağırdığı fonksiyon onunla birleştirildi (`getMonths`). (Bl.16; F4) [ö]
+- [ ] Hata kodu ya da başarı bool'u döndürülmüyor, istisna fırlatılıyor. (Bl.3 · Prefer Exceptions to Returning Error Codes) [o]
+- [ ] `try` gövdesi ve yakalama bloğu ayrı fonksiyonlarda. Hatayı yöneten fonksiyon başka iş yapmıyor: `try` ilk deyim, yakalama ve `finally` bloklarından sonra bir şey yok. (Bl.3 · Extract Try/Catch Blocks; Error Handling Is One Thing) [ö-]
+- [ ] Herkesin içe aktardığı merkezi bir hata kodu enum'u yok; yeni hata, yeni bir istisna alt sınıfıdır. (Bl.3 · The Error.java Dependency Magnet) [ö-]
+- [ ] Tekrar yok. (Bl.3 · Don't Repeat Yourself; G5) [ö-]
+- [ ] Küçük fonksiyonda erken `return` serbest; tek giriş-tek çıkış ancak büyük fonksiyonda aranır. (Bl.3 · Structured Programming) [ö-]
+- [ ] Çağrılmayan fonksiyon silindi; sürüm kontrolü onu hatırlar, silmekten korkulmaz. Kullanılmadığı "Find Usages" gibi bir araçla görülür. Yalnız ikizinin çağırdığı fonksiyon onunla birleştirildi (`getMonths`). (Bl.16; F4) [ö-]
 
 **Tür dallanması**
 - [ ] Bir tür için tek switch var: `switch`, `if/else` zinciri, tür sınaması zinciri ya da tabloyla dağıtım. O da fabrikanın dibinde durup polimorfik nesne üretiyor. Aynı ayırıcıya bakan ikinci bir dallanma alarmdır. Her switch şüphelidir: yazmadan önce polimorfizm düşünüldü. Bl.6'daki istisna, yani işlemlerin türlerden sık değiştiği yer, nadirdir. Kitaptaki uygulamalar: `setArgument`'taki tür dallanması `ArgumentMarshaler.set` çağrısına indi (Bl.14); `isInRange`'deki switch'in durumları `DateInterval` enum'una taşındı (Bl.16). (Bl.3 · Switch Statements; G23) [ö]
 
 ## 4 · Yorumlar (Bl.4, C1-C5)
-- [ ] Her yorumdan önce kodla anlatmak denendi: yorumlanan koşul niyet gösteren bir fonksiyona, yorumlanan ifade açıklayıcı bir ara değişkene dönüştü. (Bl.4 · Explain Yourself in Code; Don't Use a Comment When You Can Use a Function or a Variable; G19, G28) [ö/o]
+- [ ] Her yorumdan önce kodla anlatmak denendi: yorumlanan koşul niyet gösteren bir fonksiyona, yorumlanan ifade açıklayıcı bir ara değişkene dönüştü. (Bl.4 · Explain Yourself in Code; Don't Use a Comment When You Can Use a Function or a Variable; G19, G28) [o]
 - [ ] Kalan yorum şu iyi türlerden biri:
   - lisansa kısa gönderme (Legal),
   - NEDEN'i anlatan niyet açıklaması (Explanation of Intent),
@@ -116,26 +117,26 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 
   (Bl.4 · Good Comments) [o]
 - [ ] Uyarı yapıya çevrilebiliyorsa çevrildi: yorumla kapatılmış test yerine test çatısının gerekçeli atlama işareti (`@Ignore("neden")`). (Bl.4 · Warning of Consequences; G27) [ö]
-- [ ] Gerekli yorum yazılmış değil: bariz olanı tekrarlayan ya da yalnız imzayı sayan yorum ve belge yorumu yok. (Bl.4 · Redundant, Noise, Mandated Comments; C3) [ö]
-- [ ] Yorumda başka bir kayıt sisteminin bilgisi yok: değişiklik günlüğü, yazar, son değişiklik tarihi, hata kaydı numarası. Bunlar sürüm kontrolünün ve hata takip sisteminin işi. Yorum, kod ve tasarım üzerine teknik nottur. Lisans ve telif yorumu kalır. (Bl.4 · Journal Comments, Attributions and Bylines; Bl.16; C1) [ö]
+- [ ] Gerekli yorum yazılmış değil: bariz olanı tekrarlayan ya da yalnız imzayı sayan yorum ve belge yorumu yok. (Bl.4 · Redundant, Noise, Mandated Comments; C3) [ö-]
+- [ ] Yorumda başka bir kayıt sisteminin bilgisi yok: değişiklik günlüğü, yazar, son değişiklik tarihi, hata kaydı numarası. Bunlar sürüm kontrolünün ve hata takip sisteminin işi. Yorum, kod ve tasarım üzerine teknik nottur. Lisans ve telif yorumu kalır. (Bl.4 · Journal Comments, Attributions and Bylines; Bl.16; C1) [ö-]
 - [ ] Yoruma alınmış kod yok. (Bl.4 · Commented-Out Code; C5) [ö]
-- [ ] `// Actions //////` gibi afiş yorumu, `} // while` gibi kapanış yorumu ya da yorumda HTML yok. (Bl.4 · Position Markers, Closing Brace Comments, HTML Comments) [ö]
+- [ ] `// Actions //////` gibi afiş yorumu, `} // while` gibi kapanış yorumu ya da yorumda HTML yok. (Bl.4 · Position Markers, Closing Brace Comments, HTML Comments) [ö-]
 - [ ] Yorum yalnız yanındaki kodu anlatıyor: sistemin uzak bir yerini, tarihçeyi ya da ilgisiz ayrıntıyı anlatmıyor. Yorumla kod arasındaki bağ açık. (Bl.4 · Nonlocal Information, Too Much Information, Inobvious Connection) [o]
 - [ ] Anlamı için başka modüle bakmak gerektiren yorum yok. Gövdesi boş ya da yalnız yorum olan yakalama bloğu yok; bu aynı zamanda yutulan istisnadır. (Bl.4 · Mumbling) [ö]
-- [ ] Dışa açık API'nin belge yorumu iyi. Dışa açık olmayan iç fonksiyonlarda `@param`/`@return` gibi biçimsel belge yorumu yok. (Bl.4 · Javadocs in Public APIs / in Nonpublic Code, Function Headers) [ö]
+- [ ] Dışa açık API'nin belge yorumu iyi. Dışa açık olmayan iç fonksiyonlarda `@param`/`@return` gibi biçimsel belge yorumu yok. (Bl.4 · Javadocs in Public APIs / in Nonpublic Code, Function Headers) [ö-]
 - [ ] Değişen kodun yanındaki yorum hâlâ doğru; eskiyen yorum hemen güncellendi ya da silindi. Kodun değişecek ayrıntısını anlatan, eskimeye yatkın yorum hiç yazılmadı. Yanlış yorum, hiç yorum olmamasından kötüdür. (Bl.4 · Misleading Comments; Bl.16; C2) [o]
 - [ ] Yazmaya değen yorum iyi yazılmış: kısa, dolaşmadan, dilbilgisi ve noktalaması doğru, bariz olmayanı söylüyor. (C4) [o]
 
 ## 5 · Biçimlendirme (Bl.5, G10, G24)
-- [ ] Biçim kuralı bir araçla uygulanıyor; ekibin tek bir kuralı var. **Bu depoda henüz bir araç yapılandırması yok.** (Bl.5 · Team Rules; G24) [ö]
-- [ ] Dosya boyu tipik olarak 200 satır civarında, 500'ün altında. Bu bir alarmdır: 200'ün altında kalmak tek sorumluluğu kanıtlamaz. (Bl.5 · Vertical Formatting) [ö]
-- [ ] Gazete düzeni: dosya adı tek başına yeterli, üstte genel kavram, aşağı indikçe ayrıntı. (Bl.5 · The Newspaper Metaphor) [ö/o]
-- [ ] Kavramlar boş satırla ayrılıyor; birbirine sıkı bağlı satırlar yoğun duruyor. (Bl.5 · Vertical Openness, Vertical Density) [ö]
+- [ ] Biçim kuralı bir araçla uygulanıyor; ekibin tek bir kuralı var. **Bu depoda henüz bir araç yapılandırması yok.** (Bl.5 · Team Rules; G24) [ö-]
+- [ ] Dosya boyu tipik olarak 200 satır civarında, 500'ün altında. Bu bir alarmdır: 200'ün altında kalmak tek sorumluluğu kanıtlamaz. (Bl.5 · Vertical Formatting) [ö-]
+- [ ] Gazete düzeni: dosya adı tek başına yeterli, üstte genel kavram, aşağı indikçe ayrıntı. (Bl.5 · The Newspaper Metaphor) [o]
+- [ ] Kavramlar boş satırla ayrılıyor; birbirine sıkı bağlı satırlar yoğun duruyor. (Bl.5 · Vertical Openness, Vertical Density) [ö-]
 - [ ] Yerel değişken ilk kullanımının hemen üstünde, özel fonksiyon ilk çağrısının hemen altında. Döngü denetim değişkeni döngü deyiminin içinde bildiriliyor. Alanlar tek ve bilinen bir yerde bildiriliyor. Sıkı ilişkili kavramları dosyalara dağıtan protected alan yok. (Bl.5 · Vertical Distance, Variable Declarations, Dependent Functions; G10) [ö]
-- [ ] Aynı işin türevlerini yapan fonksiyonlar yan yana duruyor. (Bl.5 · Conceptual Affinity) [ö/o]
-- [ ] Satırlar kısa: 100-120 karakter kabul edilebilir, ötesi özensizliktir. (Bl.5 · Horizontal Formatting) [ö]
-- [ ] Sütun hizası yok; hizalanmak istenen uzun liste, sınıfın bölünmesi gerektiğini gösterir. Kapsam tek satıra sıkıştırılmıyor: `if` ya da fonksiyon gövdesi başlığıyla aynı satırda değil. Boş gövde kendi satırında ve girintili. (Bl.5 · Horizontal Alignment, Breaking Indentation, Dummy Scopes) [ö]
-- [ ] Bilinen bir sabit alt düzeye gömülmemiş; bilindiği yerden argümanla aşağı iniyor (`"FrontPage"`). Varsayılan ve ayar değerleri üst düzeyde, kolay değişecekleri tek bir yerde (`Arguments` sınıfının başı); alt düzey bu değerlerin sahibi değil. Alt düzeyde `if (arguments.port == 0) // use 80 by default` yok. (G35) [ö/o]
+- [ ] Aynı işin türevlerini yapan fonksiyonlar yan yana duruyor. (Bl.5 · Conceptual Affinity) [o]
+- [ ] Satırlar kısa: 100-120 karakter kabul edilebilir, ötesi özensizliktir. (Bl.5 · Horizontal Formatting) [ö-]
+- [ ] Sütun hizası yok; hizalanmak istenen uzun liste, sınıfın bölünmesi gerektiğini gösterir. Kapsam tek satıra sıkıştırılmıyor: `if` ya da fonksiyon gövdesi başlığıyla aynı satırda değil. Boş gövde kendi satırında ve girintili. (Bl.5 · Horizontal Alignment, Breaking Indentation, Dummy Scopes) [ö-]
+- [ ] Bilinen bir sabit alt düzeye gömülmemiş; bilindiği yerden argümanla aşağı iniyor (`"FrontPage"`). Varsayılan ve ayar değerleri üst düzeyde, kolay değişecekleri tek bir yerde (`Arguments` sınıfının başı); alt düzey bu değerlerin sahibi değil. Alt düzeyde `if (arguments.port == 0) // use 80 by default` yok. (G35) [o]
 
 ## 6 · Nesneler ve Veri Yapıları (Bl.6, G14, G36)
 - [ ] Beklenen değişiklik adlandırıldı ve biçim buna göre seçildi:
@@ -143,7 +144,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
   - yeni **işlem** bekleniyorsa: veri yapısı + fonksiyon.
 
   (Bl.6 · Data/Object Anti-Symmetry) [o]
-- [ ] Sınıf alanlarını erişimcilerle dışarı itmiyor, verinin özünü işleyen soyut bir arayüz sunuyor ("galon" değil "kalan yakıt yüzdesi"). Düşünmeden eklenmiş getter/setter yok; birlikte değişen değerler tek bir işlemle ayarlanıyor. (Bl.6 · Data Abstraction; G8) [ö]
+- [ ] Sınıf alanlarını erişimcilerle dışarı itmiyor, verinin özünü işleyen soyut bir arayüz sunuyor ("galon" değil "kalan yakıt yüzdesi"). Düşünmeden eklenmiş getter/setter yok; birlikte değişen değerler tek bir işlemle ayarlanıyor. (Bl.6 · Data Abstraction; G8) [ö-]
 - [ ] **Melez yok.** Aynı sınıf hem açık durum hem anlamlı davranış taşımıyor; melez hem yeni türü hem yeni işlemi zorlaştırır. (Bl.6 · Hybrids; G14) [ö]
   - **Açık durum (A):** dışa açık alan, yalnız alanı döndüren erişimci (getter ya da property), yalnız alana atayan değiştirici (setter). Bağımlılık enjeksiyonu setter'ı sayılmaz: atadığı alan başka metotlarda işbirlikçi olarak çağrılıyor ve onu döndüren bir erişimci yok. Böyle bir setter durumu dışarı açmaz, işbirlikçiyi içeri alır.
   - **Anlamlı davranış (B):** erişimci olmayan, bir deyimden uzun ya da başkasını çağıran ya da durum değiştiren public metot. Dilin protokol metotları ve adlı kurucular sayılmaz.
@@ -159,7 +160,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
   - **Ölçümün bilerek görmedikleri okuma maddesidir:** yabancıyı argümanla bir yardımcıya verip orada çağırmak, alana koymak. Bunlar ihlali gidermez, yalnız yerini değiştirir. Koleksiyon öğesi (döngü öğesi, açılan demet) veri yapısına erişimdir.
 - [ ] Metot başka bir nesnenin verisiyle kendi verisinden çok uğraşmıyor (feature envy); kıskandığı sınıfa taşındı (Bl.16 · `monthCodeToQuarter` → `Month.quarter()`). Kendi sınıfının türünden argüman alıp onu işleyen örnek metodu da kendi sınıfını kıskanır, gerçek örnek metodu yapıldı (Bl.16 · `getEndOfCurrentMonth`). İstisna, taşımanın tasarımı bozduğu yerdir: raporun biçim dizgesi çalışan sınıfına taşınmaz, çünkü çalışanı rapor biçimine bağlar (SRP, OCP, CCP). Bu gerekli bir kötülüktür. (G14) [ö/o]
 - [ ] Veri taşıyıcı DTO (açık alanlı, fonksiyonsuz) davranışsız: üzerinde metot yok. Yalnız görünüş için yazılmış "bean" property'leri yok. (Bl.6 · Data Transfer Objects) [ö]
-- [ ] Active Record'a (kaydet/yükle metotlu veri yapısı) iş kuralı konmamış; iş kuralı ayrı bir nesnede. (Bl.6 · Active Record) [ö]
+- [ ] Active Record'a (kaydet/yükle metotlu veri yapısı) iş kuralı konmamış; iş kuralı ayrı bir nesnede. (Bl.6 · Active Record) [o]
 - [ ] "Her şey nesnedir" efsanesine direnildi; saf veri zorla nesneye sarılmadı. (Bl.6) [o]
 
 **Fonksiyon yazıp geçilmedi: sınıf tasarlandı.** Dil fonksiyona izin verir diye tasarım fonksiyona bırakılmaz. Kitabın sınıfa götüren işaretleri aranır:
@@ -169,25 +170,25 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] Sınıf dışı fonksiyonlar (Java'da tümü static sınıfın metotları) ortak bir kavram etrafında toplanıyorsa o kavram sınıf oldu. Bir modül, adını hak eden bir nesnenin dağılmış metotlarından ibaret değil. (Bl.10 · Classes Should Be Small!, Cohesion) [o]
 
 ## 7 · Hata Yönetimi (Bl.7)
-- [ ] Hata dönüş koduyla değil istisnayla bildiriliyor. (Bl.7 · Use Exceptions Rather Than Return Codes) [ö]
-- [ ] İstisna fırlatabilen kodda önce `try` kapsamı çizildi. Yakalama bloğu programı tutarlı bir durumda bırakıyor. Önce istisnayı bekleyen bir test yazıldı; test geçince yakalanan tür, fırlatılan gerçek türe daraltıldı. (Bl.7 · Write Your Try-Catch-Finally Statement First) [ö/o]
-- [ ] Alt düzeyin istisna türü (G/Ç hataları, kütüphane hataları) üst katmanlara sızmıyor; sınırda alan istisnasına çevriliyor. (Bl.7 · Use Unchecked Exceptions) [ö]
-- [ ] Uygulamanın kendi istisnaları denetimsiz. Denetimli istisna alt düzeyden imzalar boyunca yayılmıyor; kritik bir kütüphane yazılmıyorsa kullanılmıyor. Dilde denetimli istisna yoksa madde uygulanmaz. (Bl.7 · Use Unchecked Exceptions) [ö]
-- [ ] İstisna bağlam taşıyor: mesajı başarısız olan işlemi söylüyor, özgün istisna neden (cause) olarak zincirde korunuyor. (Bl.7 · Provide Context with Exceptions) [ö]
-- [ ] İstisna sınıfları çağıranın onları nasıl yakalayacağına göre tanımlandı. Ayrı bir sınıf yalnız biri yakalanırken öbürünün geçmesi istenince açılıyor. Üçüncü taraf istisnaları sarmalayıcıda tek bir türe çevriliyor. (Bl.7 · Define Exception Classes in Terms of a Caller's Needs) [ö]
-- [ ] İş mantığında istisna akış denetimi için kullanılmıyor; özel durumu SPECIAL CASE nesnesi karşılıyor. (Bl.7 · Define the Normal Flow) [ö/o]
+- [ ] Hata dönüş koduyla değil istisnayla bildiriliyor. (Bl.7 · Use Exceptions Rather Than Return Codes) [o]
+- [ ] İstisna fırlatabilen kodda önce `try` kapsamı çizildi. Yakalama bloğu programı tutarlı bir durumda bırakıyor. Önce istisnayı bekleyen bir test yazıldı; test geçince yakalanan tür, fırlatılan gerçek türe daraltıldı. (Bl.7 · Write Your Try-Catch-Finally Statement First) [o]
+- [ ] Alt düzeyin istisna türü (G/Ç hataları, kütüphane hataları) üst katmanlara sızmıyor; sınırda alan istisnasına çevriliyor. (Bl.7 · Use Unchecked Exceptions) [o]
+- [ ] Uygulamanın kendi istisnaları denetimsiz. Denetimli istisna alt düzeyden imzalar boyunca yayılmıyor; kritik bir kütüphane yazılmıyorsa kullanılmıyor. Dilde denetimli istisna yoksa madde uygulanmaz. (Bl.7 · Use Unchecked Exceptions) [o]
+- [ ] İstisna bağlam taşıyor: mesajı başarısız olan işlemi söylüyor, özgün istisna neden (cause) olarak zincirde korunuyor. (Bl.7 · Provide Context with Exceptions) [ö-]
+- [ ] İstisna sınıfları çağıranın onları nasıl yakalayacağına göre tanımlandı. Ayrı bir sınıf yalnız biri yakalanırken öbürünün geçmesi istenince açılıyor. Üçüncü taraf istisnaları sarmalayıcıda tek bir türe çevriliyor. (Bl.7 · Define Exception Classes in Terms of a Caller's Needs) [o]
+- [ ] İş mantığında istisna akış denetimi için kullanılmıyor; özel durumu SPECIAL CASE nesnesi karşılıyor. (Bl.7 · Define the Normal Flow) [o]
 - [ ] Null döndürülmüyor: istisna, boş koleksiyon ya da özel durum nesnesi döndürülüyor. Null döndüren dış API sarmalanıyor. (Bl.7 · Don't Return Null) [ö]
-- [ ] Null argüman olarak geçilmiyor. (Bl.7 · Don't Pass Null) [ö]
+- [ ] Null argüman olarak geçilmiyor. (Bl.7 · Don't Pass Null) [ö-]
 - [ ] İstisna yutulmuyor: boş yakalama bloğu ya da yalnız loglayıp susan dal yok. (Bl.4 · Mumbling) [ö]
 
 ## 8 · Sınırlar (Bl.8)
-- [ ] Ham eşleme (`Map`) ya da dış kütüphane nesnesi sistemde elden ele dolaşmıyor; bir sınıfın ya da küçük bir ailenin içinde kalıyor. Public API sınır türü döndürmüyor ve almıyor. Dış pakete başvuran dosya sayısı en az. (Bl.8 · Using Third-Party Code; Clean Boundaries) [ö]
+- [ ] Ham eşleme (`Map`) ya da dış kütüphane nesnesi sistemde elden ele dolaşmıyor; bir sınıfın ya da küçük bir ailenin içinde kalıyor. Public API sınır türü döndürmüyor ve almıyor. Dış pakete başvuran dosya sayısı en az. (Bl.8 · Using Third-Party Code; Clean Boundaries) [ö-]
 - [ ] Sarmalayıcı uygulamanın ihtiyacına göre daraltıldı. Kitap "her Map'i sarmala" demez, "dolaştırma" der; tek yerde kalan kullanım sarmalanmaz. (Bl.8) [o]
-- [ ] Dış API öğrenme testleriyle keşfedildi. Bu testler kütüphanenin yeni sürümünde yeniden koşuluyor. Gerçek dış kaynağa dokunan testler yalnız öğrenme testleridir. Öğrenme gerekmese bile sınır, arayüzü üretim kodunun kullandığı gibi kullanan giden sınır testleriyle destekleniyor. (Bl.8 · Exploring and Learning Boundaries, Learning Tests Are Better Than Free) [ö]
-- [ ] Belirsiz ya da henüz var olmayan alt sistem için kendi dilimizde bir arayüz tanımlandı. Gerçek API ona ADAPTER ile bağlanıyor, testte bir Fake kullanılıyor. (Bl.8 · Using Code That Does Not Yet Exist) [ö/o]
+- [ ] Dış API öğrenme testleriyle keşfedildi. Bu testler kütüphanenin yeni sürümünde yeniden koşuluyor. Gerçek dış kaynağa dokunan testler yalnız öğrenme testleridir. Öğrenme gerekmese bile sınır, arayüzü üretim kodunun kullandığı gibi kullanan giden sınır testleriyle destekleniyor. (Bl.8 · Exploring and Learning Boundaries, Learning Tests Are Better Than Free) [o]
+- [ ] Belirsiz ya da henüz var olmayan alt sistem için kendi dilimizde bir arayüz tanımlandı. Gerçek API ona ADAPTER ile bağlanıyor, testte bir Fake kullanılıyor. (Bl.8 · Using Code That Does Not Yet Exist) [o]
 
 ## 9 · Birim Testleri (Bl.9, T1-T9)
-- [ ] Üretim kodundan önce başarısız bir test yazıldı; test ve kod aynı commit'te. (Bl.9 · The Three Laws of TDD) [ö/o]
+- [ ] Üretim kodundan önce başarısız bir test yazıldı; test ve kod aynı commit'te. (Bl.9 · The Three Laws of TDD) [ö-/o]
 - [ ] Test kodu üretim koduyla aynı temizlik ölçütlerinden geçti; ölçüm aracı test kodunda da koştu. (Bl.9 · Keeping Tests Clean) [ö]
 - [ ] Her test BUILD-OPERATE-CHECK düzeninde. İlgisiz ayrıntı, alan diliyle adlandırılmış yardımcılara gizlendi; bu test dili yeniden düzenlemeden doğdu, baştan tasarlanmadı. (Bl.9 · Clean Tests, Domain-Specific Testing Language) [ö/o]
 - [ ] Testte yalnız bellek ve işlemci verimliliği gevşeyebilir; temizlik gevşemez. (Bl.9 · A Dual Standard) [o]
@@ -208,7 +209,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] Bütün testler tek komutla koşuyor; komut Dil eşlemesinde. (E2) [ö]
 
 ## 10 · Sınıflar (Bl.10)
-- [ ] Sınıf içi düzen şöyle: sabitler, sınıf değişkenleri, alanlar, public metotlar; her public metodun yardımcısı onun hemen arkasında. Public alan yok; varsa gerekçesi yazılı. (Bl.10 · Class Organization) [ö]
+- [ ] Sınıf içi düzen şöyle: sabitler, sınıf değişkenleri, alanlar, public metotlar; her public metodun yardımcısı onun hemen arkasında. Public alan yok; varsa gerekçesi yazılı. (Bl.10 · Class Organization) [ö-]
 - [ ] **Sorumluluk sayısı bir.** Sınıfın boyu ne olursa olsun şunlar bakılır:
   - Metotlar kullandıkları alanlara ve birbirini çağırmalarına göre kümelenir; birbirine hiç dokunmayan iki küme, iki değişme nedeni adayıdır.
   - Sınıf "eğer, ve, veya, ama" kullanmadan yaklaşık 25 sözcükle anlatılabiliyor mu?
@@ -216,13 +217,13 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
   (Bl.10 · Classes Should Be Small!, SRP) [ö/o]
 - [ ] Uyum yüksek: alan sayısı az ve her metot alanların çoğunu kullanıyor. Alanların bir kısmını yalnız birkaç metot paylaşıyorsa bu, çıkarılmak isteyen bir sınıfın işaretidir. (Bl.10 · Cohesion, Maintaining Cohesion Results in Many Small Classes) [ö]
 - [ ] Argüman taşımamak için alana yükseltilen değişkenler uyumu düşürdüyse, onları paylaşan metotlar yeni bir sınıfa çıkarıldı. Her alan yapıcıda doğuyor; bir metotta ilk kez atanıp yalnız yardımcılarca okunan taşıyıcı alan yok. (Bl.10 · Maintaining Cohesion Results in Many Small Classes; G31) [ö]
-- [ ] Yalnız bir public metoda hizmet eden özel yardımcı kümesi yok; varsa bu bir bölme adayıdır. (Bl.10 · Organizing for Change) [ö]
-- [ ] Yeni tür eklemek var olan sınıfları açmıyor, yalnız yeni bir sınıf ekliyor (OCP). Ama mantıksal olarak tamam olan ve dokunulmayan sınıf "ileride lazım olur" diye bölünmedi; tasarımı değiştirmenin tetiği gerçek bir değişikliktir. (Bl.10 · Organizing for Change) [ö/o]
-- [ ] Sınıf somut ayrıntıya değil soyutlamaya bağlı; değişen ya da yavaş bağımlılık dışarıdan (yapıcı ya da setter ile) veriliyor, testte bir sahteyle değiştirilebiliyor. (Bl.10 · Isolating from Change, DIP) [ö]
+- [ ] Yalnız bir public metoda hizmet eden özel yardımcı kümesi yok; varsa bu bir bölme adayıdır. (Bl.10 · Organizing for Change) [ö-]
+- [ ] Yeni tür eklemek var olan sınıfları açmıyor, yalnız yeni bir sınıf ekliyor (OCP). Ama mantıksal olarak tamam olan ve dokunulmayan sınıf "ileride lazım olur" diye bölünmedi; tasarımı değiştirmenin tetiği gerçek bir değişikliktir. (Bl.10 · Organizing for Change) [o]
+- [ ] Sınıf somut ayrıntıya değil soyutlamaya bağlı; değişen ya da yavaş bağımlılık dışarıdan (yapıcı ya da setter ile) veriliyor, testte bir sahteyle değiştirilebiliyor. (Bl.10 · Isolating from Change, DIP) [o]
 - [ ] Dil sınıf dışı fonksiyona izin veriyorsa yalnız kapsam için açılmış, bütün metotları static olan sınıf yok; fonksiyonlar modülde durur. İzin vermiyorsa tümü static sınıf modülün karşılığıdır (`PrimeGenerator`). (Bl.10; G18) [ö]
 
 ## 11 · Sistemler (Bl.11)
-- [ ] Kurulum ile kullanım ayrı. Nesne bağımlılığını kendisi kurmuyor ve aramıyor; tamamen edilgen. Bağımlılık yapıcı argümanıyla, setter ile ya da ikisiyle veriliyor (DI). Bağlama işi tek bir yerde yapılıyor: giriş noktası (`main`) ya da onun çağırdığı kurulum fabrikası. Uygulama giriş noktasını bilmiyor; bağımlılık okları `main`'den uzağa gider. (Bl.11 · Separate Constructing a System from Using It, Separation of Main, Dependency Injection) [ö]
+- [ ] Kurulum ile kullanım ayrı. Nesne bağımlılığını kendisi kurmuyor ve aramıyor; tamamen edilgen. Bağımlılık yapıcı argümanıyla, setter ile ya da ikisiyle veriliyor (DI). Bağlama işi tek bir yerde yapılıyor: giriş noktası (`main`) ya da onun çağırdığı kurulum fabrikası. Uygulama giriş noktasını bilmiyor; bağımlılık okları `main`'den uzağa gider. (Bl.11 · Separate Constructing a System from Using It, Separation of Main, Dependency Injection) [ö-]
 - [ ] Setter ile verilen bağımlılık kitabın öbür kurallarını bozmuyor. Kitap iki yolu da tanır (s.157), ama setter şu kuralları bozmaya açıktır:
   - Nesne setter çağrılmadan çalışamıyorsa bu gizli bir zamansal bağdır. Zorunlu bağımlılık yapıcıdan verilir. Setter, yapıcının kurduğu çalışır bir varsayılanı değiştirmek içindir. (G31 · Hidden Temporal Couplings)
   - Alan yine yapıcıda doğuyor, setter yalnız değerini değiştiriyor. (Bl.5 · Variable Declarations)
@@ -230,11 +231,11 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
   - Enjekte edilen alanı döndüren bir getter yok. İşbirlikçi dışarı verilirse Demeter zinciri başlar, sınıf da melez olur. (Bl.6 · Hybrids, The Law of Demeter)
 
   (Bl.11 · Dependency Injection) [ö/o]
-- [ ] Gömülü tembel kurulum yok (`if (service == null) service = new MyServiceImpl(...);`). Tembellik ancak ölçülmüş bir ihtiyaçla gelir. (Bl.11 · LAZY INITIALIZATION eleştirisi) [ö]
-- [ ] Service locator (global kayıt sözlüğü, adla arama) DI'ın yerine kullanılmıyor. (Bl.11 · Dependency Injection) [ö]
+- [ ] Gömülü tembel kurulum yok (`if (service == null) service = new MyServiceImpl(...);`). Tembellik ancak ölçülmüş bir ihtiyaçla gelir. (Bl.11 · LAZY INITIALIZATION eleştirisi) [ö-]
+- [ ] Service locator (global kayıt sözlüğü, adla arama) DI'ın yerine kullanılmıyor. (Bl.11 · Dependency Injection) [o]
 - [ ] Nesnenin **ne zaman** kurulacağına uygulama, **nasıl** kurulacağına fabrika karar veriyor; fabrika dışarıdan veriliyor. (Bl.11 · Factories) [o]
-- [ ] Alan nesneleri düz nesne (POJO): diski, çerçeveyi ya da dış kütüphaneyi bilmiyor. Çerçeve türünden türemiyor, çerçevenin yaşam döngüsü metotlarını uygulamıyor, iş metodunda bağımlılık aramıyor. G/Ç kenarda. Çerçevenin eşleme bilgisi (Java `@Entity`) eşleme sık değişmiyorsa sınıfta kalabilir; tam düz nesne için dış yapılandırmaya taşınır. (Bl.11 · Scaling Up, Pure Java AOP Frameworks, EJB3) [ö]
-- [ ] Kesişen kaygılar (günlükleme, önbellek, yeniden deneme) alan koduna dağılmadan, hedef kod elle değiştirilmeden sarmalayıcıyla (DECORATOR, PROXY) tek bir yerde ekleniyor. Sarmalayıcı sarmaladığı koddan karmaşık değil; kitap vekil kodunun hacmini ve karmaşıklığını temiz kodun önünde engel sayar. Bu eleştiriden türeyen bir yasak da var (kitapta açıkça yok): çalışma anında sınıf ya da modül yamama, özel yükleyici ya da sınıf üreten gizli mekanizma gibi görünmez büyü yok. (Bl.11 · Cross-Cutting Concerns, Java Proxies, Pure Java AOP) [ö/o]
+- [ ] Alan nesneleri düz nesne (POJO): diski, çerçeveyi ya da dış kütüphaneyi bilmiyor. Çerçeve türünden türemiyor, çerçevenin yaşam döngüsü metotlarını uygulamıyor, iş metodunda bağımlılık aramıyor. G/Ç kenarda. Çerçevenin eşleme bilgisi (Java `@Entity`) eşleme sık değişmiyorsa sınıfta kalabilir; tam düz nesne için dış yapılandırmaya taşınır. (Bl.11 · Scaling Up, Pure Java AOP Frameworks, EJB3) [o]
+- [ ] Kesişen kaygılar (günlükleme, önbellek, yeniden deneme) alan koduna dağılmadan, hedef kod elle değiştirilmeden sarmalayıcıyla (DECORATOR, PROXY) tek bir yerde ekleniyor. Sarmalayıcı sarmaladığı koddan karmaşık değil; kitap vekil kodunun hacmini ve karmaşıklığını temiz kodun önünde engel sayar. Bu eleştiriden türeyen bir yasak da var (kitapta açıkça yok): çalışma anında sınıf ya da modül yamama, özel yükleyici ya da sınıf üreten gizli mekanizma gibi görünmez büyü yok. (Bl.11 · Cross-Cutting Concerns, Java Proxies, Pure Java AOP) [o]
 - [ ] Önden büyük tasarım yapılmadı. Karar son sorumlu ana kadar ertelendi. Yeni standart ya da kütüphane gösterilebilir bir değer kattığı için eklendi. (Bl.11 · Test Drive the System Architecture, Optimize Decision Making, Use Standards Wisely) [o]
 - [ ] Üst düzey kod alanın diliyle okunuyor. (Bl.11 · Systems Need Domain-Specific Languages; N2) [o]
 - [ ] Çalışabilecek en basit şey yapıldı. (Bl.11 · Conclusion) [o]
@@ -251,34 +252,34 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
   - Satırları değil algoritması benzeyen modüller TEMPLATE METHOD ya da STRATEGY ile ortaklaştı.
   - Her fonksiyonda tekrarlanan geçerlilik denetimi, değeri taşıyan bir türle (enum) kalktı (Bl.16 · `Month`).
 
-  (Bl.12 · No Duplication; G5) [ö/o]
+  (Bl.12 · No Duplication; G5) [ö-/o]
 - [ ] **Kural 3:** Niyet açık: iyi adlar, küçük fonksiyon ve sınıflar, standart kalıp adları, örnekle belgeleyen testler. İkinci bir okuma yapıldı. (Bl.12 · Expressive) [o]
 - [ ] **Kural 4:** Dogma yüzünden açılmış sınıf ya da metot yok. Tek gerçekleştirimi olan ve testte sahtesi de bulunmayan arayüz ya da soyut sınıf yok. Alan ile davranış dogma yüzünden veri sınıflarına ve davranış sınıflarına ayrılmadı. Bu kural 1-3 ile çatışırsa geri çekilir. (Bl.12 · Minimal Classes and Methods) [ö]
 
 ## 13 · Eşzamanlılık (Bl.13): yalnız eşzamanlı kod içeren görevde
 - [ ] Eşzamanlılık gerçekten gerekli: bölüşülecek bir bekleme payı var, "her zaman hızlandırır" efsanesine dayanılmadı. (Bl.13 · Why Concurrency?, Myths) [o]
-- [ ] Eşzamanlılık kodu iş mantığından ayrı. Paylaşılan veri az ve kapsüllü. Kopya kullanılabilecekse kopya kullanıldı. Thread'ler kendi verisiyle çalışıyor. (Bl.13 · Concurrency Defense Principles) [ö/o]
-- [ ] Hazır yapılar kullanıldı: iş parçacığı güvenli koleksiyon, kuyruk, executor. Korumasız bir oku-değiştir-yaz (`++lastIdUsed`) yok. İş parçacığı güvenli olmayan kütüphane sınıfları paylaşılmadı. Kilitli bölümler küçük ve iç içe değil. (Bl.13 · Know Your Library, Keep Synchronized Sections Small) [ö]
+- [ ] Eşzamanlılık kodu iş mantığından ayrı. Paylaşılan veri az ve kapsüllü. Kopya kullanılabilecekse kopya kullanıldı. Thread'ler kendi verisiyle çalışıyor. (Bl.13 · Concurrency Defense Principles) [o]
+- [ ] Hazır yapılar kullanıldı: iş parçacığı güvenli koleksiyon, kuyruk, executor. Korumasız bir oku-değiştir-yaz (`++lastIdUsed`) yok. İş parçacığı güvenli olmayan kütüphane sınıfları paylaşılmadı. Kilitli bölümler küçük ve iç içe değil. (Bl.13 · Know Your Library, Keep Synchronized Sections Small) [o]
 - [ ] Problem bilinen bir modele uyduruldu (Producer-Consumer, Readers-Writers, Dining Philosophers). Aynı nesne üzerinde art arda yapılan çağrılar için kilitleme stratejisi seçildi: istemci kilitler, sunucu kilitler ya da uyarlanmış sunucu. Tek tek güvenli çağrılardan kurulan bileşik işlem (`containsKey` + `put`) güvenli sayılmadı; tek bir atomik çağrı (`putIfAbsent`) ya da kilit kullanıldı. (Bl.13 · Know Your Execution Models, Beware Dependencies Between Synchronized Methods) [o]
-- [ ] Düzgün kapanma baştan tasarlandı: bekleyen her birleştirme ve sonuç alma için zaman aşımı ya da kuyrukta kapanma işareti var; iptal ya da kesinti sinyali yutulmuyor. (Bl.13 · Writing Correct Shut-Down Code Is Hard) [ö]
-- [ ] Önce thread'siz kod çalıştırıldı. Thread sayısı ayarlanabilir, bağımlılıklar değiştirilebilir. Arada bir düşen test "bir defalık" sayılmadı. İşlemci sayısından fazla thread ile ve bütün hedef platformlarda erken ve sık koşuldu; kod zorlamayla (jiggling) sınandı. Stres ve zorlama testleri birim takımında değil, ayrı bir koşuda. (Bl.13 · Testing Threaded Code) [ö/o]
+- [ ] Düzgün kapanma baştan tasarlandı: bekleyen her birleştirme ve sonuç alma için zaman aşımı ya da kuyrukta kapanma işareti var; iptal ya da kesinti sinyali yutulmuyor. (Bl.13 · Writing Correct Shut-Down Code Is Hard) [ö-]
+- [ ] Önce thread'siz kod çalıştırıldı. Thread sayısı ayarlanabilir, bağımlılıklar değiştirilebilir. Arada bir düşen test "bir defalık" sayılmadı. İşlemci sayısından fazla thread ile ve bütün hedef platformlarda erken ve sık koşuldu; kod zorlamayla (jiggling) sınandı. Stres ve zorlama testleri birim takımında değil, ayrı bir koşuda. (Bl.13 · Testing Threaded Code) [o]
 
 ## 14-16 · Artımlı İyileştirme ve vaka incelemeleri
-- [ ] Yeni bir tür eklemek yalnız yeni sınıf ve fabrikada bir dal gerektiriyor. Her yeni tür N ayrı yere dokunmayı gerektirmeye başlayınca özellik eklemek durduruldu, önce yeniden düzenlendi. (Bl.14 · So I Stopped) [ö/o]
+- [ ] Yeni bir tür eklemek yalnız yeni sınıf ve fabrikada bir dal gerektiriyor. Her yeni tür N ayrı yere dokunmayı gerektirmeye başlayınca özellik eklemek durduruldu, önce yeniden düzenlendi. (Bl.14 · So I Stopped) [o]
 - [ ] Eski ve yeni yapı bir süre yan yana yaşatıldı, eskiler tek tek silindi. (Bl.14) [o]
 - [ ] Yeniden düzenleme sırasında gerekirse bir önceki adım geri alındı; yeniden düzenleme deneme-yanılmayla yakınsar. (Bl.15) [o]
-- [ ] +1/-1 hesabı tek bir adlı değişkende: `level + 1` iki kez yazılmaz, `nextLevel` olur. Kodda sürü hâlinde +1 varsa değişkenin anlamı yanlış olabilir: 1 tabanlı `suffixIndex` gerçek bir uzunluğa (`suffixLength`) çevrildi (G33). Koşul mümkünse olumlu: `!buffer.shouldNotCompact()` değil `buffer.shouldCompact()` (G29). `if` ya da `while` içindeki bool mantığı niyetini söyleyen bir fonksiyona çıktı: `timer.hasExpired() && !timer.isRecurrent()` değil `shouldBeDeleted(timer)` (G28). (Bl.15 · `compact`) [ö]
-- [ ] Taban sınıf türevlerini tanımıyor (G7); türev yaratma işi fabrikada. Tek istisna, türev sayısının kesin sabit olduğu durumdur (sonlu durum makinesi); o zaman taban ve türevler aynı dağıtım biriminde durur. Sabit grupları davranış taşıyan bir enum'a dönüştü (J3). [ö]
-- [ ] Yalnız testlerin çağırdığı üretim kodu, testiyle birlikte silindi. (Bl.16) [ö]
+- [ ] +1/-1 hesabı tek bir adlı değişkende: `level + 1` iki kez yazılmaz, `nextLevel` olur. Kodda sürü hâlinde +1 varsa değişkenin anlamı yanlış olabilir: 1 tabanlı `suffixIndex` gerçek bir uzunluğa (`suffixLength`) çevrildi (G33). Koşul mümkünse olumlu: `!buffer.shouldNotCompact()` değil `buffer.shouldCompact()` (G29). `if` ya da `while` içindeki bool mantığı niyetini söyleyen bir fonksiyona çıktı: `timer.hasExpired() && !timer.isRecurrent()` değil `shouldBeDeleted(timer)` (G28). (Bl.15 · `compact`) [ö-]
+- [ ] Taban sınıf türevlerini tanımıyor (G7); türev yaratma işi fabrikada. Tek istisna, türev sayısının kesin sabit olduğu durumdur (sonlu durum makinesi); o zaman taban ve türevler aynı dağıtım biriminde durur. Sabit grupları davranış taşıyan bir enum'a dönüştü (J3). [ö-]
+- [ ] Yalnız testlerin çağırdığı üretim kodu, testiyle birlikte silindi. (Bl.16) [ö-]
 - [ ] Kod küçüldüğü için düşen kapsam yüzdesi gerileme sanılmadı. (Bl.16) [o]
 
 ## 17 · Kalan koku kodları (başka bölümde geçmeyenler)
-- [ ] G1: İdeal olan, kaynak dosyada tek dil. Kaçınılmaz ikinci dil (HTML, CSS, SQL) hem sayıca hem kapladığı yerce en az. Her kaynak dosya için geçerli; kitabın örnekleri Java dosyasına gömülü XML, HTML, YAML ve JavaScript'tir. Belge yorumundaki HTML de ikinci dildir (Bl.16). [ö]
+- [ ] G1: İdeal olan, kaynak dosyada tek dil. Kaçınılmaz ikinci dil (HTML, CSS, SQL) hem sayıca hem kapladığı yerce en az. Her kaynak dosya için geçerli; kitabın örnekleri Java dosyasına gömülü XML, HTML, YAML ve JavaScript'tir. Belge yorumundaki HTML de ikinci dildir (Bl.16). [ö-]
 - [ ] G2: Başka bir programcının makul olarak bekleyeceği davranış uygulanmış (en az sürpriz ilkesi): gün adını çeviren fonksiyon kısaltmayı da tanır, büyük-küçük harfe bakmaz. Bariz olduğu belli olmayan beklenti (`tues`, `thurs`) uygulanmadı, soru olarak bırakıldı. (Bl.16) [o]
-- [ ] G4: Emniyet kapatılmamış: derleyici, tür denetleyici ya da linter uyarısı susturulmamış; başarısız test kapatılmamış ya da silinmemiş. Emniyeti elle yönetmek her zaman risklidir: otomatik denetim varsa o seçildi, elle yönetilen ayar (Java `serialVersionUID`) gerekçeli. (Bl.16) [ö]
+- [ ] G4: Emniyet kapatılmamış: derleyici, tür denetleyici ya da linter uyarısı susturulmamış; başarısız test kapatılmamış ya da silinmemiş. Emniyeti elle yönetmek her zaman risklidir: otomatik denetim varsa o seçildi, elle yönetilen ayar (Java `serialVersionUID`) gerekçeli. (Bl.16) [ö-]
 - [ ] G6: Üst ve alt düzey kavramların ayrımı tam. Yalnız bir gerçekleştirmeye ait sabit, değişken ve yardımcı fonksiyon türevde; gerçekleştirmeye bağlı olmayan kod tabanda. Aynısı dosya, modül ve bileşen için de geçerli. Yanlış düzeydeki soyutlama sahte değerle kapatılmadı: sınırsız bir yığında `percentFull()` 0 döndürmez, metot ayrı bir arayüze (`BoundedStack`) gider. (Bl.16) [o]
-- [ ] G8: Arayüz dar: public üye, alan ve sabit sayısı az; sınıfın metodu ve örnek değişkeni az. Veri, yardımcı fonksiyon, sabit ve ara değer gizli. Aynı veriyi sunan bir fonksiyon varken tablo dışarı açılmamış (Bl.16 · `LAST_DAY_OF_MONTH`). Alt sınıflar için çok sayıda protected alan ve fonksiyon açılmamış. Fonksiyonun bildiği değişken sayısı az. [ö]
-- [ ] G9 ve G12: Ölü kod yok: hiç fırlatmayan `try`'ın yakalama bloğu, gerçekleşmeyen koşulun ya da `switch` durumunun dalı, çağrılmayan fonksiyon, erişimcileriyle birlikte kullanılmayan alan. Tasarım değişince anlamsızlaşan kod da ölüdür: enum gelince geçerlilik denetimi (`isValidMonthCode`) silinir. Ölü olduğundan şüphelenilen koşul kaldırılıp testler koşularak sınandı (Bl.15 · `compactString`). Kullanılmayan import ya da değişken, boş varsayılan yapıcı, değer katmayan niteleyici (Java'da argüman ve yerel değişkendeki `final`) yok. (Bl.15, Bl.16) [ö]
+- [ ] G8: Arayüz dar: public üye, alan ve sabit sayısı az; sınıfın metodu ve örnek değişkeni az. Veri, yardımcı fonksiyon, sabit ve ara değer gizli. Aynı veriyi sunan bir fonksiyon varken tablo dışarı açılmamış (Bl.16 · `LAST_DAY_OF_MONTH`). Alt sınıflar için çok sayıda protected alan ve fonksiyon açılmamış. Fonksiyonun bildiği değişken sayısı az. [ö-]
+- [ ] G9 ve G12: Ölü kod yok: hiç fırlatmayan `try`'ın yakalama bloğu, gerçekleşmeyen koşulun ya da `switch` durumunun dalı, çağrılmayan fonksiyon, erişimcileriyle birlikte kullanılmayan alan. Tasarım değişince anlamsızlaşan kod da ölüdür: enum gelince geçerlilik denetimi (`isValidMonthCode`) silinir. Ölü olduğundan şüphelenilen koşul kaldırılıp testler koşularak sınandı (Bl.15 · `compactString`). Kullanılmayan import ya da değişken, boş varsayılan yapıcı, değer katmayan niteleyici (Java'da argüman ve yerel değişkendeki `final`) yok. (Bl.15, Bl.16) [ö-]
 - [ ] G11: Benzer işler aynı biçimde yapılıyor. Aynı türdeki nesne her fonksiyonda aynı adı taşıyor (`response`); benzer metotların adları benzer (`processVerificationRequest`, `processDeletionRequest`). Kardeş fonksiyonlar aynı geleneği izliyor: biri değer döndürürken öbürü alana yazmıyor (Bl.15). Yeni ya da düzeltilen kod, dosyada yerleşmiş kalıba uyuyor (Bl.16). [o]
 - [ ] G13: Genel bir sabit, enum ya da genel amaçlı statik fonksiyon, kolaylık olsun diye özel bir sınıfa gömülmemiş. Fonksiyonun, sabitin ve değişkenin nerede bildirileceği düşünüldü, el altındaki yere atılmadı. Özel sınıfa bağlı olmayan kavram kendi dosyasında (Bl.16 · `Day` enum'u `DayDate`'ten çıktı). [o]
 - [ ] G16, G19: Niyet gizlenmemiş: uzun tek ifade, Macar gösterimi (`m_otCalc`, `iThsWkd`) ve sihirli sayı yok. Küçük ve yoğun olan değil, okunan kod seçildi. Karmaşık hesap açıklayıcı ara değişkenlere bölünmüş (`match.group(1)` → `key`); bunun fazlası zor olur, çoğu azından iyidir. (Bl.16) [o]
@@ -286,14 +287,14 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] G18: Statik metot yalnız polimorfik olma ihtimali olmayan, bütün verisini argümandan alan fonksiyonda kullanılmış (`Math.max`); şüphede örnek metodu seçilmiş. Bütün verisini argümandan alsa bile farklı algoritmalarla çalışma ihtimali olan fonksiyon (`HourlyPayCalculator.calculatePay(employee, overtimeRate)`) örnek metodudur. Sınıfın kendi verisiyle çalışan fonksiyon static değil (Bl.16 · `addDays`). Bilinçli prosedürel sınıf dışı fonksiyon bu kokuya girmez. [ö]
 - [ ] G21: Algoritma anlaşıldı; `if` ve bayrak yamasıyla "çalışır" hâle getirilmedi. Deneyerek çalıştırmak serbest, ama iş bitmeden nasıl çalıştığı bilindi: testlerin geçmesi yetmez. Algoritmanın uygun olup olmadığından emin olamamak olağandır; kodun ne yaptığını bilmemek tembelliktir. Anlamanın yolu, fonksiyonu nasıl çalıştığı apaçık olana dek yeniden düzenlemektir. (Bl.16 · `getPreviousDayOfWeek`) [o]
 - [ ] G22: Mantıksal bağımlılık fiziksel: gereken bilgi açıkça isteniyor, hakkında varsayım yapılmıyor. `HourlyReporter` sayfa boyunu (`PAGE_SIZE = 55`) kendi bilmez, biçimleyiciye sorar (`formatter.getMaxPageSize()`); bu aynı zamanda yanlış yerdeki sorumluluktur (G17). Gerçekleştirmenin bir ayrıntısına örtük dayanan genel algoritma, o ayrıntıyı soyut bir metotla ister (Bl.16 · `getDayOfWeekForOrdinalZero`). [o]
-- [ ] G26: Kesin: her karar bilerek verildi; nedeni ve istisnaların nasıl ele alınacağı biliniyor. Koddaki belirsizlik ya anlaşmazlıktan ya tembellikten doğar, giderilir. Para için kayan noktalı sayı yok, "ilk eşleşme tektir" varsayımı yok. Boş dönebilecek çağrı denetlenmiş. Eşzamanlı güncelleme olasıysa kilit var. Değişken gereğinden somut türle bildirilmemiş (`List` yeterken `ArrayList`); erişim de gereğinden geniş değil. [ö/o]
+- [ ] G26: Kesin: her karar bilerek verildi; nedeni ve istisnaların nasıl ele alınacağı biliniyor. Koddaki belirsizlik ya anlaşmazlıktan ya tembellikten doğar, giderilir. Para için kayan noktalı sayı yok, "ilk eşleşme tektir" varsayımı yok. Boş dönebilecek çağrı denetlenmiş. Eşzamanlı güncelleme olasıysa kilit var. Değişken gereğinden somut türle bildirilmemiş (`List` yeterken `ArrayList`); erişim de gereğinden geniş değil. [o]
 - [ ] G24: Ekip standardı yaygın sektör normlarına dayanıyor ve yalnız biçimi değil, örnek değişkenin nerede bildirildiğini ve sınıf, metot, değişken adlandırmasını da kapsıyor. Standart ayrı bir belgeden değil koddan öğreniliyor; ekipteki herkes ona uyuyor. Soyut metotlar sınıfın başında (Bl.16). [o]
 - [ ] G25: Ham sayı adlı bir sabitin arkasında (`86400` → `SECONDS_PER_DAY`, sayfa başına `55` satır → `LINES_PER_PAGE`, `1` → `Month.JANUARY.toInt()` (Bl.16)). Sihirli değer yalnız sayı değil, kendini anlatmayan her simgedir: testteki `"John Doe"` → `HOURLY_EMPLOYEE_NAME`. İstisna: kendini anlatan formülde çok iyi bilinen sabit ham kalabilir (`feetWalked / 5280.0`, `hourlyRate * 8`, `radius * Math.PI * 2`). Yanlış yazılmaya açık uzun sabit ise (π) her zaman adlıdır. [ö/o]
 - [ ] G27: Karar gelenekle değil yapıyla zorlanıyor: adlandırılmış enum üzerinde switch yerine soyut metotlu taban sınıf. [o]
-- [ ] G32: Yapının bir nedeni var ve yapı bu nedeni kendisi söylüyor. Keyfi görünen yapıyı başkaları değiştirir; sistem boyunca tutarlı yapıyı korurlar. Başka bir sınıfın yardımcısı olmayan açık sınıf, o sınıfın içine gömülmemiş, paketin en üst düzeyinde. Yalnız çağrı sırasını zorlamak için eklenmiş ama gereğini anlatmayan argüman da keyfidir (Bl.15 · `prefixIndex`). [ö/o]
-- [ ] J1: İçe aktarma listesi, birlikte çalışılan paketlerin kısa bir beyanı. Aynı paketten iki ya da daha fazla sınıf kullanılıyorsa sınıflar tek tek değil, paket olarak içe aktarılıyor; dile göre biçimi Dil eşlemesinde. Aynı adı taşıyan iki sınıf tek tek içe aktarılır ya da nitelikli adla kullanılır. [ö]
-- [ ] J2: Sabitler kalıtımla alınmıyor; kalıtım dilin kapsam kurallarını aşmanın yolu değil (Bl.16 · `MonthConstants`). [ö]
-- [ ] J3: Anlamlı sabit grupları tamsayı değil enum; tamsayının anlamı kaybolur, adlı bir sayımın üyesininki kaybolmaz. Enum alan ve metot taşıyabilir (`HourlyPayGrade.rate()`). Değer tamsayı olarak değil simge olarak geçtiği için IDE ile güvenle yeniden adlandırılır (Bl.16 · `DateInterval`). [ö]
+- [ ] G32: Yapının bir nedeni var ve yapı bu nedeni kendisi söylüyor. Keyfi görünen yapıyı başkaları değiştirir; sistem boyunca tutarlı yapıyı korurlar. Başka bir sınıfın yardımcısı olmayan açık sınıf, o sınıfın içine gömülmemiş, paketin en üst düzeyinde. Yalnız çağrı sırasını zorlamak için eklenmiş ama gereğini anlatmayan argüman da keyfidir (Bl.15 · `prefixIndex`). [ö-/o]
+- [ ] J1: İçe aktarma listesi, birlikte çalışılan paketlerin kısa bir beyanı. Aynı paketten iki ya da daha fazla sınıf kullanılıyorsa sınıflar tek tek değil, paket olarak içe aktarılıyor; dile göre biçimi Dil eşlemesinde. Aynı adı taşıyan iki sınıf tek tek içe aktarılır ya da nitelikli adla kullanılır. [ö-]
+- [ ] J2: Sabitler kalıtımla alınmıyor; kalıtım dilin kapsam kurallarını aşmanın yolu değil (Bl.16 · `MonthConstants`). [ö-]
+- [ ] J3: Anlamlı sabit grupları tamsayı değil enum; tamsayının anlamı kaybolur, adlı bir sayımın üyesininki kaybolmaz. Enum alan ve metot taşıyabilir (`HourlyPayGrade.rate()`). Değer tamsayı olarak değil simge olarak geçtiği için IDE ile güvenle yeniden adlandırılır (Bl.16 · `DateInterval`). [ö-]
 - [ ] E1: Depo tek komutla alınıyor, proje tek komutla kuruluyor. Elle aranacak ek kütüphane ya da dosya, sırayla çalıştırılacak gizemli komut dizisi yok. Komut Dil eşlemesinde. [ö]
 
 ---
