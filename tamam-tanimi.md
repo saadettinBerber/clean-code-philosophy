@@ -97,7 +97,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] Herkesin içe aktardığı merkezi bir hata kodu enum'u yok; yeni hata, yeni bir istisna alt sınıfıdır. (Bl.3 · The Error.java Dependency Magnet) [ö]
 - [ ] Tekrar yok. (Bl.3 · Don't Repeat Yourself; G5) [ö]
 - [ ] Küçük fonksiyonda erken `return` serbest; tek giriş-tek çıkış ancak büyük fonksiyonda aranır. (Bl.3 · Structured Programming) [ö]
-- [ ] Çağrılmayan fonksiyon silindi. (F4) [ö]
+- [ ] Çağrılmayan fonksiyon silindi; sürüm kontrolü onu hatırlar, silmekten korkulmaz. Kullanılmadığı "Find Usages" gibi bir araçla görülür. Yalnız ikizinin çağırdığı fonksiyon onunla birleştirildi (`getMonths`). (Bl.16; F4) [ö]
 
 **Tür dallanması**
 - [ ] Bir tür için tek switch var: `switch`, `if/else` zinciri, tür sınaması zinciri ya da tabloyla dağıtım. O da fabrikanın dibinde durup polimorfik nesne üretiyor. Aynı ayırıcıya bakan ikinci bir dallanma alarmdır. (Bl.3 · Switch Statements; G23) [ö]
@@ -283,7 +283,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] G27: Karar gelenekle değil yapıyla zorlanıyor: adlandırılmış enum üzerinde switch yerine soyut metotlu taban sınıf. [o]
 - [ ] G32: Yapı keyfi değil; dışarıdan kullanılan sınıf başka bir sınıfın içine gömülmemiş. [ö/o]
 - [ ] J1: İçe aktarma listesi, birlikte çalışılan paketlerin kısa bir beyanı. Aynı paketten iki ya da daha fazla sınıf kullanılıyorsa sınıflar tek tek değil, paket olarak içe aktarılıyor; dile göre biçimi Dil eşlemesinde. J2: Sabitler kalıtımla alınmıyor. J3: Anlamlı sabit grupları davranış taşıyan enum. [ö]
-- [ ] E1: Proje tek adımda kuruluyor. [ö]
+- [ ] E1: Depo tek komutla alınıyor, proje tek komutla kuruluyor. Elle aranacak ek kütüphane ya da dosya, sırayla çalıştırılacak gizemli komut dizisi yok. Komut Dil eşlemesinde. [ö]
 
 ---
 
@@ -405,6 +405,7 @@ Maddelerdeki ortak kavramın her dildeki karşılığı. Yeni bir dil bu tabloya
 
 | Kavram | Python | Java |
 |---|---|---|
+| Tek komutla kurma (E1) | `pip install -e .` (kitapta yok) | `ant all` (s.287); bugün `mvn package` ya da `gradle build` (kitapta yok) |
 | Giriş noktası | `main()` ve `if __name__ == "__main__":` | `public static void main` (s.155) |
 | Gömülü tembel kurulum | `if self._x is None: self._x = Somut()` | `if (service == null) service = new MyServiceImpl(...);` (s.154) |
 | Service locator | global kayıt sözlüğü, adla arama | JNDI `lookup` (s.157) |
