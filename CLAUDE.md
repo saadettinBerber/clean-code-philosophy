@@ -10,7 +10,7 @@ Bu kuralların altında SRP ve DIP/DI yatar.
 |---|---|
 | `zihin-haritasi.md` | **Tek kaynak.** Bölüm → başlık → ilke, markmap uyumlu Markdown. |
 | `zihin-haritasi.html` | Yalnız görüntüleyici; `.md`'yi okuyup çizer, içerik kopyalamaz. |
-| `export_map.py` | `.md`'yi kitap okuyucusuna (`~/Desktop/make_greater/Clean Code/data/mindmap.js`) aktarır. |
+| `export_map.py` | `.md`'yi kitap okuyucusuna (`~/Desktop/3-kitap-ceviri/Clean Code/data/mindmap.js`) aktarır. |
 | `kitap-disi-kartlar.json` | **Tek kaynak.** ◇ kitap dışı kalıpların kavram kartları; okuyucunun kart şeması (iki dilli, kötü/iyi kod, ipucu), kule senaryosu örnekleri. |
 | `export_cards.py` | Kartları doğrular ve okuyucuya (`data/offbook.js`) aktarır. Haritadaki ◇ kalıplarla birebir eşleşmezse durur. |
 | `tamam-tanimi.md` | **Tamam tanımı.** Bir görevin bittiğini söyleyen kontrol listesi. Kitabın her bölümünü başlık adıyla kapsar; kalıpların hangi ihtiyaçla geldiğini de söyler. Nesne yönelimli diller (şimdilik Python, Java) için ortak sözcüklerle yazılır; dile özgü karşılıklar sondaki "Dil eşlemesi" tablosundadır. Kitap standarttır, dile göre gevşetilmez. |
@@ -46,8 +46,8 @@ Haritaya yeni bir ◇ kalıp eklenirse kartı da yazılır; biri eksikse aktarı
 
 ## Kaynak: kitabın kendisi
 
-- **PDF:** `~/Desktop/make_greater/Clean Code/my_book.pdf`. Kitap sayfası ile PDF sayfası aynıdır (ofset 0).
-- **LightRAG grafı:** `~/Desktop/make_greater/Clean Code/tools/_work/graph/lightrag`
+- **PDF:** `~/Desktop/3-kitap-ceviri/Clean Code/my_book.pdf`. Kitap sayfası ile PDF sayfası aynıdır (ofset 0).
+- **LightRAG grafı:** `~/Desktop/3-kitap-ceviri/Clean Code/tools/_work/graph/lightrag`
   - Başlatmak: `./start_all.sh` (embedding proxy 9700, sunucu 9621). Durdurmak: `./stop_all.sh`.
   - Sorgu:
 
