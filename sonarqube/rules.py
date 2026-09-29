@@ -3,7 +3,7 @@
 Eşlenen kural kitabın bir maddesini ölçülür yapar; eşiği kitaptan gelir. Kapatılan kural kitapla çelişir ya da
 measure_code'un zaten ölçtüğü maddeyi ikinci kez söyler; gerekçesiyle durur. Tamam tanımı kural numarası taşımaz.
 """
-from collections.abc import Mapping
+from collections.abc import Mapping, Set
 from dataclasses import dataclass, field
 
 Parameters = Mapping[str, str]
@@ -28,6 +28,10 @@ class Rules:
         """Formül (K5): taban profil − kapatılanlar + eşlenenler; eşlenenler kitabın eşikleriyle."""
         kept = {rule: parameters for rule, parameters in base.items() if rule not in self._closed}
         return kept | {rule: mapped.parameters for rule, mapped in self._mapped.items()}
+
+    def unknown(self, known: Set[str]) -> list[str]:
+        """Tabloda olup sunucunun tanımadığı kurallar; profil bunlarla üretilmez."""
+        return sorted((self._mapped.keys() | self._closed.keys()) - known)
 
 
 # Tek sözcüklü satır sonu yorumu da N1'dir (`d = 0  # gün`); yalnız S1309'un G4 diye bildirdiği noqa serbest.

@@ -22,6 +22,14 @@ class ProfileTest(unittest.TestCase):
         self.assertEqual(RULES.profile(BASE)["python:LineLength"], {"maximumLineLength": "120"})
 
 
+class UnknownRulesTest(unittest.TestCase):
+    def test_rule_the_server_does_not_know_is_reported(self) -> None:
+        self.assertEqual(RULES.unknown({"python:S1172", "python:LineLength"}), ["python:S139"])
+
+    def test_closed_rule_must_be_known_too(self) -> None:
+        self.assertEqual(RULES.unknown({"python:S139", "python:LineLength"}), ["python:S1172"])
+
+
 class RuleTableTest(unittest.TestCase):
     def test_no_rule_is_both_mapped_and_closed(self) -> None:
         self.assertEqual(MAPPED.keys() & CLOSED.keys(), set())
