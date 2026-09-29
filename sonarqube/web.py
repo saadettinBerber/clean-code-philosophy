@@ -17,6 +17,10 @@ class SonarQubeError(Exception):
     """Sunucu isteği reddetti ya da sunucuya ulaşılamadı."""
 
 
+class Unreachable(SonarQubeError):
+    """Sunucuya ulaşılamadı: kapalı ya da adres yanlış."""
+
+
 class WebApi:
     def __init__(self, url: str, token: str) -> None:
         self._url = url
@@ -40,7 +44,7 @@ class WebApi:
         except urllib.error.HTTPError as error:
             raise SonarQubeError(_refusal(request, error)) from error
         except urllib.error.URLError as error:
-            raise SonarQubeError(f"{self._url} adresine ulaşılamadı: {error.reason}") from error
+            raise Unreachable(f"{self._url} adresine ulaşılamadı: {error.reason}") from error
 
 
 def _refusal(request: urllib.request.Request, error: urllib.error.HTTPError) -> str:
