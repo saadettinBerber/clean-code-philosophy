@@ -8,8 +8,8 @@ from typing import NamedTuple
 from measure.construction import Constructions
 from measure.findings import Finding, Note
 from measure.scope import Home, Scope
-from measure.syntax import (FunctionNode, admits_none, assignment_targets, end_line, is_name, is_none, is_self_attribute,
-                            nesting, root_name, self_attributes, walk_own)
+from measure.syntax import (FunctionNode, admits_none, assignment_targets, end_line, is_name, is_none,
+                            is_self_attribute, nesting, root_name, self_attributes, walk_own)
 
 RECEIVERS = ("self", "cls")
 TEST_PREFIX = "test_"

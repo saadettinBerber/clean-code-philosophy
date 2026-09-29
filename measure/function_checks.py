@@ -91,8 +91,9 @@ class ReturnsNone(FunctionCheck):
     def _may_return_none(self) -> bool:
         """Açık `return None`, değer döndüren fonksiyonda çıplak `return` ya da `Optional` dönüş türü."""
         returns = self._function.returns()
+        explicit_none = any(is_none(node.value) for node in returns)
         bare_beside_value = self._function.returns_value() and any(node.value is None for node in returns)
-        return any(is_none(node.value) for node in returns) or bare_beside_value or self._function.return_type_admits_none()
+        return explicit_none or bare_beside_value or self._function.return_type_admits_none()
 
 
 class SwallowedExceptions(FunctionCheck):

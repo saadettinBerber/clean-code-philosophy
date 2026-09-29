@@ -5,7 +5,8 @@ from measure.findings import Location
 from measure.scope import Scope
 
 PATH = "kart.py"
-[CARD_CLASS] = [node for node in ast.parse("class Card:\n    def render(self): pass\n").body if isinstance(node, ast.ClassDef)]
+CARD = "class Card:\n    def render(self): pass\n"
+[CARD_CLASS] = [node for node in ast.parse(CARD).body if isinstance(node, ast.ClassDef)]
 [RENDER_METHOD] = [node for node in CARD_CLASS.body if isinstance(node, ast.FunctionDef)]
 CLASS_LINE = 1
 METHOD_LINE = 2

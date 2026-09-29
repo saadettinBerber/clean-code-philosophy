@@ -23,7 +23,8 @@ CLEAN = "def total(rows: list[int]) -> int:\n    return sum(rows)\n"
 
 
 def switching(name: str) -> str:
-    return f'def {name}(shape: Shape) -> int:\n    if shape.kind == "circle":\n        return 1\n    elif shape.kind == "square":\n        return 2\n'
+    return (f'def {name}(shape: Shape) -> int:\n    if shape.kind == "circle":\n        return 1\n'
+            '    elif shape.kind == "square":\n        return 2\n')
 
 
 class SourceFileTest(unittest.TestCase):
@@ -60,7 +61,8 @@ class ProjectTest(unittest.TestCase):
         self.assertEqual(Measurement([Snippet(CLEAN)], [project]).notes(), [])
 
     def test_factories_of_the_project_are_known(self) -> None:
-        factory = Snippet("class Project:\n    def load(self) -> Progress:\n        return Progress(self)\n", path=PROJECT_PATH)
+        factory = Snippet("class Project:\n    def load(self) -> Progress:\n        return Progress(self)\n",
+                          path=PROJECT_PATH)
         user = Snippet("def pages(project: Project) -> list[Page]:\n    return project.load().pages()\n")
         self.assertEqual(Measurement([user], [factory]).notes(), [])
 

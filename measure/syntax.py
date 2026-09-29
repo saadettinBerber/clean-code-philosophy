@@ -94,7 +94,7 @@ def admits_none(annotation: ast.expr) -> bool:
     if isinstance(annotation, ast.BinOp) and isinstance(annotation.op, ast.BitOr):
         return admits_none(annotation.left) or admits_none(annotation.right)
     if isinstance(annotation, ast.Subscript) and last_name(annotation.value) in OPTIONAL_FORMS:
-        return last_name(annotation.value) == "Optional" or any(admits_none(part) for part in _unpacked(annotation.slice))
+        return last_name(annotation.value) == "Optional" or any(map(admits_none, _unpacked(annotation.slice)))
     return is_none(annotation)
 
 
