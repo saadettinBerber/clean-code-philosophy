@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 
 from measure.findings import Finding, alarm, look
 from measure.function import Function, Parameter
-from measure.syntax import admits_none, assignment_targets, is_empty_body, is_name, is_none, is_self_attribute
+from measure.syntax import assignment_targets, is_empty_body, is_name, is_none, is_self_attribute
 
 IDEAL_BODY_LINES = 4
 MAX_BODY_LINES = 20
@@ -92,11 +92,7 @@ class ReturnsNone(FunctionCheck):
         """Açık `return None`, değer döndüren fonksiyonda çıplak `return` ya da `Optional` dönüş türü."""
         returns = self._function.returns()
         bare_beside_value = self._function.returns_value() and any(node.value is None for node in returns)
-        return any(is_none(node.value) for node in returns) or bare_beside_value or self._optional_annotation()
-
-    def _optional_annotation(self) -> bool:
-        annotation = self._function.return_annotation()
-        return annotation is not None and not is_none(annotation) and admits_none(annotation)
+        return any(is_none(node.value) for node in returns) or bare_beside_value or self._function.return_type_admits_none()
 
 
 class SwallowedExceptions(FunctionCheck):
@@ -125,17 +121,13 @@ class TypeHints(FunctionCheck):
 
     def _untyped(self) -> list[Finding]:
         untyped = [f"'{parameter.name}'" for parameter in self._function.signature() if parameter.annotation is None]
-        untyped += [] if self._function.return_annotation() is not None else ["dönüş"]
+        untyped += [] if self._function.has_return_type() else ["dönüş"]
         return [alarm(f"türü yazılı değil: {', '.join(untyped)} ({TYPE_HINT_SOURCE})")] if untyped else []
 
     def _bare(self) -> list[Finding]:
-        bare = sorted({name for annotation in self._annotations() for name in _bare_containers(annotation)})
+        bare = sorted({name for annotation in self._function.written_types() for name in _bare_containers(annotation)})
         quoted = ", ".join(f"'{name}'" for name in bare)
         return [alarm(f"içerik türü yazılı değil: {quoted} (G26; {TYPE_HINT_SOURCE})")] if bare else []
-
-    def _annotations(self) -> list[ast.expr]:
-        written = [parameter.annotation for parameter in self._function.signature()]
-        return [annotation for annotation in written + [self._function.return_annotation()] if annotation is not None]
 
 
 def _bare_containers(annotation: ast.expr) -> list[str]:

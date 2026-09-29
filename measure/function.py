@@ -8,8 +8,8 @@ from typing import NamedTuple
 from measure.construction import Constructions
 from measure.findings import Finding, Note
 from measure.scope import Home, Scope
-from measure.syntax import (FunctionNode, assignment_targets, end_line, is_name, is_none, is_self_attribute, nesting,
-                            root_name, self_attributes, walk_own)
+from measure.syntax import (FunctionNode, admits_none, assignment_targets, end_line, is_name, is_none, is_self_attribute,
+                            nesting, root_name, self_attributes, walk_own)
 
 RECEIVERS = ("self", "cls")
 TEST_PREFIX = "test_"
@@ -84,8 +84,18 @@ class Function:
             return [node.value for node in self.own_nodes() if isinstance(node, ast.Yield)]
         return [node.value for node in self.returns()]
 
-    def return_annotation(self) -> ast.expr | None:
-        return self._node.returns
+    def has_return_type(self) -> bool:
+        return self._node.returns is not None
+
+    def return_type_admits_none(self) -> bool:
+        """Yazılı dönüş türü boş dönüşe izin veriyor mu; `-> None` komutu boş dönüş sayılmaz."""
+        returns = self._node.returns
+        return returns is not None and not is_none(returns) and admits_none(returns)
+
+    def written_types(self) -> list[ast.expr]:
+        """İmzada yazılmış türler: parametrelerinki ve dönüşünki."""
+        written = [parameter.annotation for parameter in self.signature()] + [self._node.returns]
+        return [annotation for annotation in written if annotation is not None]
 
     def decorators(self) -> list[ast.expr]:
         return self._node.decorator_list
