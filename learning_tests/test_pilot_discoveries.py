@@ -15,11 +15,15 @@ TEST_WITH_LONG_LINE = ("import unittest\n\n\nclass TitleTest(unittest.TestCase):
                        "    def test_title(self) -> None:\n"
                        f"        self.assertEqual(len('{'x' * 130}'), 130)\n")
 TEST_LONG_LINE_NUMBER = 6
+THREE_AND_FOUR_ARGUMENTS = ("def three(a, b, c):\n    return a + b + c\n\n\n"
+                            "def four(a, b, c, d):\n    return a + b + c + d\n")
+FOUR_ARGUMENTS_LINE = 5
 
 PROJECT_FILES = {
     "src/test_checks.py": PRODUCTION_NAMED_LIKE_A_TEST,
     "tests/test_title.py": TEST_WITH_LONG_LINE,
     "test_sources/test_title.py": TEST_WITH_LONG_LINE,
+    "src/arguments.py": THREE_AND_FOUR_ARGUMENTS,
 }
 
 
@@ -43,6 +47,10 @@ class PilotDiscoveriesTest(unittest.TestCase):
         """Aynı test dosyası kaynak olarak bildirilince kurallar ona da uygulanır: testler ayrı projede taranır (K7)."""
         lines = self.sonarqube.issue_lines("python:LineLength", "test_sources/test_title.py")
         self.assertEqual(lines, [TEST_LONG_LINE_NUMBER])
+
+    def test_argument_limit_is_the_largest_allowed_count(self) -> None:
+        """S107 `max=3`: 3 argümana izin var, 4 bulgu verir. Kitabın "3 argüman alarm" eşiği `max=2` ister."""
+        self.assertEqual(self.sonarqube.issue_lines("python:S107", "src/arguments.py"), [FOUR_ARGUMENTS_LINE])
 
 
 if __name__ == "__main__":
