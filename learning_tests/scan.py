@@ -20,7 +20,7 @@ SCANNER = "sonarsource/sonar-scanner-cli@sha256:a3f4215076706c95a17a68c19322ee91
 TOKEN_FILE = Path.home() / ".config" / "secrets" / "sonarqube-token"
 PROJECT = "ogrenme-testleri"
 PROFILE = "Pilot · tüm kurallar"
-SCAN_PROPERTIES = (f"-Dsonar.projectKey={PROJECT}", "-Dsonar.sources=src",
+SCAN_PROPERTIES = (f"-Dsonar.projectKey={PROJECT}", "-Dsonar.sources=src", "-Dsonar.tests=tests",
                    "-Dsonar.python.version=3.13", "-Dsonar.python.testFileHeuristic.disabled=true",
                    "-Dsonar.working.directory=/scan/.scannerwork")
 REPORT_TASK = Path(".scannerwork") / "report-task.txt"

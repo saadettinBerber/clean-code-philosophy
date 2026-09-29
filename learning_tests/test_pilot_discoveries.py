@@ -11,9 +11,13 @@ from learning_tests.scan import TOKEN_FILE, SonarQube
 LONG_LINE = f"TITLE = '{'x' * 130}'\n"
 PRODUCTION_NAMED_LIKE_A_TEST = "def checks() -> list[str]:\n    return []\n\n\n" + LONG_LINE
 LONG_LINE_NUMBER = 5
+TEST_WITH_LONG_LINE = ("import unittest\n\n\nclass TitleTest(unittest.TestCase):\n"
+                       "    def test_title(self) -> None:\n"
+                       f"        self.assertEqual(len('{'x' * 130}'), 130)\n")
 
 PROJECT_FILES = {
     "src/test_checks.py": PRODUCTION_NAMED_LIKE_A_TEST,
+    "tests/test_title.py": TEST_WITH_LONG_LINE,
 }
 
 
@@ -28,6 +32,10 @@ class PilotDiscoveriesTest(unittest.TestCase):
     def test_production_file_named_like_a_test_is_measured(self) -> None:
         """Test tahmini kapalıyken `test_*.py` adı üretim dosyasını test yapmaz, kurallar ona uygulanır."""
         self.assertEqual(self.sonarqube.issue_lines("python:LineLength", "src/test_checks.py"), [LONG_LINE_NUMBER])
+
+    def test_rules_skip_files_declared_as_tests(self) -> None:
+        """Kural kapsamı varsayılan olarak yalnız üretim kodu (`scope()` → MAIN); arayüz 'ALL' gösterse de."""
+        self.assertEqual(self.sonarqube.issue_lines("python:LineLength", "tests/test_title.py"), [])
 
 
 if __name__ == "__main__":
