@@ -24,6 +24,11 @@ python3 -m http.server 8766 --bind 127.0.0.1
 
 Sonra http://127.0.0.1:8766/zihin-haritasi.html adresini açın.
 
+## Kodda dil
+
+Koddaki adlar İngilizcedir: kod dosyası (`.py`, `.html`, `.js`), modül, sınıf, fonksiyon, değişken, sabit, HTML kimliği ve komut satırı seçeneği. Python'un anahtar sözcükleri ve standart kütüphanesi İngilizce olduğundan Türkçe ad kodu iki dile böler.
+Yorumlar, docstring'ler ve kullanıcıya giden iletiler Türkçe olabilir. Türkçe metin taşıyan belgeler (`.md`) ve içerik verisi (`.json`) Türkçe adlarını korur.
+
 ## Kitap okuyucusundaki harita
 
 Okuyucunun üst barındaki 🧠 Harita düğmesi bu haritayı tam ekran açar. Okuyucu, haritayı bu klasörden değil kendi `data/mindmap.js` dosyasından okur. Bu yüzden `zihin-haritasi.md` her değiştiğinde aktarım çalıştırılır:
