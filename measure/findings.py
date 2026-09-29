@@ -24,14 +24,14 @@ class Note:
     finding: Finding
 
 
-def alarm(message):
+def alarm(message: str) -> Finding:
     return Finding(ALARM, message)
 
 
-def look(message):
+def look(message: str) -> Finding:
     return Finding(LOOK, message)
 
 
-def render(note):
+def render(note: Note) -> str:
     where, finding = note.location, note.finding
     return f"{where.path}:{where.line}: {finding.level} {where.name}: {finding.message}"

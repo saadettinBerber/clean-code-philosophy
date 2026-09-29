@@ -1,10 +1,12 @@
 import unittest
+from collections.abc import Iterable
 
+from measure.findings import Note
 from measure.source_checks import MIN_CARRIERS, CarriedArguments, CommentedOutCode, DispatchTables, Todos
 from tests.snippets import Snippet, names
 
 
-def functions_taking(name, count):
+def functions_taking(name: str, count: int) -> str:
     return "".join(f"def step{index}({name}, kind):\n    return {name}\n\n" for index in range(count))
 
 
@@ -23,59 +25,59 @@ LABEL_TABLE = 'SIDE_LABELS = {"code": ("Önce", "Sonra"), "contrast": ("Kaçın"
 DECLARED_PROCEDURAL = '"""Prosedürel (Bl.6): türler sabit, sorular çoğalıyor."""\n' + functions_taking("node", MIN_CARRIERS)
 
 
-def lines_of(notes):
+def lines_of(notes: Iterable[Note]) -> list[int]:
     return [note.location.line for note in notes]
 
 
 class CommentedOutCodeTest(unittest.TestCase):
-    def test_commented_statement_is_code(self):
+    def test_commented_statement_is_code(self) -> None:
         self.assertEqual(lines_of(CommentedOutCode(Snippet("x = 1\n# total = x + 2\n")).notes()), [2])
 
-    def test_consecutive_commented_lines_form_one_block(self):
+    def test_consecutive_commented_lines_form_one_block(self) -> None:
         self.assertEqual(lines_of(CommentedOutCode(Snippet("# for item in items:\n#     go(item)\n")).notes()), [1])
 
-    def test_prose_comment_is_not_code(self):
+    def test_prose_comment_is_not_code(self) -> None:
         self.assertEqual(CommentedOutCode(Snippet("# Sayfa sonunda yarım kalan paragraf birleşir.\n")).notes(), [])
 
-    def test_single_word_comment_is_not_code(self):
+    def test_single_word_comment_is_not_code(self) -> None:
         self.assertEqual(CommentedOutCode(Snippet("# noqa\n")).notes(), [])
 
-    def test_trailing_comment_is_not_a_block(self):
+    def test_trailing_comment_is_not_a_block(self) -> None:
         self.assertEqual(CommentedOutCode(Snippet("x = 1  # type: int\n")).notes(), [])
 
 
 class TodosTest(unittest.TestCase):
-    def test_every_todo_raises_an_alarm(self):
+    def test_every_todo_raises_an_alarm(self) -> None:
         self.assertEqual(lines_of(Todos(Snippet("# TODO kartları sırala\nx = 1  # FIXME sınır\n")).notes()), [1, 2])
 
-    def test_plain_comment_is_not_a_todo(self):
+    def test_plain_comment_is_not_a_todo(self) -> None:
         self.assertEqual(Todos(Snippet("# Kartlar sıralı gelir.\n")).notes(), [])
 
-    def test_todo_inside_a_string_is_not_a_comment(self):
+    def test_todo_inside_a_string_is_not_a_comment(self) -> None:
         self.assertEqual(Todos(Snippet('PATTERN = "# TODO"\n')).notes(), [])
 
 
 class CarriedArgumentsTest(unittest.TestCase):
-    def test_argument_carried_through_enough_functions_raises_an_alarm(self):
+    def test_argument_carried_through_enough_functions_raises_an_alarm(self) -> None:
         notes = CarriedArguments(Snippet(functions_taking("card", MIN_CARRIERS))).notes()
         self.assertEqual([note.finding.message.split("'")[1] for note in notes], ["card", "kind"])
 
-    def test_argument_in_fewer_functions_is_fine(self):
+    def test_argument_in_fewer_functions_is_fine(self) -> None:
         self.assertEqual(CarriedArguments(Snippet(functions_taking("card", MIN_CARRIERS - 1))).notes(), [])
 
-    def test_methods_are_not_counted(self):
+    def test_methods_are_not_counted(self) -> None:
         code = "class Card:\n" + "".join(f"    def step{i}(self, card):\n        return card\n" for i in range(MIN_CARRIERS))
         self.assertEqual(CarriedArguments(Snippet(code)).notes(), [])
 
-    def test_declared_procedural_module_is_not_measured(self):
+    def test_declared_procedural_module_is_not_measured(self) -> None:
         self.assertEqual(CarriedArguments(Snippet(DECLARED_PROCEDURAL)).notes(), [])
 
 
 class DispatchTablesTest(unittest.TestCase):
-    def test_string_keyed_table_of_functions_is_a_switch(self):
+    def test_string_keyed_table_of_functions_is_a_switch(self) -> None:
         self.assertEqual(names(DispatchTables(Snippet(DISPATCH_TABLE)).notes()), ["_MIDDLE_PARTS"])
 
-    def test_table_of_plain_values_is_not_a_switch(self):
+    def test_table_of_plain_values_is_not_a_switch(self) -> None:
         self.assertEqual(DispatchTables(Snippet(LABEL_TABLE)).notes(), [])
 
 

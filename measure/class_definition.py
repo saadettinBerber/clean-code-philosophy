@@ -1,110 +1,112 @@
 """Ölçülen sınıf: alanları, metotları ve sorumluluk kümeleri (Bl.6, Bl.10)."""
 import ast
+from collections.abc import Iterable
 from functools import reduce
 from typing import NamedTuple
 
-from measure.findings import Note
+from measure.findings import Finding, Note
 from measure.function import Method
-from measure.syntax import FUNCTION_NODES, last_name
+from measure.scope import Scope
+from measure.syntax import FUNCTION_NODES, end_line, last_name
 
 TEST_CASE_BASE = "TestCase"
 
 
 class Cluster(NamedTuple):
     """Birlikte değişen metotlar ve dokundukları alan ya da metot adları."""
-    methods: frozenset
-    touched: frozenset
+    methods: frozenset[str]
+    touched: frozenset[str]
 
 
 class ClassDefinition:
     """Bir sınıfın yapısı; bulguyu kendi yeriyle nota çevirir."""
 
-    def __init__(self, node, scope):
+    def __init__(self, node: ast.ClassDef, scope: Scope) -> None:
         self._node = node
         self._scope = scope
 
-    def note(self, finding):
+    def note(self, finding: Finding) -> Note:
         return Note(self._scope.location(self._node), finding)
 
-    def length(self):
-        return self._node.end_lineno - self._node.lineno + 1
+    def length(self) -> int:
+        return end_line(self._node) - self._node.lineno + 1
 
-    def methods(self):
+    def methods(self) -> list[Method]:
         inside = self._scope.inner(self._node)
         return [Method(node, inside)
                 for node in self._node.body if isinstance(node, FUNCTION_NODES)]
 
-    def is_data_structure(self):
+    def is_data_structure(self) -> bool:
         """Metodu olmayan sınıf bir veri yapısıdır; uyum ve melezlik ona uygulanmaz (Bl.6)."""
         return not self.methods()
 
-    def is_test_case(self):
+    def is_test_case(self) -> bool:
         """Test sınıfı ne nesne ne veri yapısıdır; Bl.6'nın ayrımı ona uygulanmaz. Testi olmayan ortak kurulum
         sınıfı da `TestCase`'ten türediği için test sınıfıdır."""
         return any(method.is_test() for method in self.methods()) or TEST_CASE_BASE in self._base_names()
 
-    def _base_names(self):
+    def _base_names(self) -> set[str]:
         return {last_name(base) for base in self._node.bases}
 
-    def constructor_fields(self):
+    def constructor_fields(self) -> set[str]:
         return {field for method in self.methods() if method.is_constructor() for field in method.assigned_fields()}
 
-    def late_fields(self):
+    def late_fields(self) -> set[str]:
         """Kurucu dışında ilk kez atanan alanlar."""
         return {field for method in self.methods() for field in method.assigned_fields()} - self.constructor_fields()
 
-    def instance_fields(self):
+    def instance_fields(self) -> set[str]:
         """Kurucuda atanan alanlar ile dataclass gibi sınıf gövdesinde tür bildirilen alanlar."""
         declared = {node.target.id for node in self._node.body
                     if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name)}
         return (self.constructor_fields() | declared) - {method.name() for method in self.methods()}
 
-    def field_users(self):
+    def field_users(self) -> dict[str, list[str]]:
         """Alan → onu kullanan metotlar (kurucular hariç)."""
         others = [method for method in self.methods() if not method.is_constructor()]
         return {field: [m.name() for m in others if field in m.touched_attributes()] for field in self.instance_fields()}
 
-    def responsibility_clusters(self):
+    def responsibility_clusters(self) -> list[tuple[list[str], list[str]]]:
         """Alan paylaşan ya da birbirini çağıran metot kümeleri; her küme bir değişme nedeni adayıdır."""
         fields = self.instance_fields()
-        clusters = reduce(_merged_with, self._method_clusters(), [])
+        clusters = reduce(_merged_with, self._method_clusters(), list[Cluster]())
         return [(sorted(c.methods), sorted(c.touched & fields)) for c in clusters if c.touched & fields]
 
-    def public_state(self):
+    def public_state(self) -> list[str]:
         """Dışa açık durum: alt çizgisiz alanlar ve public erişimciler (Bl.6 · Hybrids)."""
         fields = sorted(field for field in self.instance_fields() if not field.startswith("_"))
         return fields + sorted(m.name() for m in self.methods()
                                if m.is_public() and m.is_accessor() and not self._injects(m))
 
-    def _injects(self, setter):
+    def _injects(self, setter: Method) -> bool:
         """İşbirlikçiyi içeri alan setter durumu açmaz: alan başkalarınca çağrılır, dışarı verilmez (Bl.11 · DI)."""
         others = [method for method in self.methods() if method is not setter]
         fields = setter.assigned_fields()
         is_called = fields <= _union(method.collaborators() for method in others)
         return setter.is_setter() and is_called and not fields & _union(method.returned_fields() for method in others)
 
-    def behavior_methods(self):
+    def behavior_methods(self) -> list[str]:
         """Erişimci ve adlı kurucu olmayan, anlamlı iş yapan public metotlar (Bl.6 · Hybrids)."""
         return sorted(m.name() for m in self.methods()
                       if m.is_public() and not m.is_special() and not m.is_accessor() and not m.is_named_constructor()
                       and m.does_work())
 
-    def _method_clusters(self):
+    def _method_clusters(self) -> list[Cluster]:
         """Her metot kendi başına bir küme olarak başlar; kendini dışarı veren metot public metotlara bağlıdır."""
         names = {method.name() for method in self.methods()}
         reach = self.instance_fields() | names
         return [Cluster(frozenset({m.name()}), frozenset((m.touched_attributes() & reach) | {m.name()} | self._called_back(m)))
                 for m in self.methods() if not m.is_lifecycle()]
 
-    def _called_back(self, method):
+    def _called_back(self, method: Method) -> set[str]:
         return {m.name() for m in self.methods() if m.is_public()} if method.hands_out_self() else set()
 
 
-def _union(sets):
+def _union(sets: Iterable[set[str]]) -> set[str]:
     return set().union(*sets)
 
 
-def _merged_with(clusters, method):
+def _merged_with(clusters: list[Cluster], method: Cluster) -> list[Cluster]:
     """Metodun dokunduğu şeyleri paylaşan kümeler metotla tek kümede birleşir."""
     joined = [cluster for cluster in clusters if cluster.touched & method.touched]
     merged = Cluster(method.methods.union(*(c.methods for c in joined)), method.touched.union(*(c.touched for c in joined)))

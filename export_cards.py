@@ -8,6 +8,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Any
 
 HERE = Path(__file__).resolve().parent
 CARDS_SOURCE = HERE / "kitap-disi-kartlar.json"
@@ -21,6 +22,8 @@ PATTERN_AFTER_ARROW = re.compile(r"→\s*([A-Z][A-Z ]*[A-Z])")
 LANGS = ("en", "tr")
 BILINGUAL_FIELDS = ("title", "summary", "tip")
 CODE_SAMPLES = ("bad", "good")
+# JSON kaynağından okunan nesne; alanları kaynağa göre değişir, doğrulama `validate`dedir.
+Json = dict[str, Any]
 
 
 class CardError(Exception):
@@ -34,31 +37,31 @@ def reader_root() -> Path:
     return root
 
 
-def offbook_patterns_in_map() -> set:
+def offbook_patterns_in_map() -> set[str]:
     leaves = [line for line in MIND_MAP.read_text(encoding="utf-8").splitlines() if OFFBOOK_MARK in line]
     return {match.group(1) for line in leaves for match in PATTERN_AFTER_ARROW.finditer(line)}
 
 
-def require_bilingual(unit, where: str) -> None:
+def require_bilingual(unit: object, where: str) -> None:
     for lang in LANGS:
         if not isinstance(unit, dict) or not str(unit.get(lang, "")).strip():
             raise CardError(f"{where}: '{lang}' metni eksik")
 
 
-def check_sample(sample, where: str) -> None:
+def check_sample(sample: object, where: str) -> None:
     if not isinstance(sample, dict) or not sample.get("lang") or not sample.get("code"):
         raise CardError(f"{where}: lang ve code zorunlu")
     require_bilingual(sample.get("why"), f"{where}.why")
 
 
-def check_related(card: dict, reader: Path) -> None:
+def check_related(card: Json, reader: Path) -> None:
     for link in card.get("related", []):
         require_bilingual(link, f"{card['id']}.related")
         if not (reader / READER_PAGE.format(link.get("page"))).is_file():
             raise CardError(f"{card['id']}: okuyucuda sayfa {link.get('page')} yok")
 
 
-def check_card(card: dict, sources: dict, reader: Path) -> None:
+def check_card(card: Json, sources: Json, reader: Path) -> None:
     card_id = card.get("id") or "<kimliksiz kart>"
     if not card.get("pattern"):
         raise CardError(f"{card_id}: pattern zorunlu")
@@ -71,18 +74,18 @@ def check_card(card: dict, sources: dict, reader: Path) -> None:
     check_related(card, reader)
 
 
-def all_cards(document: dict) -> list:
+def all_cards(document: Json) -> list[Json]:
     return [card for group in document["groups"] for card in group["cards"]]
 
 
-def check_unique_ids(cards: list) -> None:
+def check_unique_ids(cards: list[Json]) -> None:
     ids = [card.get("id") for card in cards]
     duplicates = sorted({card_id for card_id in ids if ids.count(card_id) > 1})
     if duplicates:
         raise CardError(f"Tekrarlanan kart kimlikleri: {', '.join(duplicates)}")
 
 
-def check_matches_map(cards: list) -> None:
+def check_matches_map(cards: list[Json]) -> None:
     in_cards = {card["pattern"] for card in cards}
     in_map = offbook_patterns_in_map()
     if in_cards != in_map:
@@ -90,7 +93,7 @@ def check_matches_map(cards: list) -> None:
                         f"kartı olup haritada olmayan: {sorted(in_cards - in_map)}")
 
 
-def validate(document: dict, reader: Path) -> None:
+def validate(document: Json, reader: Path) -> None:
     cards = all_cards(document)
     for group in document["groups"]:
         require_bilingual(group.get("title"), f"grup {group.get('id')}")
@@ -100,26 +103,26 @@ def validate(document: dict, reader: Path) -> None:
     check_matches_map(cards)
 
 
-def joined_code(sample: dict) -> dict:
+def joined_code(sample: Json) -> Json:
     code = sample["code"]
     return {**sample, "code": "\n".join(code) if isinstance(code, list) else code}
 
 
-def export_card(card: dict, sources: dict) -> dict:
+def export_card(card: Json, sources: Json) -> Json:
     exported = {**card, "source": sources[card["source"]], "offbook": True}
     for sample in CODE_SAMPLES:
         exported[sample] = joined_code(card[sample])
     return exported
 
 
-def export_document(document: dict) -> dict:
+def export_document(document: Json) -> Json:
     sources = document["sources"]
     groups = [{"id": g["id"], "title": g["title"], "cards": [export_card(c, sources) for c in g["cards"]]}
               for g in document["groups"]]
     return {"mark": OFFBOOK_MARK, "groups": groups}
 
 
-def render(exported: dict) -> str:
+def render(exported: Json) -> str:
     return f"{HEADER}window.OFFBOOK = {json.dumps(exported, ensure_ascii=False, indent=1)};\n"
 
 

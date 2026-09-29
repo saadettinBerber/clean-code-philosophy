@@ -1,5 +1,6 @@
 import ast
 import unittest
+from collections.abc import Iterable
 
 from measure.construction import Constructions
 from measure.demeter import TrainWrecks
@@ -98,7 +99,7 @@ FAKE_HOLDS_PAGES = "class FakeDocument:\n    def page(self, number):\n        re
 
 
 
-def wrecks(*codes):
+def wrecks(*codes: str) -> list[str]:
     """Kaynaklar birlikte ölçülür; fabrika bilgisi hepsinden toplanır."""
     sources = [Snippet(code, f"parca{index}.py") for index, code in enumerate(codes)]
     constructions = Constructions.among(sources)
@@ -106,109 +107,109 @@ def wrecks(*codes):
 
 
 class TrainWrecksTest(unittest.TestCase):
-    def test_call_on_a_returned_object_is_a_train_wreck(self):
+    def test_call_on_a_returned_object_is_a_train_wreck(self) -> None:
         self.assertEqual(len(wrecks("def f(ctxt): ctxt.options().scratch_dir()")), 1)
 
-    def test_long_chain_is_reported_once(self):
+    def test_long_chain_is_reported_once(self) -> None:
         self.assertEqual(len(wrecks("def f(a): a.b().c().d()")), 1)
 
-    def test_object_created_by_the_function_may_be_called(self):
+    def test_object_created_by_the_function_may_be_called(self) -> None:
         self.assertEqual(wrecks("def f(path): Path(path).read_text()"), [])
 
-    def test_object_made_by_a_static_factory_may_be_called(self):
+    def test_object_made_by_a_static_factory_may_be_called(self) -> None:
         self.assertEqual(wrecks("def f(data): Card.of(data).kind()"), [])
 
-    def test_call_on_what_an_instance_returns_is_a_train_wreck(self):
+    def test_call_on_what_an_instance_returns_is_a_train_wreck(self) -> None:
         self.assertEqual(len(wrecks("def f(deck): deck.of(1).kind()")), 1)
 
-    def test_call_on_what_a_constant_returns_is_a_train_wreck(self):
+    def test_call_on_what_a_constant_returns_is_a_train_wreck(self) -> None:
         self.assertEqual(len(wrecks("def f(): RULES.get(1).kind()")), 1)
 
-    def test_object_made_by_a_private_class_may_be_called(self):
+    def test_object_made_by_a_private_class_may_be_called(self) -> None:
         self.assertEqual(wrecks("def f(html): _Parser().feed(html)"), [])
 
-    def test_call_on_what_a_private_function_returns_is_a_train_wreck(self):
+    def test_call_on_what_a_private_function_returns_is_a_train_wreck(self) -> None:
         self.assertEqual(len(wrecks("def f(x): _parse(x).go()")), 1)
 
-    def test_call_on_what_a_private_constant_returns_is_a_train_wreck(self):
+    def test_call_on_what_a_private_constant_returns_is_a_train_wreck(self) -> None:
         self.assertEqual(len(wrecks("def f(): _RULES.get(1).kind()")), 1)
 
-    def test_object_made_by_a_module_qualified_class_may_be_called(self):
+    def test_object_made_by_a_module_qualified_class_may_be_called(self) -> None:
         self.assertEqual(wrecks("def f(path): zipfile.ZipFile(path).read('a')"), [])
 
-    def test_call_on_what_a_module_function_returns_is_a_train_wreck(self):
+    def test_call_on_what_a_module_function_returns_is_a_train_wreck(self) -> None:
         self.assertEqual(len(wrecks("def f(path): zipfile.open_zip(path).read('a')")), 1)
 
-    def test_super_may_be_called(self):
+    def test_super_may_be_called(self) -> None:
         self.assertEqual(wrecks("def f(self): super().close()"), [])
 
-    def test_opened_file_may_be_read(self):
+    def test_opened_file_may_be_read(self) -> None:
         self.assertEqual(wrecks("def f(path): open(path).read()"), [])
 
-    def test_object_made_by_a_built_in_type_may_be_called(self):
+    def test_object_made_by_a_built_in_type_may_be_called(self) -> None:
         self.assertEqual(wrecks("def f(items): list(items).sort()"), [])
 
-    def test_call_on_what_a_built_in_function_hands_out_is_a_train_wreck(self):
+    def test_call_on_what_a_built_in_function_hands_out_is_a_train_wreck(self) -> None:
         self.assertEqual(len(wrecks("def f(items): next(iter(items)).render()")), 1)
 
-    def test_object_a_class_method_builds_with_cls_may_be_called(self):
+    def test_object_a_class_method_builds_with_cls_may_be_called(self) -> None:
         self.assertEqual(wrecks(CLASS_METHOD_BUILDS_WITH_CLS), [])
 
-    def test_call_on_what_a_parameter_named_like_cls_hands_out_is_a_train_wreck(self):
+    def test_call_on_what_a_parameter_named_like_cls_hands_out_is_a_train_wreck(self) -> None:
         self.assertEqual(len(wrecks("def f(klass):\n    klass(1).of(2).go()\n")), 1)
 
-    def test_object_made_by_a_local_factory_may_be_called(self):
+    def test_object_made_by_a_local_factory_may_be_called(self) -> None:
         self.assertEqual(wrecks(LOCAL_FACTORY), [])
 
-    def test_call_on_what_a_local_helper_hands_out_is_a_train_wreck(self):
+    def test_call_on_what_a_local_helper_hands_out_is_a_train_wreck(self) -> None:
         self.assertEqual(len(wrecks(LOCAL_HELPER)), 1)
 
-    def test_object_made_by_an_own_factory_method_may_be_called(self):
+    def test_object_made_by_an_own_factory_method_may_be_called(self) -> None:
         self.assertEqual(wrecks(OWN_FACTORY_METHOD), [])
 
-    def test_call_on_what_an_own_method_hands_out_is_a_train_wreck(self):
+    def test_call_on_what_an_own_method_hands_out_is_a_train_wreck(self) -> None:
         self.assertEqual(len(wrecks(OWN_FIELD_METHOD)), 1)
 
-    def test_factory_may_build_the_object_before_returning_it(self):
+    def test_factory_may_build_the_object_before_returning_it(self) -> None:
         self.assertEqual(wrecks(BUILD_THEN_RETURN), [])
 
-    def test_factory_of_a_factory_is_a_factory(self):
+    def test_factory_of_a_factory_is_a_factory(self) -> None:
         self.assertEqual(wrecks(FACTORY_OF_FACTORY), [])
 
-    def test_helper_that_may_return_nothing_is_not_a_factory(self):
+    def test_helper_that_may_return_nothing_is_not_a_factory(self) -> None:
         self.assertEqual(len(wrecks(SOMETIMES_EMPTY)), 1)
 
-    def test_factory_may_choose_between_two_constructions(self):
+    def test_factory_may_choose_between_two_constructions(self) -> None:
         self.assertEqual(wrecks("def _a(x):\n    return Alpha() if x else Beta()\n\ndef f(x):\n    _a(x).go()\n"), [])
 
-    def test_procedure_without_return_is_not_a_factory(self):
+    def test_procedure_without_return_is_not_a_factory(self) -> None:
         self.assertEqual(len(wrecks("def _run(x):\n    x.go()\n\ndef f(x):\n    _run(x).done()\n")), 1)
 
-    def test_data_structure_operations_are_not_train_wrecks(self):
+    def test_data_structure_operations_are_not_train_wrecks(self) -> None:
         self.assertEqual(wrecks("def f(text): clean(text).strip()"), [])
 
-    def test_groups_of_a_match_are_data(self):
+    def test_groups_of_a_match_are_data(self) -> None:
         self.assertEqual(wrecks("def f(rule, line): rule.match(line).group(1)"), [])
 
-    def test_questions_about_a_string_are_data(self):
+    def test_questions_about_a_string_are_data(self) -> None:
         self.assertEqual(wrecks("def f(host): word_before(host).isalnum()"), [])
 
-    def test_pattern_compiled_by_the_standard_library_may_be_called(self):
+    def test_pattern_compiled_by_the_standard_library_may_be_called(self) -> None:
         self.assertEqual(wrecks("def f(token, text): re.compile(token).sub('', text)"), [])
 
-    def test_call_on_what_another_objects_compile_returns_is_a_train_wreck(self):
+    def test_call_on_what_another_objects_compile_returns_is_a_train_wreck(self) -> None:
         self.assertEqual(len(wrecks("def f(compiler, token): compiler.compile(token).sub('')")), 1)
 
-    def test_parser_built_by_an_argument_parser_may_be_called(self):
+    def test_parser_built_by_an_argument_parser_may_be_called(self) -> None:
         self.assertEqual(wrecks("def f(parser): parser.add_subparsers().add_parser('info').set_defaults(run=go)"), [])
 
-    def test_namespace_built_by_parsing_arguments_is_data(self):
+    def test_namespace_built_by_parsing_arguments_is_data(self) -> None:
         self.assertEqual(wrecks("def f(parser, argv): parser.parse_args(argv).run()"), [])
 
-    def test_call_on_what_another_parser_method_returns_is_a_train_wreck(self):
+    def test_call_on_what_another_parser_method_returns_is_a_train_wreck(self) -> None:
         self.assertEqual(len(wrecks("def f(parser): parser.get_default('x').render()")), 1)
 
-    def test_methods_are_measured_too(self):
+    def test_methods_are_measured_too(self) -> None:
         self.assertEqual(len(wrecks("class Report:\n    def f(self, ctxt):\n        ctxt.options().dir()\n")), 1)
 
 
@@ -217,104 +218,104 @@ class FactoryKnowledgeTest(unittest.TestCase):
     """Kimin nesne kurduğu: başka modülün fabrikası, çağıranın kapsamında ad çözümü, tablodan seçilen sınıf,
     bağlam yöneticisi (Bl.6 · The Law of Demeter; Bl.3 · Switch Statements)."""
 
-    def test_choice_with_one_foreign_branch_is_not_a_factory(self):
+    def test_choice_with_one_foreign_branch_is_not_a_factory(self) -> None:
         self.assertEqual(len(wrecks(ONE_FOREIGN_BRANCH)), 1)
 
-    def test_object_made_by_another_modules_factory_method_may_be_called(self):
+    def test_object_made_by_another_modules_factory_method_may_be_called(self) -> None:
         self.assertEqual(wrecks(PROJECT_LOADS_PROGRESS, USES_LOADED_PROGRESS), [])
 
-    def test_name_shared_with_a_method_that_is_not_a_factory_is_a_train_wreck(self):
+    def test_name_shared_with_a_method_that_is_not_a_factory_is_a_train_wreck(self) -> None:
         self.assertEqual(len(wrecks(PROJECT_LOADS_PROGRESS, CACHE_LOADS_ITS_FIELD, USES_LOADED_PROGRESS)), 1)
 
-    def test_factory_outside_the_measured_sources_is_unknown(self):
+    def test_factory_outside_the_measured_sources_is_unknown(self) -> None:
         self.assertEqual(len(wrecks(USES_LOADED_PROGRESS)), 1)
 
-    def test_object_made_by_another_modules_function_may_be_called(self):
+    def test_object_made_by_another_modules_function_may_be_called(self) -> None:
         self.assertEqual(wrecks("def make_card(x):\n    return Card(x)\n", "def f(x): cards.make_card(x).go()"), [])
 
-    def test_factory_of_a_factory_in_another_module_is_a_factory(self):
+    def test_factory_of_a_factory_in_another_module_is_a_factory(self) -> None:
         self.assertEqual(wrecks("def _a():\n    return Alpha()\n", "def b(): return _a()", "def f(): b().go()"), [])
 
-    def test_bare_name_resolves_to_its_own_modules_factory_first(self):
+    def test_bare_name_resolves_to_its_own_modules_factory_first(self) -> None:
         self.assertEqual(wrecks("def _para(x):\n    return Para(x)\n\ndef f(x):\n    _para(x).go()\n",
                                 "def _para(x):\n    return x.para\n"), [])
 
-    def test_own_method_resolves_to_its_own_classs_factory_first(self):
+    def test_own_method_resolves_to_its_own_classs_factory_first(self) -> None:
         self.assertEqual(wrecks(DOCUMENT_BUILDS_PAGES, FAKE_HOLDS_PAGES), [])
 
-    def test_bare_name_in_a_method_resolves_to_its_own_modules_factory_first(self):
+    def test_bare_name_in_a_method_resolves_to_its_own_modules_factory_first(self) -> None:
         self.assertEqual(wrecks(METHOD_CALLS_MODULE_FACTORY, "def _para(x):\n    return x.para\n"), [])
 
-    def test_another_objects_method_does_not_resolve_to_the_callers_class(self):
+    def test_another_objects_method_does_not_resolve_to_the_callers_class(self) -> None:
         self.assertEqual(len(wrecks(DOCUMENT_ASKS_ANOTHER, FAKE_HOLDS_PAGES)), 1)
 
-    def test_method_of_another_object_resolves_among_all_sources(self):
+    def test_method_of_another_object_resolves_among_all_sources(self) -> None:
         self.assertEqual(len(wrecks(DOCUMENT_BUILDS_PAGES, FAKE_HOLDS_PAGES, "def f(doc): doc.page(1).text()")), 1)
 
-    def test_class_chosen_from_a_table_builds_the_object(self):
+    def test_class_chosen_from_a_table_builds_the_object(self) -> None:
         self.assertEqual(wrecks(MODULE_TABLE + "def f(data): _KINDS[data](data).go()"), [])
 
-    def test_factory_choosing_its_class_from_a_table_is_a_factory(self):
+    def test_factory_choosing_its_class_from_a_table_is_a_factory(self) -> None:
         self.assertEqual(wrecks(FACTORY_CHOOSING_FROM_A_TABLE + "def f(data):\n    make(data).go()\n"), [])
 
-    def test_class_chosen_from_a_local_table_builds_the_object(self):
+    def test_class_chosen_from_a_local_table_builds_the_object(self) -> None:
         self.assertEqual(wrecks(LOCAL_TABLE), [])
 
-    def test_table_of_classes_built_by_a_comprehension_builds_too(self):
+    def test_table_of_classes_built_by_a_comprehension_builds_too(self) -> None:
         self.assertEqual(wrecks(CLASSES_OF_A_COMPREHENSION + "def f(data): _CARDS[data](data).go()"), [])
 
-    def test_table_holding_something_other_than_a_class_is_not_a_constructor(self):
+    def test_table_holding_something_other_than_a_class_is_not_a_constructor(self) -> None:
         self.assertEqual(len(wrecks('_HANDLERS = {"a": Alpha, "b": handle}\ndef f(x): _HANDLERS[x](x).go()')), 1)
 
-    def test_choice_without_a_default_class_may_hand_out_anything(self):
+    def test_choice_without_a_default_class_may_hand_out_anything(self) -> None:
         self.assertEqual(len(wrecks(MODULE_TABLE + "def f(x): _KINDS.get(x)(x).go()")), 1)
 
-    def test_choice_with_a_default_that_is_not_a_class_may_hand_out_anything(self):
+    def test_choice_with_a_default_that_is_not_a_class_may_hand_out_anything(self) -> None:
         self.assertEqual(len(wrecks(MODULE_TABLE + "def f(x, fallback): _KINDS.get(x, fallback)(x).go()")), 1)
 
-    def test_table_passed_in_as_an_argument_is_unknown(self):
+    def test_table_passed_in_as_an_argument_is_unknown(self) -> None:
         self.assertEqual(len(wrecks("def f(kinds, x): kinds[x](x).go()")), 1)
 
-    def test_local_name_hides_the_modules_table(self):
+    def test_local_name_hides_the_modules_table(self) -> None:
         self.assertEqual(len(wrecks(MODULE_TABLE + "def f(x, other):\n    _KINDS = other\n    _KINDS[x](x).go()\n")), 1)
 
-    def test_table_of_another_module_is_not_seen(self):
+    def test_table_of_another_module_is_not_seen(self) -> None:
         self.assertEqual(len(wrecks(MODULE_TABLE, "def f(x): _KINDS[x](x).go()")), 1)
 
-    def test_local_name_bound_to_a_table_and_to_something_else_is_unknown(self):
+    def test_local_name_bound_to_a_table_and_to_something_else_is_unknown(self) -> None:
         code = 'def f(x, other):\n    kinds = {"a": Alpha}\n    kinds = other\n    kinds[x]().go()\n'
         self.assertEqual(len(wrecks(code)), 1)
 
-    def test_module_name_bound_to_a_table_and_to_something_else_is_unknown(self):
+    def test_module_name_bound_to_a_table_and_to_something_else_is_unknown(self) -> None:
         self.assertEqual(len(wrecks(MODULE_TABLE + "_KINDS = load()\ndef f(x): _KINDS[x](x).go()")), 1)
 
-    def test_comprehension_over_an_item_that_is_not_a_class_is_not_a_table_of_classes(self):
+    def test_comprehension_over_an_item_that_is_not_a_class_is_not_a_table_of_classes(self) -> None:
         self.assertEqual(len(wrecks("_CARDS = {c.KIND: c for c in (Explain, helper)}\ndef f(x): _CARDS[x](x).go()")), 1)
 
-    def test_only_get_chooses_from_a_table(self):
+    def test_only_get_chooses_from_a_table(self) -> None:
         self.assertEqual(len(wrecks(MODULE_TABLE + "def f(x): _KINDS.pick(x, Gamma)(x).go()")), 1)
 
-    def test_comprehension_over_unknown_items_is_not_a_table_of_classes(self):
+    def test_comprehension_over_unknown_items_is_not_a_table_of_classes(self) -> None:
         self.assertEqual(len(wrecks("_CARDS = {c.KIND: c for c in CARDS}\ndef f(x): _CARDS[x](x).go()")), 1)
 
-    def test_context_manager_yielding_what_it_builds_is_a_factory(self):
+    def test_context_manager_yielding_what_it_builds_is_a_factory(self) -> None:
         self.assertEqual(wrecks(OPENED_PAGE + USES_OPENED_PAGE), [])
 
-    def test_context_manager_decorator_may_be_qualified_by_its_module(self):
+    def test_context_manager_decorator_may_be_qualified_by_its_module(self) -> None:
         qualified = OPENED_PAGE.replace("@contextmanager", "@contextlib.contextmanager")
         self.assertEqual(wrecks(qualified + USES_OPENED_PAGE), [])
 
-    def test_context_manager_yielding_what_another_object_hands_out_is_not_a_factory(self):
+    def test_context_manager_yielding_what_another_object_hands_out_is_not_a_factory(self) -> None:
         yields_a_stranger = OPENED_PAGE.replace("yield Page(document)", "yield document.first()")
         self.assertEqual(len(wrecks(yields_a_stranger + USES_OPENED_PAGE)), 1)
 
-    def test_asynchronous_context_manager_yielding_what_it_builds_is_a_factory(self):
+    def test_asynchronous_context_manager_yielding_what_it_builds_is_a_factory(self) -> None:
         self.assertEqual(wrecks(ASYNC_OPENED_PAGE), [])
 
-    def test_context_manager_yielding_nothing_is_not_a_factory(self):
+    def test_context_manager_yielding_nothing_is_not_a_factory(self) -> None:
         self.assertEqual(len(wrecks(OPENED_PAGE.replace("yield Page(document)", "yield") + USES_OPENED_PAGE)), 1)
 
-    def test_generator_that_is_not_a_context_manager_is_not_a_factory(self):
+    def test_generator_that_is_not_a_context_manager_is_not_a_factory(self) -> None:
         self.assertEqual(len(wrecks(OPENED_PAGE.replace("@contextmanager", "@cache") + USES_OPENED_PAGE)), 1)
 
 
@@ -330,80 +331,80 @@ CAUGHT = "def f(a):\n    e = a.b()\n    try:\n        a.go()\n    except OSError
 class SplitChainTest(unittest.TestCase):
     """Zinciri ara değişkene bölmek ihlali gidermez (Bl.6 · Train Wrecks, Hiding Structure)."""
 
-    def test_chain_split_through_a_local_name_is_a_train_wreck(self):
+    def test_chain_split_through_a_local_name_is_a_train_wreck(self) -> None:
         self.assertEqual(wrecks(SPLIT), ["ara değişkene bölünmüş zincir 'options = ctxt.options()' → "
                                          "'options.scratch_dir()' (Bl.6 · Train Wrecks; G36)"])
 
-    def test_object_the_function_built_may_be_called_through_a_name(self):
+    def test_object_the_function_built_may_be_called_through_a_name(self) -> None:
         self.assertEqual(wrecks("def f(path):\n    text = Path(path)\n    text.read_text()\n"), [])
 
-    def test_argument_rebound_to_a_stranger_is_a_stranger(self):
+    def test_argument_rebound_to_a_stranger_is_a_stranger(self) -> None:
         self.assertEqual(len(wrecks("def f(ctxt, other):\n    ctxt = other.child()\n    ctxt.go()\n")), 1)
 
-    def test_rebinding_to_a_construction_makes_a_friend(self):
+    def test_rebinding_to_a_construction_makes_a_friend(self) -> None:
         self.assertEqual(wrecks("def f(a):\n    x = a.b()\n    x = Box()\n    x.c()\n"), [])
 
-    def test_call_before_the_binding_talks_to_the_argument(self):
+    def test_call_before_the_binding_talks_to_the_argument(self) -> None:
         self.assertEqual(wrecks("def f(a, x):\n    x.c()\n    x = a.b()\n"), [])
 
-    def test_data_structure_operation_on_a_stranger_is_not_a_train_wreck(self):
+    def test_data_structure_operation_on_a_stranger_is_not_a_train_wreck(self) -> None:
         self.assertEqual(wrecks("def f(a):\n    name = a.b()\n    name.strip()\n"), [])
 
-    def test_annotated_binding_is_followed(self):
+    def test_annotated_binding_is_followed(self) -> None:
         self.assertEqual(len(wrecks("def f(a):\n    x: Options = a.b()\n    x.c()\n")), 1)
 
-    def test_walrus_binding_is_followed(self):
+    def test_walrus_binding_is_followed(self) -> None:
         self.assertEqual(len(wrecks("def f(a):\n    if (x := a.b()):\n        x.c()\n")), 1)
 
-    def test_context_handed_out_by_another_object_is_a_stranger(self):
+    def test_context_handed_out_by_another_object_is_a_stranger(self) -> None:
         self.assertEqual(len(wrecks("def f(a):\n    with a.lock() as held:\n        held.release()\n")), 1)
 
-    def test_redirected_output_is_a_friend(self):
+    def test_redirected_output_is_a_friend(self) -> None:
         self.assertEqual(wrecks(REDIRECTED), [])
 
-    def test_redirector_imported_by_name_builds_too(self):
+    def test_redirector_imported_by_name_builds_too(self) -> None:
         self.assertEqual(wrecks(REDIRECTED.replace("contextlib.redirect_stdout", "redirect_stderr")), [])
 
-    def test_opened_file_is_a_friend(self):
+    def test_opened_file_is_a_friend(self) -> None:
         self.assertEqual(wrecks("def f(path):\n    with open(path) as file:\n        file.read()\n"), [])
 
-    def test_stranger_bound_in_one_branch_may_reach_the_call(self):
+    def test_stranger_bound_in_one_branch_may_reach_the_call(self) -> None:
         self.assertEqual(len(wrecks(MAYBE_A_STRANGER)), 1)
 
-    def test_friend_bound_after_the_branch_cuts_the_stranger_off(self):
+    def test_friend_bound_after_the_branch_cuts_the_stranger_off(self) -> None:
         self.assertEqual(wrecks(FRIEND_AFTER_THE_BRANCH), [])
 
-    def test_friend_bound_in_the_callers_own_branch_cuts_the_stranger_off(self):
+    def test_friend_bound_in_the_callers_own_branch_cuts_the_stranger_off(self) -> None:
         self.assertEqual(wrecks(FRIEND_IN_ITS_OWN_BRANCH), [])
 
-    def test_loop_element_is_collection_access(self):
+    def test_loop_element_is_collection_access(self) -> None:
         self.assertEqual(wrecks("def f(a, items):\n    x = a.b()\n    for x in items:\n        x.c()\n"), [])
 
-    def test_unpacked_element_is_collection_access(self):
+    def test_unpacked_element_is_collection_access(self) -> None:
         self.assertEqual(wrecks("def f(a):\n    first, rest = a.split_off()\n    first.render()\n"), [])
 
-    def test_names_of_a_literal_tuple_are_followed_one_by_one(self):
+    def test_names_of_a_literal_tuple_are_followed_one_by_one(self) -> None:
         self.assertEqual(len(wrecks("def f(a):\n    x, y = a.b(), Box()\n    x.c()\n    y.c()\n")), 1)
 
-    def test_field_is_a_friend(self):
+    def test_field_is_a_friend(self) -> None:
         self.assertEqual(wrecks(FIELD_HOLDS_IT), [])
 
-    def test_nested_functions_bindings_do_not_leak(self):
+    def test_nested_functions_bindings_do_not_leak(self) -> None:
         self.assertEqual(wrecks(NESTED_FUNCTION_BINDS), [])
 
-    def test_copied_stranger_stays_a_stranger(self):
+    def test_copied_stranger_stays_a_stranger(self) -> None:
         self.assertEqual(len(wrecks("def f(a):\n    x = a.b()\n    y = x\n    y.c()\n")), 1)
 
-    def test_comprehension_names_its_own_elements(self):
+    def test_comprehension_names_its_own_elements(self) -> None:
         self.assertEqual(wrecks("def f(a, pages):\n    p = a.b()\n    return [p.render() for p in pages]\n"), [])
 
-    def test_caught_exception_is_a_friend(self):
+    def test_caught_exception_is_a_friend(self) -> None:
         self.assertEqual(wrecks(CAUGHT), [])
 
-    def test_chain_continuing_from_a_split_is_reported_once(self):
+    def test_chain_continuing_from_a_split_is_reported_once(self) -> None:
         self.assertEqual(len(wrecks("def f(a):\n    x = a.b()\n    x.c().d()\n")), 1)
 
-    def test_object_made_by_another_modules_factory_may_be_called_through_a_name(self):
+    def test_object_made_by_another_modules_factory_may_be_called_through_a_name(self) -> None:
         split = "def f(project):\n    progress = project.load()\n    progress.pages()\n"
         self.assertEqual(wrecks(PROJECT_LOADS_PROGRESS, split), [])
 
@@ -411,12 +412,12 @@ class SplitChainTest(unittest.TestCase):
 class SplitEqualsChainTest(unittest.TestCase):
     """Zincirli ve bölünmüş yazılış her zaman aynı kararı verir; iki halkalı zincirde alarm sayısı da aynıdır."""
 
-    def test_every_chain_decides_like_its_split(self):
+    def test_every_chain_decides_like_its_split(self) -> None:
         for code in CHAINS:
             with self.subTest(code=code):
                 self.assertEqual(bool(wrecks(*code)), bool(wrecks(*split_all(code))))
 
-    def test_two_link_chain_counts_like_its_split(self):
+    def test_two_link_chain_counts_like_its_split(self) -> None:
         for code in TWO_LINK_CHAINS:
             with self.subTest(code=code):
                 self.assertEqual(len(wrecks(*code)), len(wrecks(*split_all(code))))
@@ -438,7 +439,7 @@ CHAINS = TWO_LINK_CHAINS + [("def f(a): a.b().c().d()",), ("def f(klass):\n    k
                             ("def f(parser): parser.add_subparsers().add_parser('info').set_defaults(run=go)",)]
 
 
-def split_all(codes):
+def split_all(codes: Iterable[str]) -> tuple[str, ...]:
     """Her zincir halkası bir ara değişkene bölünür: `a.b().c()` → `link = a.b()` ve `link.c()`."""
     return tuple(ast.unparse(_Splitter().visit(ast.parse(code))) for code in codes)
 
@@ -446,7 +447,7 @@ def split_all(codes):
 class _Splitter(ast.NodeTransformer):
     """Deyimin değerindeki zinciri, halka halka ara değişkenlere açar."""
 
-    def generic_visit(self, node):
+    def generic_visit(self, node: ast.AST) -> ast.AST:
         super().generic_visit(node)
         for field in ("body", "orelse"):
             if isinstance(getattr(node, field, None), list):
@@ -454,7 +455,7 @@ class _Splitter(ast.NodeTransformer):
         return node
 
     @classmethod
-    def _split(cls, statement):
+    def _split(cls, statement: ast.stmt) -> list[ast.stmt]:
         call = getattr(statement, "value", None)
         is_chain = isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute)
         if not (is_chain and isinstance(call.func.value, ast.Call)):

@@ -42,29 +42,29 @@ def f(shape):
 
 
 class FieldSwitchesTest(unittest.TestCase):
-    def test_two_comparisons_on_one_key_are_a_switch(self):
+    def test_two_comparisons_on_one_key_are_a_switch(self) -> None:
         self.assertEqual(Switches(Snippet(RENDER_BY_TYPE).function()).fields(), ["type"])
 
-    def test_single_comparison_is_not_a_switch(self):
+    def test_single_comparison_is_not_a_switch(self) -> None:
         self.assertEqual(Switches(Snippet(SINGLE_COMPARISON).function()).fields(), [])
 
-    def test_match_on_a_field_is_a_switch(self):
+    def test_match_on_a_field_is_a_switch(self) -> None:
         self.assertEqual(Switches(Snippet(MATCH_ON_FIELD).function()).fields(), ["kind"])
 
 
 class TypeSwitchTest(unittest.TestCase):
-    def test_isinstance_branches_are_a_switch(self):
+    def test_isinstance_branches_are_a_switch(self) -> None:
         self.assertEqual(Switches(Snippet(ISINSTANCE_BRANCHES).function()).types(), {"Square", "Circle"})
 
-    def test_single_isinstance_predicate_is_not_a_switch(self):
+    def test_single_isinstance_predicate_is_not_a_switch(self) -> None:
         self.assertEqual(Switches(Snippet("def f(x):\n    return isinstance(x, (A, B))\n").function()).types(), frozenset())
 
 
 class OneSwitchTest(unittest.TestCase):
-    def test_same_switch_in_two_functions_raises_alarms(self):
+    def test_same_switch_in_two_functions_raises_alarms(self) -> None:
         self.assertEqual(names(OneSwitch(Snippet(RENDER_BY_TYPE + COUNT_BY_TYPE).functions()).notes()), ["render", "count"])
 
-    def test_switch_in_one_function_is_the_one_switch(self):
+    def test_switch_in_one_function_is_the_one_switch(self) -> None:
         self.assertEqual(OneSwitch(Snippet(RENDER_BY_TYPE).functions()).notes(), [])
 
 

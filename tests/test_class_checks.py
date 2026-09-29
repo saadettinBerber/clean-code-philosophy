@@ -2,6 +2,7 @@ import unittest
 
 from measure.class_checks import (MAX_CLASS_LINES, ClassSize, Cohesion, FieldsOutsideConstructor, Hybrid,
                                   Responsibilities, UnusedSelf)
+from measure.class_definition import ClassDefinition
 from measure.findings import ALARM, LOOK
 from tests.snippets import Snippet, levels
 
@@ -153,64 +154,64 @@ class Tax:
 """
 
 
-def class_with_lines(count):
+def class_with_lines(count: int) -> ClassDefinition:
     body = "\n".join(f"    X{index} = {index}" for index in range(count - 1))
     return Snippet(f"class Big:\n{body}\n").cls()
 
 
 class ClassSizeTest(unittest.TestCase):
-    def test_class_at_the_alarm_line_gives_no_note(self):
+    def test_class_at_the_alarm_line_gives_no_note(self) -> None:
         self.assertEqual(ClassSize(class_with_lines(MAX_CLASS_LINES)).findings(), [])
 
-    def test_one_line_over_raises_the_alarm(self):
+    def test_one_line_over_raises_the_alarm(self) -> None:
         self.assertEqual(levels(ClassSize(class_with_lines(MAX_CLASS_LINES + 1)).findings()), [ALARM])
 
 
 class ResponsibilitiesTest(unittest.TestCase):
-    def test_small_class_with_two_jobs_is_caught(self):
+    def test_small_class_with_two_jobs_is_caught(self) -> None:
         self.assertEqual(levels(Responsibilities(Snippet(SUPER_DASHBOARD).cls()).findings()), [ALARM])
 
-    def test_methods_sharing_fields_form_one_responsibility(self):
+    def test_methods_sharing_fields_form_one_responsibility(self) -> None:
         self.assertEqual(Responsibilities(Snippet(COHESIVE_STACK).cls()).findings(), [])
 
-    def test_methods_calling_each_other_form_one_responsibility(self):
+    def test_methods_calling_each_other_form_one_responsibility(self) -> None:
         self.assertEqual(Responsibilities(Snippet(MUTUAL_CALLS).cls()).findings(), [])
 
 
-    def test_visitor_handing_itself_out_is_one_responsibility(self):
+    def test_visitor_handing_itself_out_is_one_responsibility(self) -> None:
         self.assertEqual(Responsibilities(Snippet(VISITOR).cls()).findings(), [])
 
-    def test_visitor_handing_itself_out_by_keyword_is_one_responsibility(self):
+    def test_visitor_handing_itself_out_by_keyword_is_one_responsibility(self) -> None:
         self.assertEqual(Responsibilities(Snippet(VISITOR.replace("accept(self)", "accept(visitor=self)")).cls()).findings(), [])
 
-    def test_handing_out_a_field_does_not_join_the_callbacks(self):
+    def test_handing_out_a_field_does_not_join_the_callbacks(self) -> None:
         self.assertEqual(levels(Responsibilities(Snippet(FIELD_HANDED_OUT).cls()).findings()), [ALARM])
 
-    def test_tear_down_belongs_to_the_fixture(self):
+    def test_tear_down_belongs_to_the_fixture(self) -> None:
         self.assertEqual(Responsibilities(Snippet(TEST_WITH_TEAR_DOWN).cls()).findings(), [])
 
-    def test_ordinary_cleanup_method_is_a_responsibility_of_its_own(self):
+    def test_ordinary_cleanup_method_is_a_responsibility_of_its_own(self) -> None:
         self.assertEqual(levels(Responsibilities(Snippet(CLEANUP_BESIDE_WORK).cls()).findings()), [ALARM])
 
 class CohesionTest(unittest.TestCase):
-    def test_field_used_by_one_method_is_worth_a_look(self):
+    def test_field_used_by_one_method_is_worth_a_look(self) -> None:
         self.assertEqual(levels(Cohesion(Snippet(SUPER_DASHBOARD).cls()).findings()), [LOOK, LOOK])
 
-    def test_fields_shared_by_methods_are_cohesive(self):
+    def test_fields_shared_by_methods_are_cohesive(self) -> None:
         self.assertEqual(Cohesion(Snippet(COHESIVE_STACK).cls()).findings(), [])
 
-    def test_data_structure_without_methods_is_not_measured(self):
+    def test_data_structure_without_methods_is_not_measured(self) -> None:
         self.assertEqual(Cohesion(Snippet(POINT).cls()).findings(), [])
 
 
 class FieldsOutsideConstructorTest(unittest.TestCase):
-    def test_field_born_in_a_method_raises_an_alarm(self):
+    def test_field_born_in_a_method_raises_an_alarm(self) -> None:
         self.assertEqual(levels(FieldsOutsideConstructor(Snippet(FIELD_BORN_IN_METHOD).cls()).findings()), [ALARM])
 
-    def test_fields_declared_in_the_constructor_are_fine(self):
+    def test_fields_declared_in_the_constructor_are_fine(self) -> None:
         self.assertEqual(FieldsOutsideConstructor(Snippet(COHESIVE_STACK).cls()).findings(), [])
 
-    def test_fields_built_in_set_up_are_fine(self):
+    def test_fields_built_in_set_up_are_fine(self) -> None:
         self.assertEqual(FieldsOutsideConstructor(Snippet(FIELD_BUILT_IN_SET_UP).cls()).findings(), [])
 
 SHARED_FIXTURE_BASE = """
@@ -324,55 +325,55 @@ class Metadata:
 
 
 class HybridTest(unittest.TestCase):
-    def test_public_field_beside_behavior_is_a_hybrid(self):
+    def test_public_field_beside_behavior_is_a_hybrid(self) -> None:
         self.assertEqual(levels(Hybrid(Snippet(PUBLIC_FIELD_WITH_BEHAVIOR).cls()).findings()), [ALARM])
 
-    def test_fields_assigned_together_are_public_state(self):
+    def test_fields_assigned_together_are_public_state(self) -> None:
         findings = Hybrid(Snippet(FIELDS_ASSIGNED_TOGETHER).cls()).findings()
         self.assertIn("['first', 'rest', 'title']", findings[0].message)
 
-    def test_public_accessor_beside_behavior_is_a_hybrid(self):
+    def test_public_accessor_beside_behavior_is_a_hybrid(self) -> None:
         self.assertEqual(levels(Hybrid(Snippet(PUBLIC_ACCESSOR_WITH_BEHAVIOR).cls()).findings()), [ALARM])
 
-    def test_object_hiding_its_data_is_not_a_hybrid(self):
+    def test_object_hiding_its_data_is_not_a_hybrid(self) -> None:
         self.assertEqual(Hybrid(Snippet(COHESIVE_STACK).cls()).findings(), [])
 
-    def test_data_structure_is_not_a_hybrid(self):
+    def test_data_structure_is_not_a_hybrid(self) -> None:
         self.assertEqual(Hybrid(Snippet(POINT).cls()).findings(), [])
 
-    def test_shared_fixture_base_is_a_test_case(self):
+    def test_shared_fixture_base_is_a_test_case(self) -> None:
         self.assertEqual(Hybrid(Snippet(SHARED_FIXTURE_BASE).cls()).findings(), [])
 
-    def test_class_named_like_a_test_case_but_not_derived_is_measured(self):
+    def test_class_named_like_a_test_case_but_not_derived_is_measured(self) -> None:
         self.assertEqual(levels(Hybrid(Snippet(FIXTURE_LOOKALIKE).cls()).findings()), [ALARM])
 
-    def test_named_constructor_is_not_behavior(self):
+    def test_named_constructor_is_not_behavior(self) -> None:
         self.assertEqual(Hybrid(Snippet(DATA_WITH_NAMED_CONSTRUCTOR).cls()).findings(), [])
 
-    def test_static_factory_choosing_a_subclass_is_not_behavior(self):
+    def test_static_factory_choosing_a_subclass_is_not_behavior(self) -> None:
         self.assertEqual(Hybrid(Snippet(DATA_WITH_STATIC_FACTORY).cls()).findings(), [])
 
-    def test_class_method_computing_an_answer_is_behavior(self):
+    def test_class_method_computing_an_answer_is_behavior(self) -> None:
         self.assertEqual(levels(Hybrid(Snippet(DATA_WITH_CLASS_QUERY).cls()).findings()), [ALARM])
 
-    def test_test_case_is_not_a_hybrid(self):
+    def test_test_case_is_not_a_hybrid(self) -> None:
         self.assertEqual(Hybrid(Snippet(PUBLIC_FIXTURE_TEST_CASE).cls()).findings(), [])
 
-    def test_setter_injecting_a_collaborator_is_not_public_state(self):
+    def test_setter_injecting_a_collaborator_is_not_public_state(self) -> None:
         self.assertEqual(Hybrid(Snippet(INJECTED_COLLABORATOR).cls()).findings(), [])
 
-    def test_injected_collaborator_handed_out_by_a_getter_is_public_state(self):
+    def test_injected_collaborator_handed_out_by_a_getter_is_public_state(self) -> None:
         self.assertEqual(levels(Hybrid(Snippet(EXPOSED_COLLABORATOR).cls()).findings()), [ALARM])
 
-    def test_setter_of_data_mutated_in_place_is_public_state(self):
+    def test_setter_of_data_mutated_in_place_is_public_state(self) -> None:
         self.assertEqual(levels(Hybrid(Snippet(SETTER_OF_MUTATED_DATA).cls()).findings()), [ALARM])
 
 
 class UnusedSelfTest(unittest.TestCase):
-    def test_method_ignoring_self_is_worth_a_look(self):
+    def test_method_ignoring_self_is_worth_a_look(self) -> None:
         self.assertEqual(levels(UnusedSelf(Snippet(METHOD_IGNORING_SELF).cls()).findings()), [LOOK])
 
-    def test_static_method_is_not_measured(self):
+    def test_static_method_is_not_measured(self) -> None:
         self.assertEqual(UnusedSelf(Snippet(STATIC_METHOD).cls()).findings(), [])
 
 

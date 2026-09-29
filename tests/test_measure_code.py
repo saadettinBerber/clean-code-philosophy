@@ -7,17 +7,17 @@ ROOT = PurePosixPath("proje")
 
 
 class VisibleTest(unittest.TestCase):
-    def test_files_under_hidden_directories_are_skipped(self):
+    def test_files_under_hidden_directories_are_skipped(self) -> None:
         paths = [ROOT / "a.py", ROOT / ".venv" / "b.py", ROOT / ".kilo" / "kopya" / "c.py"]
         self.assertEqual(visible(paths, ROOT), [ROOT / "a.py"])
 
-    def test_a_hidden_root_given_on_purpose_is_searched(self):
+    def test_a_hidden_root_given_on_purpose_is_searched(self) -> None:
         root = PurePosixPath(".kilo/kopya")
         self.assertEqual(visible([root / "a.py"], root), [root / "a.py"])
 
 
 class UnmeasuredTest(unittest.TestCase):
-    def test_measured_file_is_not_read_again_from_the_project(self):
+    def test_measured_file_is_not_read_again_from_the_project(self) -> None:
         project = [PurePosixPath("measure/a.py"), PurePosixPath("measure/b.py")]
         self.assertEqual(unmeasured(project, [PurePosixPath("./measure/a.py")]), [PurePosixPath("measure/b.py")])
 
