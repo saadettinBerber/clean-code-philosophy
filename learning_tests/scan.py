@@ -8,6 +8,7 @@ import os
 import subprocess
 import tempfile
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from collections.abc import Mapping
@@ -35,7 +36,7 @@ Json = dict[str, Any]
 
 
 class ScanError(Exception):
-    """Tarama bir şey kanıtlayamaz: profil yanlış, tarayıcı başarısız ya da sunucu raporu işleyemedi."""
+    """Tarama ya da sorgu bir şey kanıtlayamaz: profil yanlış, tarayıcı başarısız, sunucu işleyemedi ya da reddetti."""
 
 
 class SonarQube:
@@ -53,7 +54,9 @@ class SonarQube:
             self._wait(task_id(Path(work) / REPORT_TASK))
 
     def issue_lines(self, rule: str, path: str) -> list[int]:
-        """Dosyada kuralın açık bulgularının satırları."""
+        """Dosyada kuralın açık bulgularının satırları. Arama API'si tanımadığı dosyaya da boş liste döner;
+        boş cevap "bakılmadı" anlamına gelmesin diye dosya önce sorulur."""
+        self._require_file(path)
         found = self._get("api/issues/search", {"components": f"{PROJECT}:{path}", "rules": rule, "resolved": "false"})
         return sorted(int(issue["line"]) for issue in found["issues"])
 
@@ -62,6 +65,10 @@ class SonarQube:
         [profile] = self._get("api/qualityprofiles/search", {"project": PROJECT, "language": "py"})["profiles"]
         if profile["name"] != PROFILE:
             raise ScanError(f"{PROJECT} '{profile['name']}' profiline bağlı, beklenen '{PROFILE}'")
+
+    def _require_file(self, path: str) -> None:
+        """Sunucunun dizinlemediği dosya için ölçüm API'si 404 döner."""
+        self._get("api/measures/component", {"component": f"{PROJECT}:{path}", "metricKeys": "lines"})
 
     def _scan(self, project: Path, work: Path) -> None:
         run = subprocess.run(scanner_command(project, work), env={**os.environ, "SONAR_TOKEN": self._token},
@@ -81,6 +88,12 @@ class SonarQube:
         return str(self._get("api/ce/task", {"id": task})["task"]["status"])
 
     def _get(self, api: str, parameters: Mapping[str, str]) -> Json:
+        try:
+            return self._response(api, parameters)
+        except urllib.error.HTTPError as error:
+            raise ScanError(f"{api} {dict(parameters)}: {error.code} {error.read().decode()}") from error
+
+    def _response(self, api: str, parameters: Mapping[str, str]) -> Json:
         request = urllib.request.Request(f"{SERVER}/{api}?{urllib.parse.urlencode(parameters)}",
                                          headers={"Authorization": f"Bearer {self._token}"})
         with urllib.request.urlopen(request) as response:
