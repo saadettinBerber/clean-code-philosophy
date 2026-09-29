@@ -9,6 +9,8 @@ import urllib.request
 from collections.abc import Mapping
 from typing import Any
 
+PAGE_SIZE = 500
+
 # Sunucunun JSON cevabı; alanlarını sınır sınıfları okur, dışarı ham sözlük çıkmaz.
 Json = dict[str, Any]
 
@@ -30,6 +32,11 @@ class WebApi:
         url = f"{self._url}/{api}?{urllib.parse.urlencode(parameters)}"
         return dict(json.loads(self._send(urllib.request.Request(url, headers=self._headers()))))
 
+    def pages(self, api: str, parameters: Mapping[str, str]) -> list[Json]:
+        """Sayfalı arama API'sinin bütün sayfaları; kaç sayfa olduğunu ilk sayfanın toplamı söyler."""
+        pages = [self.get(api, _page(parameters, 1))]
+        return pages + [self.get(api, _page(parameters, number)) for number in range(2, _page_count(pages[0]) + 1)]
+
     def post(self, api: str, parameters: Mapping[str, str]) -> None:
         form = urllib.parse.urlencode(parameters).encode()
         self._send(urllib.request.Request(f"{self._url}/{api}", data=form, headers=self._headers(), method="POST"))
@@ -45,6 +52,14 @@ class WebApi:
             raise SonarQubeError(_refusal(request, error)) from error
         except urllib.error.URLError as error:
             raise Unreachable(f"{self._url} adresine ulaşılamadı: {error.reason}") from error
+
+
+def _page(parameters: Mapping[str, str], number: int) -> dict[str, str]:
+    return {**parameters, "ps": str(PAGE_SIZE), "p": str(number)}
+
+
+def _page_count(first: Json) -> int:
+    return -(-int(first["total"]) // PAGE_SIZE)
 
 
 def _refusal(request: urllib.request.Request, error: urllib.error.HTTPError) -> str:

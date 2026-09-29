@@ -2,14 +2,11 @@
 
 Okumak Analysis Token'la olur; yazmak yönetim yetkisi, yani User Token ister.
 """
-from collections.abc import Mapping
-
 from sonarqube.rules import Parameters
 from sonarqube.web import Json, WebApi
 
 LANGUAGE = "py"
 RULE_SEARCH = "api/rules/search"
-PAGE_SIZE = 500
 
 
 class ProfileError(Exception):
@@ -25,7 +22,7 @@ class QualityProfile:
 
     def active_rules(self) -> dict[str, Parameters]:
         """Profilde açık kurallar ve eşikleri."""
-        pages = rule_pages(self._web, {"qprofile": self._key, "activation": "true", "f": "actives"})
+        pages = self._web.pages(RULE_SEARCH, {"qprofile": self._key, "activation": "true", "f": "actives"})
         return {rule: _parameters(activations) for page in pages for rule, activations in page["actives"].items()}
 
     def activate(self, rule: str, parameters: Parameters) -> None:
@@ -62,26 +59,12 @@ class SonarQubeProfiles:
 
     def rule_keys(self) -> set[str]:
         """Sunucunun tanıdığı Python kuralları."""
-        return {str(rule["key"]) for page in rule_pages(self._web, {"languages": LANGUAGE, "f": "name"})
+        return {str(rule["key"]) for page in self._web.pages(RULE_SEARCH, {"languages": LANGUAGE, "f": "name"})
                 for rule in page["rules"]}
 
     def _keys(self) -> dict[str, str]:
         found = self._web.get("api/qualityprofiles/search", {"language": LANGUAGE})
         return {str(profile["name"]): str(profile["key"]) for profile in found["profiles"]}
-
-
-def rule_pages(web: WebApi, query: Mapping[str, str]) -> list[Json]:
-    """Kural araması sayfa sayfa gelir; bütün sayfalar, ilk sayfanın söylediği toplama göre."""
-    pages = [web.get(RULE_SEARCH, _page(query, 1))]
-    return pages + [web.get(RULE_SEARCH, _page(query, number)) for number in range(2, _page_count(pages[0]) + 1)]
-
-
-def _page(query: Mapping[str, str], number: int) -> dict[str, str]:
-    return {**query, "ps": str(PAGE_SIZE), "p": str(number)}
-
-
-def _page_count(first: Json) -> int:
-    return -(-int(first["total"]) // PAGE_SIZE)
 
 
 def _parameters(activations: list[Json]) -> Parameters:
