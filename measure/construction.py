@@ -132,11 +132,16 @@ def is_class_table(value: ast.AST) -> bool:
 
 
 def _comprehends_classes(comprehension: ast.DictComp) -> bool:
-    """`{sınıf.KIND: sınıf for sınıf in (A, B)}`: değer, sınıf listesinin öğesidir."""
-    [generator] = comprehension.generators or [None]
-    listed = isinstance(getattr(generator, "iter", None), (ast.Tuple, ast.List))
-    is_element = listed and isinstance(generator.target, ast.Name) and is_name(comprehension.value, generator.target.id)
-    return is_element and all(Callee(item).names_a_class() for item in generator.iter.elts)
+    """`{sınıf.KIND: sınıf for sınıf in (A, B)}`: tek üreteçli kavramada değer, sınıf listesinin öğesidir."""
+    generators = comprehension.generators
+    return len(generators) == 1 and _lists_classes_as(comprehension.value, generators[0])
+
+
+def _lists_classes_as(value: ast.expr, generator: ast.comprehension) -> bool:
+    """Üreteç bir sınıf listesini geziyor ve değer, gezilen öğenin kendisi."""
+    listed, target = generator.iter, generator.target
+    return (isinstance(listed, (ast.Tuple, ast.List)) and isinstance(target, ast.Name) and is_name(value, target.id)
+            and all(Callee(item).names_a_class() for item in listed.elts))
 
 
 def _class_tables_of(source: SourceFile) -> list[Place]:

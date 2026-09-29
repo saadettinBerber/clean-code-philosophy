@@ -264,6 +264,10 @@ class FactoryKnowledgeTest(unittest.TestCase):
     def test_table_of_classes_built_by_a_comprehension_builds_too(self) -> None:
         self.assertEqual(wrecks(CLASSES_OF_A_COMPREHENSION + "def f(data): _CARDS[data](data).go()"), [])
 
+    def test_comprehension_with_two_generators_is_not_a_class_table(self) -> None:
+        two_generators = "_KINDS = {a: b for a in (A, B) for b in (C, D)}\n"
+        self.assertEqual(len(wrecks(two_generators + "def f(x): _KINDS[x](x).go()")), 1)
+
     def test_table_holding_something_other_than_a_class_is_not_a_constructor(self) -> None:
         self.assertEqual(len(wrecks('_HANDLERS = {"a": Alpha, "b": handle}\ndef f(x): _HANDLERS[x](x).go()')), 1)
 
