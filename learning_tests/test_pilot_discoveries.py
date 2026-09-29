@@ -36,6 +36,19 @@ PRICE_TABLE = """def price_table(rows, currency):
 """
 PRICE_TABLE_LINES = len(PRICE_TABLE.splitlines())
 PRICE_TABLE_WITH_ITEM = re.sub(r"\brow\b", "item", PRICE_TABLE)
+POLYMORPHIC_FRAGMENTS = """class Fragment:
+    def __init__(self, html):
+        self._html = html
+
+    def render(self, first_note):
+        return self._html
+
+
+class Heading(Fragment):
+    def render(self, first_note):
+        return first_note + self._html
+"""
+BASE_RENDER_LINE = 5
 
 PROJECT_FILES = {
     "src/test_checks.py": PRODUCTION_NAMED_LIKE_A_TEST,
@@ -45,6 +58,7 @@ PROJECT_FILES = {
     "src/prices.py": PRICE_TABLE,
     "src/prices_copy.py": PRICE_TABLE,
     "src/prices_with_item.py": PRICE_TABLE_WITH_ITEM,
+    "src/fragments.py": POLYMORPHIC_FRAGMENTS,
 }
 
 
@@ -80,6 +94,10 @@ class PilotDiscoveriesTest(unittest.TestCase):
     def test_copy_with_one_renamed_variable_is_not_found(self) -> None:
         """Adlar normalleştirilmez: tek değişkenin adı değişince kopya görünmez olur; G5 okuma maddesi kalır."""
         self.assertEqual(self.sonarqube.duplicated_lines("src/prices_with_item.py"), 0)
+
+    def test_unused_parameter_of_a_polymorphic_method_is_reported(self) -> None:
+        """S1172 arayüzün istediği parametreyi ölü sayar; kitapla çelişir (Bl.3 · Switch Statements), kapatılır."""
+        self.assertEqual(self.sonarqube.issue_lines("python:S1172", "src/fragments.py"), [BASE_RENDER_LINE])
 
 
 if __name__ == "__main__":
