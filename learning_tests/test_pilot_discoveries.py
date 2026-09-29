@@ -14,10 +14,12 @@ LONG_LINE_NUMBER = 5
 TEST_WITH_LONG_LINE = ("import unittest\n\n\nclass TitleTest(unittest.TestCase):\n"
                        "    def test_title(self) -> None:\n"
                        f"        self.assertEqual(len('{'x' * 130}'), 130)\n")
+TEST_LONG_LINE_NUMBER = 6
 
 PROJECT_FILES = {
     "src/test_checks.py": PRODUCTION_NAMED_LIKE_A_TEST,
     "tests/test_title.py": TEST_WITH_LONG_LINE,
+    "test_sources/test_title.py": TEST_WITH_LONG_LINE,
 }
 
 
@@ -36,6 +38,11 @@ class PilotDiscoveriesTest(unittest.TestCase):
     def test_rules_skip_files_declared_as_tests(self) -> None:
         """Kural kapsamı varsayılan olarak yalnız üretim kodu (`scope()` → MAIN); arayüz 'ALL' gösterse de."""
         self.assertEqual(self.sonarqube.issue_lines("python:LineLength", "tests/test_title.py"), [])
+
+    def test_rules_apply_to_tests_declared_as_sources(self) -> None:
+        """Aynı test dosyası kaynak olarak bildirilince kurallar ona da uygulanır: testler ayrı projede taranır (K7)."""
+        lines = self.sonarqube.issue_lines("python:LineLength", "test_sources/test_title.py")
+        self.assertEqual(lines, [TEST_LONG_LINE_NUMBER])
 
 
 if __name__ == "__main__":
