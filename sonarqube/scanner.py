@@ -8,6 +8,7 @@ import subprocess
 import tempfile
 import time
 from collections.abc import Mapping
+from dataclasses import dataclass
 from pathlib import Path
 
 from sonarqube.web import SonarQubeError, WebApi
@@ -30,6 +31,14 @@ class ScanError(SonarQubeError):
     """Tarama bir şey kanıtlayamaz: tarayıcı başarısız oldu ya da sunucu raporu işleyemedi."""
 
 
+@dataclass(frozen=True)
+class Scan:
+    """Bir tarama: taranan kök ve tarayıcıya verilen özellikler."""
+
+    root: Path
+    properties: Mapping[str, str]
+
+
 class Scanner:
     """Tarayıcı konteyneri. Token yalnız konteynerin ortam değişkeninde ve istek başlığında durur."""
 
@@ -38,10 +47,10 @@ class Scanner:
         self._token = token
         self._web = WebApi(url, token)
 
-    def scan(self, root: Path, properties: Mapping[str, str]) -> None:
+    def scan(self, scan: Scan) -> None:
         """Kökü verilen özelliklerle tarar; sunucu raporu işleyene dek bekler."""
         with tempfile.TemporaryDirectory() as work:
-            self._run(self._container(root, Path(work)) + arguments(properties))
+            self._run(self._container(scan.root, Path(work)) + arguments(scan.properties))
             self._wait(task_id(Path(work) / REPORT_TASK))
 
     def _container(self, root: Path, work: Path) -> list[str]:

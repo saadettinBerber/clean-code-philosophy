@@ -5,6 +5,8 @@ Anahtar kök klasörün adıdır; testler ayrıca `<ad>-testler` projesinde tara
 from collections.abc import Sequence
 from pathlib import Path
 
+from sonarqube.scanner import Scan
+
 TESTS_SUFFIX = "-testler"
 
 
@@ -19,11 +21,12 @@ class Project:
         """Ana projenin ve test projesinin anahtarı."""
         return self._root.name, self._root.name + TESTS_SUFFIX
 
-    def scans(self) -> list[dict[str, str]]:
+    def scans(self) -> list[Scan]:
         """Ana taramada testler test olarak bildirilir: teste özel kurallar yalnız orada çalışır. Test taramasında
         kaynak olarak bildirilir: genel kurallar testlere yalnız orada uygulanır (Bl.9 · Keeping Tests Clean)."""
         main, tests = self.keys()
         folders = ",".join(self._tests)
         excluded = ",".join(f"{folder}/**" for folder in self._tests)
-        return [{"sonar.projectKey": main, "sonar.sources": ".", "sonar.exclusions": excluded, "sonar.tests": folders},
-                {"sonar.projectKey": tests, "sonar.sources": folders}]
+        main_scan = {"sonar.projectKey": main, "sonar.sources": ".", "sonar.exclusions": excluded,
+                     "sonar.tests": folders}
+        return [Scan(self._root, main_scan), Scan(self._root, {"sonar.projectKey": tests, "sonar.sources": folders})]

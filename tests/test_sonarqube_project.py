@@ -1,4 +1,5 @@
 import unittest
+from collections.abc import Mapping
 from pathlib import Path
 
 from sonarqube.project import Project
@@ -18,12 +19,13 @@ class ProjectTest(unittest.TestCase):
 
     def test_second_scan_declares_test_folders_as_sources(self) -> None:
         [_, tests] = PROJECT.scans()
-        self.assertEqual(tests, {"sonar.projectKey": "felsefe-testler", "sonar.sources": "tests,learning_tests"})
+        expected = {"sonar.projectKey": "felsefe-testler", "sonar.sources": "tests,learning_tests"}
+        self.assertEqual(tests.properties, expected)
 
 
-def main_scan() -> dict[str, str]:
+def main_scan() -> Mapping[str, str]:
     [main, _] = PROJECT.scans()
-    return main
+    return main.properties
 
 
 if __name__ == "__main__":

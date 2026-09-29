@@ -8,7 +8,7 @@ import tempfile
 from collections.abc import Mapping
 from pathlib import Path
 
-from sonarqube.scanner import Scanner
+from sonarqube.scanner import Scan, Scanner
 from sonarqube.web import Json, WebApi
 
 SERVER = "http://127.0.0.1:9000"
@@ -34,7 +34,7 @@ class SonarQube:
         self._require_profile()
         with tempfile.TemporaryDirectory() as project:
             write_files(files, Path(project))
-            self._scanner.scan(Path(project), SCAN_PROPERTIES)
+            self._scanner.scan(Scan(Path(project), SCAN_PROPERTIES))
 
     def issue_lines(self, rule: str, path: str) -> list[int]:
         """Dosyada kuralın açık bulgularının satırları. Arama API'si tanımadığı dosyaya da boş liste döner;
