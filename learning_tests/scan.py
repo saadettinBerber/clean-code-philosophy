@@ -1,19 +1,17 @@
 """Öğrenme testlerinin projesini gerçek SonarQube sunucusuna taratır, sonucu web API'sinden okur.
 
-Üçüncü tarafı doğrudan çağırır: sınır nesnesi (`SonarQubeServer`) henüz yok, bu testler onun neye dayanacağını
-öğrenir (Bl.8 · Learning Tests). `ogrenme-testleri` projesi bir kez, yönetim yetkisiyle pilot profiline bağlanmıştır.
+Üçüncü tarafın uç noktalarını doğrudan çağırır; `SonarQubeServer` henüz yok, bu testler onun neye dayanacağını
+öğrenir (Bl.8 · Learning Tests). İstek, sınır ailesinin taşıma kapısından (`sonarqube/web.py`) geçer.
+`ogrenme-testleri` projesi bir kez, yönetim yetkisiyle pilot profiline bağlanmıştır.
 """
-import json
 import os
 import subprocess
 import tempfile
 import time
-import urllib.error
-import urllib.parse
-import urllib.request
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any
+
+from sonarqube.web import Json, WebApi
 
 SERVER = "http://127.0.0.1:9000"
 SCANNER = "sonarsource/sonar-scanner-cli@sha256:a3f4215076706c95a17a68c19322ee916e40a3acd081a8c1a1e839e0194afa57"
@@ -32,11 +30,9 @@ POLL_SECONDS = 2
 MAX_POLLS = 90
 OUTPUT_TAIL = 3000
 
-Json = dict[str, Any]
-
 
 class ScanError(Exception):
-    """Tarama ya da sorgu bir şey kanıtlayamaz: profil yanlış, tarayıcı başarısız, sunucu işleyemedi ya da reddetti."""
+    """Tarama bir şey kanıtlayamaz: profil yanlış, tarayıcı başarısız ya da sunucu raporu işleyemedi."""
 
 
 class SonarQube:
@@ -44,6 +40,7 @@ class SonarQube:
 
     def __init__(self, token: str) -> None:
         self._token = token
+        self._web = WebApi(SERVER, token)
 
     def analyze(self, files: Mapping[str, str]) -> None:
         """Bellekteki projeyi geçici klasöre yazar, klasörü salt okunur bağlayıp tarar, sunucu işleyene dek bekler."""
@@ -57,12 +54,13 @@ class SonarQube:
         """Dosyada kuralın açık bulgularının satırları. Arama API'si tanımadığı dosyaya da boş liste döner;
         boş cevap "bakılmadı" anlamına gelmesin diye dosya önce sorulur."""
         self._require_file(path)
-        found = self._get("api/issues/search", {"components": f"{PROJECT}:{path}", "rules": rule, "resolved": "false"})
+        query = {"components": f"{PROJECT}:{path}", "rules": rule, "resolved": "false"}
+        found = self._web.get("api/issues/search", query)
         return sorted(int(issue["line"]) for issue in found["issues"])
 
     def _require_profile(self) -> None:
         """Kitap eşikleri pilot profilinde; başka profille taranan proje keşifleri yanlış sınar."""
-        [profile] = self._get("api/qualityprofiles/search", {"project": PROJECT, "language": "py"})["profiles"]
+        [profile] = self._web.get("api/qualityprofiles/search", {"project": PROJECT, "language": "py"})["profiles"]
         if profile["name"] != PROFILE:
             raise ScanError(f"{PROJECT} '{profile['name']}' profiline bağlı, beklenen '{PROFILE}'")
 
@@ -76,7 +74,7 @@ class SonarQube:
         self._measures(path, "lines")
 
     def _measures(self, path: str, metric: str) -> list[Json]:
-        found = self._get("api/measures/component", {"component": f"{PROJECT}:{path}", "metricKeys": metric})
+        found = self._web.get("api/measures/component", {"component": f"{PROJECT}:{path}", "metricKeys": metric})
         return list(found["component"]["measures"])
 
     def _scan(self, project: Path, work: Path) -> None:
@@ -94,19 +92,7 @@ class SonarQube:
     def _polled_status(self, task: str) -> str:
         """Biraz bekleyip analiz görevinin durumunu sorar."""
         time.sleep(POLL_SECONDS)
-        return str(self._get("api/ce/task", {"id": task})["task"]["status"])
-
-    def _get(self, api: str, parameters: Mapping[str, str]) -> Json:
-        try:
-            return self._response(api, parameters)
-        except urllib.error.HTTPError as error:
-            raise ScanError(f"{api} {dict(parameters)}: {error.code} {error.read().decode()}") from error
-
-    def _response(self, api: str, parameters: Mapping[str, str]) -> Json:
-        request = urllib.request.Request(f"{SERVER}/{api}?{urllib.parse.urlencode(parameters)}",
-                                         headers={"Authorization": f"Bearer {self._token}"})
-        with urllib.request.urlopen(request) as response:
-            return dict(json.load(response))
+        return str(self._web.get("api/ce/task", {"id": task})["task"]["status"])
 
 
 def write_files(files: Mapping[str, str], root: Path) -> None:
