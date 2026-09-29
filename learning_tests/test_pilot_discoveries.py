@@ -49,6 +49,8 @@ class Heading(Fragment):
         return first_note + self._html
 """
 BASE_RENDER_LINE = 5
+TRAILING_COMMENTS = "MAX_ARGUMENTS = 3  # kitabın triadic eşiği\nMAX_NESTING = 2  # girinti\n"
+SENTENCE_COMMENT_LINE = 1
 
 PROJECT_FILES = {
     "src/test_checks.py": PRODUCTION_NAMED_LIKE_A_TEST,
@@ -59,6 +61,7 @@ PROJECT_FILES = {
     "src/prices_copy.py": PRICE_TABLE,
     "src/prices_with_item.py": PRICE_TABLE_WITH_ITEM,
     "src/fragments.py": POLYMORPHIC_FRAGMENTS,
+    "src/limits.py": TRAILING_COMMENTS,
 }
 
 
@@ -98,6 +101,10 @@ class PilotDiscoveriesTest(unittest.TestCase):
     def test_unused_parameter_of_a_polymorphic_method_is_reported(self) -> None:
         """S1172 arayüzün istediği parametreyi ölü sayar; kitapla çelişir (Bl.3 · Switch Statements), kapatılır."""
         self.assertEqual(self.sonarqube.issue_lines("python:S1172", "src/fragments.py"), [BASE_RENDER_LINE])
+
+    def test_trailing_comment_is_reported_unless_it_is_one_word(self) -> None:
+        """S139 satır sonu yorumunu bulur (Bl.2 · N1); varsayılan desen tek sözcüklü yorumu serbest bırakır."""
+        self.assertEqual(self.sonarqube.issue_lines("python:S139", "src/limits.py"), [SENTENCE_COMMENT_LINE])
 
 
 if __name__ == "__main__":
