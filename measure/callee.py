@@ -20,10 +20,11 @@ CONSTRUCTOR_NAMES = BUILT_IN_CONSTRUCTORS | {"cls"}
 # `ctxt.createScratchFileStream(name)` da nesneye yeni bir nesne kurdurur (Bl.6 · Hiding Structure). `parse_args`
 # davranışsız bir veri yapısı (`Namespace`) kurar; veri yapısına Demeter uygulanmaz (Bl.6 · Train Wrecks).
 # `redirect_stdout` ve `redirect_stderr` küçük harfle yazılmış sınıflardır; `with … as` hedefi verilen akıştır.
+# `urlopen` her çağrıda çağırana ait yeni bir cevap nesnesi kurar; `open`'ın ağdaki karşılığıdır.
 # Başka nesnelerde de sık görülen belirsiz adlar (`compile`, `sub`, `match`) yalnız modülüyle nitelenmiş hâliyle girer.
 STANDARD_LIBRARY_CONSTRUCTORS = frozenset({"re.compile", "add_subparsers", "add_parser", "add_argument_group",
                                            "add_mutually_exclusive_group", "parse_args", "redirect_stdout",
-                                           "redirect_stderr"})
+                                           "redirect_stderr", "urlopen"})
 
 
 class Callee:

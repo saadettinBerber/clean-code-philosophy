@@ -47,6 +47,7 @@ def f(run):
         run()
     output.getvalue()
 """
+OPENED_URL = "def f(url):\n    with urllib.request.urlopen(url) as response:\n        response.read()\n"
 MODULE_TABLE = '_KINDS = {"a": Alpha, "b": Beta}\n'
 LOCAL_TABLE = 'def f(position):\n    kinds = {"top": Top, "none": NoHeader}\n    kinds[position]().go()\n'
 CLASSES_OF_A_COMPREHENSION = '_CARDS = {card.KIND: card for card in (Explain, Contrast)}\n'
@@ -371,6 +372,9 @@ class SplitChainTest(unittest.TestCase):
 
     def test_opened_file_is_a_friend(self) -> None:
         self.assertEqual(wrecks("def f(path):\n    with open(path) as file:\n        file.read()\n"), [])
+
+    def test_opened_url_is_a_friend(self) -> None:
+        self.assertEqual(wrecks(OPENED_URL), [])
 
     def test_stranger_bound_in_one_branch_may_reach_the_call(self) -> None:
         self.assertEqual(len(wrecks(MAYBE_A_STRANGER)), 1)
