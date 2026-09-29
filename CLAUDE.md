@@ -14,7 +14,7 @@ Bu kuralların altında SRP ve DIP/DI yatar.
 | `kitap-disi-kartlar.json` | **Tek kaynak.** ◇ kitap dışı kalıpların kavram kartları; okuyucunun kart şeması (iki dilli, kötü/iyi kod, ipucu), kule senaryosu örnekleri. |
 | `export_cards.py` | Kartları doğrular ve okuyucuya (`data/offbook.js`) aktarır. Haritadaki ◇ kalıplarla birebir eşleşmezse durur. |
 | `tamam-tanimi.md` | **Tamam tanımı.** Bir görevin bittiğini söyleyen kontrol listesi. Kitabın her bölümünü başlık adıyla kapsar; kalıpların hangi ihtiyaçla geldiğini de söyler. Nesne yönelimli diller (şimdilik Python, Java) için ortak sözcüklerle yazılır; dile özgü karşılıklar sondaki "Dil eşlemesi" tablosundadır. Kitap standarttır, dile göre gevşetilmez. |
-| `measure_code.py` + `measure/` | Listenin ölçülebilir maddelerini Python kodunda AST ile ölçer: `python3 measure_code.py <dosya ya da dizin>`. Çıktı alarmdır, her alarm okunarak karara bağlanır. Testleri: `python3 -m unittest discover -s tests -t .` |
+| `measure_code.py` + `measure/` | Listenin [ö] maddelerini Python kodunda AST ile ölçer: `python3 measure_code.py [--project KÖK] <dosya ya da dizin>`. Not yalnız verilen dosyalara yazılır; fabrika ve switch gibi dosya ötesi bilgi için kökteki bütün kaynaklar okunur (varsayılan: çalışma dizini, gizli dizinler atlanır). Çıktı alarmdır, her alarm okunarak karara bağlanır. Testleri: `python3 -m unittest discover -s tests -t .` |
 
 Görmek için:
 

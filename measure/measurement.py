@@ -10,10 +10,14 @@ from measure.test_checks import TEST_CHECKS
 
 class Measurement:
     """Kaynak kümesinin ölçümü. Testler üretim koduyla aynı ölçümlerden geçer, üstüne test ölçümleri eklenir
-    (Bl.9 · Keeping Tests Clean)."""
+    (Bl.9 · Keeping Tests Clean).
 
-    def __init__(self, sources):
-        self._sources = sources
+    Not yalnız ölçülen kaynaklara yazılır. Projenin öbür kaynakları yalnız bilinir: fabrikalar ve aynı ayırıcıya
+    dallanan switch'ler dosya ötesi bilgidir, tek dosya ölçülürken de bütün projeden gelir."""
+
+    def __init__(self, sources, project=()):
+        self._sources = list(sources)
+        self._known = self._sources + [source for source in project if source not in self._sources]
 
     def notes(self):
         return sorted(self._function_notes() + self._class_notes() + self._source_notes() + self._switch_notes()
@@ -21,6 +25,12 @@ class Measurement:
 
     def _functions(self):
         return [function for source in self._sources for function in source.functions()]
+
+    def _known_functions(self):
+        return [function for source in self._known for function in source.functions()]
+
+    def _measured_only(self, notes):
+        return [note for note in notes if any(source.holds(note) for source in self._sources)]
 
     def _function_notes(self):
         return [function.note(finding) for function in self._functions()
@@ -43,8 +53,8 @@ class Measurement:
                 for note in check.notes()]
 
     def _switch_notes(self):
-        return OneSwitch(self._functions()).notes()
+        return self._measured_only(OneSwitch(self._known_functions()).notes())
 
     def _demeter_notes(self):
-        constructions = Constructions.among(self._sources)
+        constructions = Constructions.among(self._known)
         return [note for source in self._sources for note in TrainWrecks(source, constructions).notes()]

@@ -24,6 +24,9 @@ class Scope:
     def module_home(self):
         return self._path, ""
 
+    def owns(self, location):
+        return location.path == self._path
+
     def inner(self, node):
         return Scope(self._path, self._qualified(node.name))
 
