@@ -1,9 +1,9 @@
 import unittest
 
-from measure.findings import ALARM, LOOK
+from measure.findings import ALARM, LOOK, Finding
 from measure.function_checks import (IDEAL_BODY_LINES, MAX_BODY_LINES, ArgumentCount, CommandQuery, FlagArguments,
                                      FunctionSize, MagicNumbers, NestingDepth, OutputArguments, ReturnsNone,
-                                     SwallowedExceptions)
+                                     SwallowedExceptions, TypeHints)
 from tests.snippets import Snippet, function_with_body_lines, levels
 
 DOCUMENTED_IDEAL = 'def f():\n    """Belge."""\n' + "\n".join(f"    x{i} = {i}" for i in range(IDEAL_BODY_LINES))
@@ -179,6 +179,50 @@ class MagicNumbersTest(unittest.TestCase):
 
     def test_self_evident_numbers_are_fine(self):
         self.assertEqual(MagicNumbers(Snippet("def f(items): return items[-1] * 2 + 0").function()).findings(), [])
+
+
+class TypeHintsTest(unittest.TestCase):
+    def test_fully_typed_signature_gives_no_note(self) -> None:
+        self.assertEqual(hints("def f(name: str, count: int) -> list[str]: pass"), [])
+
+    def test_untyped_parameter_raises_an_alarm(self) -> None:
+        self.assertIn("'count'", only_alarm("def f(name: str, count) -> None: pass"))
+
+    def test_missing_return_type_raises_an_alarm(self) -> None:
+        self.assertIn("dönüş", only_alarm("def f(name: str): pass"))
+
+    def test_one_alarm_names_every_missing_type(self) -> None:
+        message = only_alarm("def f(name, count): pass")
+        self.assertTrue(all(part in message for part in ("'name'", "'count'", "dönüş")))
+
+    def test_packed_arguments_need_types(self) -> None:
+        self.assertIn("'rest'", only_alarm("def f(*rest, **options: str) -> None: pass"))
+
+    def test_self_and_cls_need_no_type(self) -> None:
+        self.assertEqual(hints("def f(self, cls) -> None: pass"), [])
+
+    def test_constructor_declares_none(self) -> None:
+        self.assertIn("dönüş", only_alarm("def __init__(self, name: str): pass"))
+
+    def test_bare_container_raises_an_alarm(self) -> None:
+        self.assertIn("'list'", only_alarm("def f(names: list) -> None: pass"))
+
+    def test_bare_container_inside_another_type_is_found(self) -> None:
+        self.assertIn("'dict'", only_alarm("def f() -> list[dict]: pass"))
+
+    def test_container_with_element_type_is_fine(self) -> None:
+        self.assertEqual(hints("def f(names: Sequence[str]) -> dict[str, int]: pass"), [])
+
+
+def hints(code: str) -> list[Finding]:
+    return TypeHints(Snippet(code).function()).findings()
+
+
+def only_alarm(code: str) -> str:
+    """Tek ALARM beklenir; iletisi döner."""
+    [finding] = hints(code)
+    assert finding.level == ALARM, finding
+    return finding.message
 
 
 if __name__ == "__main__":

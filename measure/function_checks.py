@@ -4,7 +4,7 @@ yeni ölçüm yeni bir sınıftır ve FUNCTION_CHECKS'e eklenir.
 import ast
 from abc import ABC, abstractmethod
 
-from measure.findings import alarm, look
+from measure.findings import Finding, alarm, look
 from measure.syntax import assignment_targets, is_empty_body, is_name, is_none, is_self_attribute
 
 IDEAL_BODY_LINES = 4
@@ -13,6 +13,9 @@ MAX_NESTING = 2
 MAX_ARGUMENTS = 2
 POLYADIC_ARGUMENTS = 4
 SELF_EVIDENT_NUMBERS = frozenset({0, 1, -1, 2})
+BARE_CONTAINERS = frozenset({"list", "dict", "set", "frozenset", "tuple", "type",
+                             "Sequence", "Iterable", "Iterator", "Mapping", "Callable"})
+TYPE_HINT_SOURCE = "Dil eşlemesi · İmza türü"
 
 
 class FunctionCheck(ABC):
@@ -113,5 +116,34 @@ class MagicNumbers(FunctionCheck):
         return is_number and node.value not in SELF_EVIDENT_NUMBERS
 
 
+class TypeHints(FunctionCheck):
+    """İmzada her parametrenin ve dönüşün türü yazılı, kaplar içerik türüyle. Kitapta yok: kitabın Java'sında
+    tür imzada dilin zorunluluğudur; Python'da yazılmazsa standart gevşer (tamam-tanimi.md · Dil eşlemesi)."""
+
+    def findings(self) -> list[Finding]:
+        return self._untyped() + self._bare()
+
+    def _untyped(self) -> list[Finding]:
+        untyped = [f"'{parameter.name}'" for parameter in self._function.signature() if parameter.annotation is None]
+        untyped += [] if self._function.return_annotation() is not None else ["dönüş"]
+        return [alarm(f"türü yazılı değil: {', '.join(untyped)} ({TYPE_HINT_SOURCE})")] if untyped else []
+
+    def _bare(self) -> list[Finding]:
+        bare = sorted({name for annotation in self._annotations() for name in _bare_containers(annotation)})
+        quoted = ", ".join(f"'{name}'" for name in bare)
+        return [alarm(f"içerik türü yazılı değil: {quoted} (G26; {TYPE_HINT_SOURCE})")] if bare else []
+
+    def _annotations(self) -> list[ast.expr]:
+        written = [parameter.annotation for parameter in self._function.signature()]
+        return [annotation for annotation in written + [self._function.return_annotation()] if annotation is not None]
+
+
+def _bare_containers(annotation: ast.expr) -> list[str]:
+    """İçerik türü verilmemiş kap adları: `list[dict]` içindeki `dict` gibi."""
+    subscripted = {id(node.value) for node in ast.walk(annotation) if isinstance(node, ast.Subscript)}
+    return [node.id for node in ast.walk(annotation)
+            if isinstance(node, ast.Name) and node.id in BARE_CONTAINERS and id(node) not in subscripted]
+
+
 FUNCTION_CHECKS = (FunctionSize, NestingDepth, ArgumentCount, FlagArguments, OutputArguments, CommandQuery,
-                   ReturnsNone, SwallowedExceptions, MagicNumbers)
+                   ReturnsNone, SwallowedExceptions, MagicNumbers, TypeHints)

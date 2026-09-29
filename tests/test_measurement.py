@@ -19,11 +19,11 @@ def total(rows):
 ADD_METHOD_LINE = 6
 SOME_LINE = 3
 PROJECT_PATH = "proje.py"
-CLEAN = "def total(rows):\n    return sum(rows)\n"
+CLEAN = "def total(rows: list[int]) -> int:\n    return sum(rows)\n"
 
 
 def switching(name):
-    return f'def {name}(shape):\n    if shape.kind == "circle":\n        return 1\n    elif shape.kind == "square":\n        return 2\n'
+    return f'def {name}(shape: Shape) -> int:\n    if shape.kind == "circle":\n        return 1\n    elif shape.kind == "square":\n        return 2\n'
 
 
 class SourceFileTest(unittest.TestCase):
@@ -38,18 +38,18 @@ class MeasurementTest(unittest.TestCase):
         self.assertIn(("Report.add", ADD_METHOD_LINE), [(note.location.name, note.location.line) for note in notes])
 
     def test_clean_code_gives_no_notes(self):
-        self.assertEqual(Measurement([Snippet("def total(rows):\n    return sum(rows)\n")]).notes(), [])
+        self.assertEqual(Measurement([Snippet(CLEAN)]).notes(), [])
 
     def test_test_functions_also_pass_the_test_checks(self):
         self.assertNotEqual(Measurement([Snippet("def test_total(self):\n    pass\n")]).notes(), [])
 
     def test_factories_of_every_measured_source_are_known(self):
-        factory = Snippet("class Project:\n    def load(self):\n        return Progress(self)\n")
-        user = Snippet("def pages(project):\n    return project.load().pages()\n")
+        factory = Snippet("class Project:\n    def load(self) -> Progress:\n        return Progress(self)\n")
+        user = Snippet("def pages(project: Project) -> list[Page]:\n    return project.load().pages()\n")
         self.assertEqual(Measurement([factory, user]).notes(), [])
 
     def test_production_functions_skip_the_test_checks(self):
-        self.assertEqual(Measurement([Snippet("def total(self):\n    pass\n")]).notes(), [])
+        self.assertEqual(Measurement([Snippet("def total(self) -> None:\n    pass\n")]).notes(), [])
 
 
 class ProjectTest(unittest.TestCase):
@@ -60,8 +60,8 @@ class ProjectTest(unittest.TestCase):
         self.assertEqual(Measurement([Snippet(CLEAN)], [project]).notes(), [])
 
     def test_factories_of_the_project_are_known(self):
-        factory = Snippet("class Project:\n    def load(self):\n        return Progress(self)\n", path=PROJECT_PATH)
-        user = Snippet("def pages(project):\n    return project.load().pages()\n")
+        factory = Snippet("class Project:\n    def load(self) -> Progress:\n        return Progress(self)\n", path=PROJECT_PATH)
+        user = Snippet("def pages(project: Project) -> list[Page]:\n    return project.load().pages()\n")
         self.assertEqual(Measurement([user], [factory]).notes(), [])
 
     def test_switch_on_the_same_field_in_the_project_counts(self):
