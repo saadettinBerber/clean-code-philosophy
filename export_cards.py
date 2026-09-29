@@ -61,8 +61,15 @@ def check_related(card: Json, reader: Path) -> None:
             raise CardError(f"{card['id']}: okuyucuda sayfa {link.get('page')} yok")
 
 
+def required_id(found: object) -> str:
+    """Kart kimliği zorunludur: tekrar denetimi ve okuyucu kartı onunla tanır."""
+    if not found:
+        raise CardError("<kimliksiz kart>: id zorunlu")
+    return str(found)
+
+
 def check_card(card: Json, sources: Json, reader: Path) -> None:
-    card_id = card.get("id") or "<kimliksiz kart>"
+    card_id = required_id(card.get("id"))
     if not card.get("pattern"):
         raise CardError(f"{card_id}: pattern zorunlu")
     if card.get("source") not in sources:
@@ -79,7 +86,7 @@ def all_cards(document: Json) -> list[Json]:
 
 
 def check_unique_ids(cards: list[Json]) -> None:
-    ids = [card.get("id") for card in cards]
+    ids = [card["id"] for card in cards]
     duplicates = sorted({card_id for card_id in ids if ids.count(card_id) > 1})
     if duplicates:
         raise CardError(f"Tekrarlanan kart kimlikleri: {', '.join(duplicates)}")
