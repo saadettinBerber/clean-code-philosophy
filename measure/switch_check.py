@@ -47,7 +47,7 @@ class Switches:
     def _field_key(node: ast.expr) -> str:
         if isinstance(node, ast.Attribute):
             return node.attr
-        return node.slice.value if isinstance(node, ast.Subscript) and is_string_literal(node.slice) else ""
+        return _string_key(node.slice) if isinstance(node, ast.Subscript) else ""
 
     @staticmethod
     def _is_isinstance(node: ast.AST) -> bool:
@@ -58,6 +58,11 @@ class Switches:
     def _named_types(call: ast.Call) -> list[ast.expr]:
         types = call.args[1]
         return types.elts if isinstance(types, ast.Tuple) else [types]
+
+
+def _string_key(key: ast.expr) -> str:
+    """Dizge sabiti anahtar; demet ya da başka bir ifade alan adı sayılmaz."""
+    return key.value if isinstance(key, ast.Constant) and isinstance(key.value, str) else ""
 
 
 class OneSwitch:

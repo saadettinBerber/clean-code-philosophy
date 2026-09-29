@@ -32,6 +32,14 @@ def f(block):
             go()
 """
 
+TUPLE_KEYED = """
+def f(row):
+    if row["a", "b"] == "x":
+        go()
+    elif row["a", "b"] == "y":
+        go()
+"""
+
 ISINSTANCE_BRANCHES = """
 def f(shape):
     if isinstance(shape, Square):
@@ -50,6 +58,9 @@ class FieldSwitchesTest(unittest.TestCase):
 
     def test_match_on_a_field_is_a_switch(self) -> None:
         self.assertEqual(Switches(Snippet(MATCH_ON_FIELD).function()).fields(), ["kind"])
+
+    def test_tuple_key_is_not_a_field(self) -> None:
+        self.assertEqual(Switches(Snippet(TUPLE_KEYED).function()).fields(), [])
 
 
 class TypeSwitchTest(unittest.TestCase):
