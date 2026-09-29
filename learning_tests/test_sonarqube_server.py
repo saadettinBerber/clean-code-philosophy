@@ -4,6 +4,7 @@
     python3 -m unittest discover -s learning_tests -t .
 `sinir-testi` projesi ilk taramada kendiliğinden kurulur ve varsayılan profili, yani kitabın profilini alır.
 """
+import functools
 import tempfile
 import unittest
 from pathlib import Path
@@ -32,6 +33,17 @@ def server() -> SonarQubeServer:
     return SonarQubeServer(SERVER, TOKEN_FILE.read_text(encoding="utf-8").strip())
 
 
+@functools.cache
+def analyzed_project() -> Project:
+    """Fikstür projesi bir kez taranır; iki test sınıfı aynı taramayı sorar."""
+    with tempfile.TemporaryDirectory() as parent:
+        root = Path(parent) / PROJECT_NAME
+        write_files(PROJECT_FILES, root)
+        project = Project(root, ["tests"])
+        server().analyze(project)
+    return project
+
+
 class StatusTest(unittest.TestCase):
     def test_running_server_is_up(self) -> None:
         self.assertIs(server().status(), ServerStatus.UP)
@@ -45,12 +57,7 @@ class IssuesTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        with tempfile.TemporaryDirectory() as parent:
-            root = Path(parent) / PROJECT_NAME
-            write_files(PROJECT_FILES, root)
-            project = Project(root, ["tests"])
-            server().analyze(project)
-        cls.found = [(issue.rule, issue.path, issue.line) for issue in server().issues(project)]
+        cls.found = [(issue.rule, issue.path, issue.line) for issue in server().issues(analyzed_project())]
 
     def test_book_profile_reports_a_one_word_trailing_comment(self) -> None:
         """Varsayılan desen `# girinti`yi serbest bırakırdı; kitabın profili N1 sayar."""
@@ -64,6 +71,15 @@ class IssuesTest(unittest.TestCase):
 
     def test_file_level_issue_is_placed_on_the_first_line(self) -> None:
         self.assertIn(("python:S104", "big.py", 1), self.found)
+
+
+class IndexedTest(unittest.TestCase):
+    def test_scanned_file_is_indexed(self) -> None:
+        self.assertTrue(server().indexed(analyzed_project(), "limits.py"))
+
+    def test_file_the_server_never_saw_is_not_indexed(self) -> None:
+        """Bulgu araması bu dosyaya boş liste dönerdi; "temiz" ile "bakılmadı" ayrılır."""
+        self.assertFalse(server().indexed(analyzed_project(), "yok.py"))
 
 
 if __name__ == "__main__":

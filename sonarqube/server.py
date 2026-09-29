@@ -9,9 +9,10 @@ from enum import Enum
 
 from sonarqube.project import Project
 from sonarqube.scanner import Scanner
-from sonarqube.web import Json, Unreachable, WebApi
+from sonarqube.web import Json, NotFound, Unreachable, WebApi
 
 ISSUE_SEARCH = "api/issues/search"
+MEASURES = "api/measures/component"
 # Dosya düzeyindeki bulgunun (S104 gibi) satırı yoktur; dosyanın başına, modüle yazılır.
 FILE_LEVEL_LINE = 1
 
@@ -63,6 +64,15 @@ class SonarQubeServer:
         pages = [page for key in project.keys()
                  for page in self._web.pages(ISSUE_SEARCH, {"components": key, "resolved": "false"})]
         return distinct(reported(issue) for page in pages for issue in page["issues"])
+
+    def indexed(self, project: Project, path: str) -> bool:
+        """Bulgu araması tanımadığı dosyaya boş liste döner; "temiz" ile "bakılmadı" ayrılsın diye dosya ayrıca
+        sorulur (K2). Ölçüm API'si tanımadığı dosyaya 404 döner."""
+        try:
+            self._web.get(MEASURES, {"component": project.component(path), "metricKeys": "lines"})
+        except NotFound:
+            return False
+        return True
 
 
 def server_status(state: str) -> ServerStatus:

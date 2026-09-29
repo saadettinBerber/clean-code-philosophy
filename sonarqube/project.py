@@ -21,6 +21,10 @@ class Project:
         """Ana projenin ve test projesinin anahtarı."""
         return self._root.name, self._root.name + TESTS_SUFFIX
 
+    def component(self, path: str) -> str:
+        """Dosyanın sunucudaki adı; test dosyası da ana projede dizinlidir."""
+        return f"{self._root.name}:{path}"
+
     def scans(self) -> list[Scan]:
         """Ana taramada testler test olarak bildirilir: teste özel kurallar yalnız orada çalışır. Test taramasında
         kaynak olarak bildirilir: genel kurallar testlere yalnız orada uygulanır (Bl.9 · Keeping Tests Clean)."""

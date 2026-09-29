@@ -11,6 +11,9 @@ class ProjectTest(unittest.TestCase):
     def test_key_is_the_name_of_the_root(self) -> None:
         self.assertEqual(PROJECT.keys(), ("felsefe", "felsefe-testler"))
 
+    def test_file_is_named_within_the_main_project(self) -> None:
+        self.assertEqual(PROJECT.component("tests/test_a.py"), "felsefe:tests/test_a.py")
+
     def test_main_scan_declares_test_folders_as_tests(self) -> None:
         self.assertEqual(main_scan()["sonar.tests"], "tests,learning_tests")
 
