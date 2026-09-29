@@ -66,9 +66,18 @@ class SonarQube:
         if profile["name"] != PROFILE:
             raise ScanError(f"{PROJECT} '{profile['name']}' profiline bağlı, beklenen '{PROFILE}'")
 
+    def duplicated_lines(self, path: str) -> int:
+        """Dosyada kopyası başka yerde bulunan satırların sayısı (CPD)."""
+        [measure] = self._measures(path, "duplicated_lines")
+        return int(measure["value"])
+
     def _require_file(self, path: str) -> None:
         """Sunucunun dizinlemediği dosya için ölçüm API'si 404 döner."""
-        self._get("api/measures/component", {"component": f"{PROJECT}:{path}", "metricKeys": "lines"})
+        self._measures(path, "lines")
+
+    def _measures(self, path: str, metric: str) -> list[Json]:
+        found = self._get("api/measures/component", {"component": f"{PROJECT}:{path}", "metricKeys": metric})
+        return list(found["component"]["measures"])
 
     def _scan(self, project: Path, work: Path) -> None:
         run = subprocess.run(scanner_command(project, work), env={**os.environ, "SONAR_TOKEN": self._token},
