@@ -6,6 +6,9 @@ measure_code'un zaten ölçtüğü maddeyi ikinci kez söyler; gerekçesiyle dur
 from collections.abc import Mapping, Set
 from dataclasses import dataclass, field
 
+PROFILE = "Clean Code felsefesi"
+BASE_PROFILE = "Sonar way"
+
 Parameters = Mapping[str, str]
 
 
@@ -24,7 +27,7 @@ class Rules:
         self._mapped = mapped
         self._closed = closed
 
-    def profile(self, base: Mapping[str, Parameters]) -> dict[str, Parameters]:
+    def profile_from(self, base: Mapping[str, Parameters]) -> dict[str, Parameters]:
         """Formül (K5): taban profil − kapatılanlar + eşlenenler; eşlenenler kitabın eşikleriyle."""
         kept = {rule: parameters for rule, parameters in base.items() if rule not in self._closed}
         return kept | {rule: mapped.parameters for rule, mapped in self._mapped.items()}

@@ -10,16 +10,16 @@ RULES = Rules({"python:LineLength": MappedRule("Bl.5 · Horizontal Formatting", 
 
 class ProfileTest(unittest.TestCase):
     def test_closed_rule_leaves_the_base(self) -> None:
-        self.assertNotIn("python:S1172", RULES.profile(BASE))
+        self.assertNotIn("python:S1172", RULES.profile_from(BASE))
 
     def test_other_base_rules_stay_as_they_are(self) -> None:
-        self.assertEqual(RULES.profile(BASE)["python:S1481"], {})
+        self.assertEqual(RULES.profile_from(BASE)["python:S1481"], {})
 
     def test_mapped_rule_is_added(self) -> None:
-        self.assertIn("python:S139", RULES.profile(BASE))
+        self.assertIn("python:S139", RULES.profile_from(BASE))
 
     def test_mapped_rule_carries_the_book_threshold(self) -> None:
-        self.assertEqual(RULES.profile(BASE)["python:LineLength"], {"maximumLineLength": "120"})
+        self.assertEqual(RULES.profile_from(BASE)["python:LineLength"], {"maximumLineLength": "120"})
 
 
 class UnknownRulesTest(unittest.TestCase):
