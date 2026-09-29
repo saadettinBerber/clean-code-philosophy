@@ -9,6 +9,7 @@ from typing import TypeGuard
 FUNCTION_NODES = (ast.FunctionDef, ast.AsyncFunctionDef)
 NESTED_SCOPES = FUNCTION_NODES + (ast.ClassDef, ast.Lambda)
 BLOCK_NODES = (ast.If, ast.For, ast.AsyncFor, ast.While, ast.With, ast.AsyncWith, ast.Try, ast.Match)
+OPTIONAL_FORMS = frozenset({"Optional", "Union"})
 FunctionNode = ast.FunctionDef | ast.AsyncFunctionDef
 Definition = FunctionNode | ast.ClassDef
 
@@ -85,6 +86,16 @@ def end_position(node: ast.stmt | ast.expr) -> tuple[int, int]:
 
 def is_none(node: ast.AST | None) -> bool:
     return isinstance(node, ast.Constant) and node.value is None
+
+
+def admits_none(annotation: ast.expr) -> bool:
+    """Türün en dış düzeyi None'a izin veriyor mu: `None`, `X | None`, `Optional[X]`, `Union[X, None]`.
+    Kabın içindeki None (`list[X | None]`) sayılmaz: kap boş dönmez."""
+    if isinstance(annotation, ast.BinOp) and isinstance(annotation.op, ast.BitOr):
+        return admits_none(annotation.left) or admits_none(annotation.right)
+    if isinstance(annotation, ast.Subscript) and last_name(annotation.value) in OPTIONAL_FORMS:
+        return last_name(annotation.value) == "Optional" or any(admits_none(part) for part in _unpacked(annotation.slice))
+    return is_none(annotation)
 
 
 def is_string_literal(node: ast.AST | None) -> bool:

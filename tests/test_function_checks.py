@@ -155,6 +155,12 @@ class ReturnsNoneTest(unittest.TestCase):
     def test_optional_annotation_is_an_alarm(self) -> None:
         self.assertEqual(levels(ReturnsNone(Snippet("def f(x) -> Optional[int]: return x").function()).findings()), [ALARM])
 
+    def test_union_with_none_is_an_alarm(self) -> None:
+        self.assertEqual(levels(ReturnsNone(Snippet("def f(x) -> int | None: return x").function()).findings()), [ALARM])
+
+    def test_none_inside_a_container_is_not_an_empty_return(self) -> None:
+        self.assertEqual(ReturnsNone(Snippet("def f(x) -> list[int | None]: return [x]").function()).findings(), [])
+
     def test_protocol_method_returns_what_the_language_expects(self) -> None:
         self.assertEqual(ReturnsNone(Snippet("def __exit__(self, *details):\n    return None").function()).findings(), [])
 

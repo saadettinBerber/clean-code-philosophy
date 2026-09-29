@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 
 from measure.findings import Finding, alarm, look
 from measure.function import Function, Parameter
-from measure.syntax import assignment_targets, is_empty_body, is_name, is_none, is_self_attribute
+from measure.syntax import admits_none, assignment_targets, is_empty_body, is_name, is_none, is_self_attribute
 
 IDEAL_BODY_LINES = 4
 MAX_BODY_LINES = 20
@@ -96,8 +96,7 @@ class ReturnsNone(FunctionCheck):
 
     def _optional_annotation(self) -> bool:
         annotation = self._function.return_annotation()
-        text = ast.unparse(annotation) if annotation is not None else "None"
-        return text != "None" and ("None" in text or "Optional" in text)
+        return annotation is not None and not is_none(annotation) and admits_none(annotation)
 
 
 class SwallowedExceptions(FunctionCheck):
