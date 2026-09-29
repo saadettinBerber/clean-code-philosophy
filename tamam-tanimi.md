@@ -90,6 +90,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - [ ] İki argümanın doğal bir sırası ve uyumu var (`Point(x, y)`). Yoksa bir argüman düşürüldü. Kitap bunun üç yolunu verir: fonksiyonu argümanın metodu yapmak, argümanı alana çevirmek ya da argümanı yapıcıda alan bir sınıf çıkarmak (`FieldWriter`). (Bl.3 · Dyadic Functions) [o]
 - [ ] Birlikte gezen argümanlar, adını hak eden bir kavrama sarıldı (`makeCircle(Point center, double radius)`). Aynı parametre çifti iki ya da daha fazla fonksiyonda geçiyorsa bu bir adaydır. (Bl.3 · Argument Objects) [ö-]
 - [ ] Fonksiyon adı argümanla bir fiil/isim çifti kuruyor (`writeField(name)`). Sıra belirsizse argümanların adı fonksiyon adına yazılıyor: anahtar sözcük biçimi (`assertExpectedEqualsActual(expected, actual)`). (Bl.3 · Verbs and Keywords) [o]
+- [ ] İmzada türler yazılı: her parametrenin ve dönüşün türü, kaplar içerik türüyle (`list[str]`; çıplak `list` değil). Kitapta yok: kitabın Java'sında tür imzada dilin zorunluluğudur, türü yazılmayan imza standardı gevşetir. Tür gereğinden somut yazılmaz (G26). Yerel değişkene tür yazılmaz; türü imzadan çıkar. Karşılıkları Dil eşlemesinde. (Dil eşlemesi · İmza türü; G26) [ö]
 
 **Yan etki, CQS, hata**
 - [ ] Adın söylemediği bir yan etki yok. Zamansal bağ kaçınılmazsa gizli değil, adda ve yapıda görünüyor. Sıra ya kova zinciriyle zorlanıyor, her fonksiyon bir sonrakinin girdisini üretiyor (`saturateGradient()` → `reticulateSplines(gradient)` → `diveForMoog(splines, reason)`); ya da sonraki adım öncekini kendisi çağırıyor (Bl.15 · `findCommonPrefixAndSuffix` önce `findCommonPrefix`'i çağırır). Sırayı zorlayıp nedenini anlatmayan argüman keyfidir (G32). (Bl.3 · Have No Side Effects; N7, G31) [o]
@@ -348,6 +349,7 @@ Maddelerdeki ortak kavramın her dildeki karşılığı. Yeni bir dil bu tabloya
 | Fabrikayı zorunlu kılmak | uygulanmaz: `__init__` gizlenemez, yalnız adla gelenek kurulur | `private` yapıcı (s.25) |
 | Alıcı nesne (argüman sayılmaz) | `self`, `cls` | `this`; imzada görünmez |
 | Değişken sayılı argüman | `*args` bir, `**kwargs` bir argüman | `Object... args` bir argüman (s.43) |
+| İmza türü | her parametre ve dönüş: `def f(name: str, *rest: int) -> list[str]:`; `__init__` ve komutlar `-> None`; `self`, `cls` ve `lambda` muaf (kitapta yok) | uygulanmaz: tür imzada dilin zorunluluğudur; kitabın bütün imzaları türlüdür |
 | Anahtar sözcüklü argüman | Dilin aracıdır, argüman sayısına girer. Sıra belirsizliği önce adla çözülür. | uygulanmaz: dilde adlı argüman yok, belirsizliği yalnız ad çözer (s.43) |
 | Değer döndürmeyen fonksiyon | `None` döner | `void` (s.41) |
 | Tür sınaması | `isinstance`, `match` | `instanceof`, `switch` (s.38) |
