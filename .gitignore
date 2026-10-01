@@ -1,2 +1,6 @@
 __pycache__/
 .~lock.*#
+
+# Kitap grafının vektörleri (106 MB): yerelde durur, repoya girmez
+book_graph/store/vdb_*.json
+book_graph/server/.env
