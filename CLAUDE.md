@@ -15,7 +15,6 @@ Bu kuralların altında SRP ve DIP/DI yatar.
 | `export_cards.py` | Kartları doğrular ve okuyucuya (`data/offbook.js`) aktarır. Haritadaki ◇ kalıplarla birebir eşleşmezse durur. |
 | `tamam-tanimi.md` | **Tamam tanımı.** Bir görevin bittiğini söyleyen kontrol listesi. Kitabın her bölümünü başlık adıyla kapsar; kalıpların hangi ihtiyaçla geldiğini de söyler. Nesne yönelimli diller (şimdilik Python, Java) için ortak sözcüklerle yazılır; dile özgü karşılıklar sondaki "Dil eşlemesi" tablosundadır. Kitap standarttır, dile göre gevşetilmez. |
 | `measure_code.py` + `measure/` | Listenin [ö] maddelerini Python kodunda AST ile ölçer: `python3 measure_code.py [--project KÖK] <dosya ya da dizin>`. Not yalnız verilen dosyalara yazılır; fabrika ve switch gibi dosya ötesi bilgi için kökteki bütün kaynaklar okunur (varsayılan: çalışma dizini, gizli dizinler atlanır). Çıktı alarmdır, her alarm okunarak karara bağlanır. Testleri: `python3 -m unittest discover -s tests -t .` |
-| `book_graph/store/` | Kitabın LightRAG deposu (graf ve kv dosyaları). Vektörler (`vdb_*`) repoda yok, `.gitignore`'dadır; vektörsüz tek başına sorgulanamaz. Kullanımı "Kaynak: kitabın kendisi" bölümünde. |
 
 Görmek için:
 
@@ -67,9 +66,6 @@ curl -s -X POST http://127.0.0.1:9621/query -H 'Content-Type: application/json' 
   - Gateway kesintisinde belge "failed" kalır; `hazirla.py yeniden` önbellekteki çıkarımları kullanarak kaldığı yerden sürdürür.
   - İkinci bir sunucu açılırsa (`start_yeniden.sh`, 9622) `INPUT_DIR` ortam değişkeni `--input-dir` ile aynı klasörü göstermeli: sunucu yüklenen dosyayı `--input-dir`'e yazar, ayrıştırıcı `INPUT_DIR`'de arar.
   - Bölüm başlangıç sayfaları okuyucunun `progress.json` → `chapters` tablosundadır.
-- **Repodaki kopya:** `book_graph/store/`, LightRAG'in çalışma dizinidir (`WORKING_DIR`). Vektörler (`vdb_*.json`) repoda yoktur; elde varsa bu klasöre konur. Vektörsüz store sorgulanamaz; o durumda yukarıdaki yerel LightRAG yolu ya da PDF kullanılır, ikisi de yoksa kullanıcıya sorulur.
-  - Sorgu yukarıdaki `/query` ile yapılır. Cevabı sunucunun LLM'i yazmasın diye gövdeye `"only_need_context": true` konur, bağlamı çağıran okur. `local`, `global`, `hybrid` ve `mix` kipleri anahtar kelimeyi LLM'e çıkarttırır; LLM yoksa `ll_keywords` ve `hl_keywords` elle verilir ya da `naive` kipi kullanılır.
-  - Soruyu vektörlemek için indeksin kullandığı gömme modeli gerekir (bge-m3); başka bir model vektörlerle uyuşmaz.
 
 ## Haritayı güncelleme kuralı
 
