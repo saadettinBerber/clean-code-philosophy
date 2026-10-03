@@ -361,7 +361,7 @@ Maddelerdeki ortak kavramın her dildeki karşılığı. Yeni bir dil bu tabloya
 | Yorum işareti | `#` | `//`, `/* */` | `//`, `/* */` |
 | Kapanış yorumu | `# end while` | `} // while` (s.67) | `} // while` |
 | Belge yorumu | docstring, `Args:`/`Returns:` | Javadoc, `@param`/`@return` (s.63, 71) | TSDoc: `/** */`, `@param`/`@returns` |
-| Biçimlendirici | black ya da ruff (kitapta yok) | IDE biçimlendiricisi (s.90) | proje kökündeki `.editorconfig` ve linter (`oxlint`) ayarı; DSH deposu böyle (kitapta yok) |
+| Biçimlendirici | black ya da ruff (kitapta yok) | IDE biçimlendiricisi (s.90) | Prettier, sürümü birebir sabit; linter (`oxlint`) biçimlendirici değildir. Prettier `if` gövdesini başlığın satırında bırakabilir; bunu linter'ın `curly` kuralı yakalar (kitapta yok) |
 
 **Sınıflar ve nesneler**
 
