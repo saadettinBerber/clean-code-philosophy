@@ -7,7 +7,7 @@ Kaynak kitabın kendisidir ve kitap **standarttır**: kural dile ya da alışkan
 - **[ö-] Ölçülebilir, aracı yok:** AST ya da basit bir araçla mekanik denetime uygun, ama bugün hiçbir araç ölçmüyor; okunarak denetlenir. Araç eklenince [ö] olur.
 - **[o] Okuma:** Kararı yargı verir; kod okunarak cevaplanır.
 
-**Dil.** Liste nesne yönelimli diller içindir; şimdilik Python ve Java. Maddeler bu dillerin ortak sözcükleriyle yazılır: sınıf, nesne, alan, yapıcı, erişim düzeyi, arayüz, istisna, null. Örnek adlar kitabın Java yazımıyla verilir ki kaynağa dönülebilsin. Her kavramın dildeki karşılığı sondaki **Dil eşlemesi** tablosundadır. Yeni bir dil o tabloya sütun olarak girer, maddeler değişmez. Kitap her dilde standarttır.
+**Dil.** Liste nesne yönelimli diller içindir; şimdilik Python, Java ve TypeScript. Maddeler bu dillerin ortak sözcükleriyle yazılır: sınıf, nesne, alan, yapıcı, erişim düzeyi, arayüz, istisna, null. Örnek adlar kitabın Java yazımıyla verilir ki kaynağa dönülebilsin. Her kavramın dildeki karşılığı sondaki **Dil eşlemesi** tablosundadır. Yeni bir dil o tabloya sütun olarak girer, maddeler değişmez. Kitap her dilde standarttır.
 - Bir dilde karşılığı olmayan madde tabloda "uygulanmaz" diye yazılır ve nedeni verilir; sessizce atlanmaz.
 - Ölçüm aracı yalnız Python için var (`measure_code.py`). Aracı olmayan dilde [ö] maddeler okunarak denetlenir.
 
@@ -341,101 +341,101 @@ Maddelerdeki ortak kavramın her dildeki karşılığı. Yeni bir dil bu tabloya
 
 **Adlar ve fonksiyonlar**
 
-| Kavram | Python | Java |
-|---|---|---|
-| Ad yazımı | fonksiyon ve değişken `snake_case`, sınıf `PascalCase`: `elapsed_time_in_days` | fonksiyon ve değişken `camelCase`, sınıf `PascalCase`: `elapsedTimeInDays` (s.18). Maddelerdeki örnekler bu yazımla verilir. |
-| Yüklem adı önekleri | `is_`, `has_`, `can_` | `is`, `has`, `can`; erişimci adları `get`/`set`/`is` (s.25) |
-| Adlı kurucu | `@classmethod` fabrikası: `from_real_number(...)` | statik fabrika metodu: `Complex.FromRealNumber(23.0)` (s.25) |
-| Fabrikayı zorunlu kılmak | uygulanmaz: `__init__` gizlenemez, yalnız adla gelenek kurulur | `private` yapıcı (s.25) |
-| Alıcı nesne (argüman sayılmaz) | `self`, `cls` | `this`; imzada görünmez |
-| Değişken sayılı argüman | `*args` bir, `**kwargs` bir argüman | `Object... args` bir argüman (s.43) |
-| İmza türü | her parametre ve dönüş: `def f(name: str, *rest: int) -> list[str]:`; `__init__` ve komutlar `-> None`; `self`, `cls` ve `lambda` muaf (kitapta yok) | uygulanmaz: tür imzada dilin zorunluluğudur; kitabın bütün imzaları türlüdür |
-| Anahtar sözcüklü argüman | Dilin aracıdır, argüman sayısına girer. Sıra belirsizliği önce adla çözülür. | uygulanmaz: dilde adlı argüman yok, belirsizliği yalnız ad çözer (s.43) |
-| Değer döndürmeyen fonksiyon | `None` döner | `void` (s.41) |
-| Tür sınaması | `isinstance`, `match` | `instanceof`, `switch` (s.38) |
-| Tabloyla dağıtım | değerleri fonksiyon olan `dict` | değerleri fonksiyon ya da nesne olan `Map` (kitapta yok) |
-| Tek satıra sıkıştırılmış kapsam | aynı satırda `if x: y`, `def f(): return x`; `lambda` ataması (PEP 8, kitapta yok) | `{return "";}` tek satırda (s.89). `lambda` ataması: uygulanmaz, Java'da olağan kullanımdır. |
-| Boş gövde | ayrı satırda `pass` | ayrı satırda, girintili `;` (s.90) |
-| Döngü denetim değişkeni | uygulanmaz: `for` değişkeni zaten döngü deyiminde doğar | `for (int i = 0; …)` (s.80) |
-| Değer katmayan niteleyici (G12) | uygulanmaz: `final` anahtar sözcüğü yok | argüman ve yerel değişkendeki `final` (s.276) |
-| Yorum işareti | `#` | `//`, `/* */` |
-| Kapanış yorumu | `# end while` | `} // while` (s.67) |
-| Belge yorumu | docstring, `Args:`/`Returns:` | Javadoc, `@param`/`@return` (s.63, 71) |
-| Biçimlendirici | black ya da ruff (kitapta yok) | IDE biçimlendiricisi (s.90) |
+| Kavram | Python | Java | TypeScript |
+|---|---|---|---|
+| Ad yazımı | fonksiyon ve değişken `snake_case`, sınıf `PascalCase`: `elapsed_time_in_days` | fonksiyon ve değişken `camelCase`, sınıf `PascalCase`: `elapsedTimeInDays` (s.18). Maddelerdeki örnekler bu yazımla verilir. | fonksiyon ve değişken `camelCase`, sınıf, arayüz ve tür `PascalCase`: `elapsedTimeInDays`; Java yazımıyla aynı |
+| Yüklem adı önekleri | `is_`, `has_`, `can_` | `is`, `has`, `can`; erişimci adları `get`/`set`/`is` (s.25) | `is`, `has`, `can`; erişimci `get x()` ya da `getX()` |
+| Adlı kurucu | `@classmethod` fabrikası: `from_real_number(...)` | statik fabrika metodu: `Complex.FromRealNumber(23.0)` (s.25) | statik fabrika metodu: `Complex.fromRealNumber(23.0)` |
+| Fabrikayı zorunlu kılmak | uygulanmaz: `__init__` gizlenemez, yalnız adla gelenek kurulur | `private` yapıcı (s.25) | `private constructor`; derleyici zorlar |
+| Alıcı nesne (argüman sayılmaz) | `self`, `cls` | `this`; imzada görünmez | `this`; imzada görünmez. Tür için yazılan `this:` sözde parametresi de sayılmaz. |
+| Değişken sayılı argüman | `*args` bir, `**kwargs` bir argüman | `Object... args` bir argüman (s.43) | `...args: number[]` bir argüman |
+| İmza türü | her parametre ve dönüş: `def f(name: str, *rest: int) -> list[str]:`; `__init__` ve komutlar `-> None`; `self`, `cls` ve `lambda` muaf (kitapta yok) | uygulanmaz: tür imzada dilin zorunluluğudur; kitabın bütün imzaları türlüdür | her parametre ve her dönüş: `function f(name: string, ...rest: number[]): string[]`; komutlar `: void` ya da `: Promise<void>`. Dil dönüş türünü çıkarabilir, yine de yazılır; gerekçe Python satırındakiyle aynı. `any` yazılmaz, derleyici `strict`. Satır içi geri çağırma (callback) muaf, türünü bağlamdan alır (kitapta yok). |
+| Anahtar sözcüklü argüman | Dilin aracıdır, argüman sayısına girer. Sıra belirsizliği önce adla çözülür. | uygulanmaz: dilde adlı argüman yok, belirsizliği yalnız ad çözer (s.43) | uygulanmaz: dilde adlı argüman yok. Yerine geçen nesne parametresi (`f({ center, radius })`) tek argüman sayılır, ancak türü adını hak eden bir kavramsa (`Circle`); satır içi adsız türün her alanı bir argümandır (Bl.3 · Argument Objects, s.43). |
+| Değer döndürmeyen fonksiyon | `None` döner | `void` (s.41) | `void`; asenkron fonksiyonda `Promise<void>` |
+| Tür sınaması | `isinstance`, `match` | `instanceof`, `switch` (s.38) | `instanceof`, `typeof`, ayırıcı alanlı birleşimde `switch (x.kind)` |
+| Tabloyla dağıtım | değerleri fonksiyon olan `dict` | değerleri fonksiyon ya da nesne olan `Map` (kitapta yok) | değerleri fonksiyon olan nesne ya da `Map`: `Record<string, () => T>` (kitapta yok) |
+| Tek satıra sıkıştırılmış kapsam | aynı satırda `if x: y`, `def f(): return x`; `lambda` ataması (PEP 8, kitapta yok) | `{return "";}` tek satırda (s.89). `lambda` ataması: uygulanmaz, Java'da olağan kullanımdır. | aynı satırda `if (x) y()`, `{ return x }`. Modül düzeyinde ada atanmış ok fonksiyonu (`const f = () => …`) yerine `function` bildirimi: bildirim yukarı taşındığı (hoisting) için çağıran üstte, çağrılan altta durabilir (Bl.3 · The Stepdown Rule). Satır içi geri çağırma serbest (kitapta yok). |
+| Boş gövde | ayrı satırda `pass` | ayrı satırda, girintili `;` (s.90) | ayrı satırda, girintili `;`; Java'yla aynı |
+| Döngü denetim değişkeni | uygulanmaz: `for` değişkeni zaten döngü deyiminde doğar | `for (int i = 0; …)` (s.80) | `for (let i = 0; …)`, `for (const item of items)` |
+| Değer katmayan niteleyici (G12) | uygulanmaz: `final` anahtar sözcüğü yok | argüman ve yerel değişkendeki `final` (s.276) | üyede açıkça yazılan `public`: varsayılan zaten odur. Yerel değişkendeki `const` niteleyici değil, dilin olağan bildirimidir. |
+| Yorum işareti | `#` | `//`, `/* */` | `//`, `/* */` |
+| Kapanış yorumu | `# end while` | `} // while` (s.67) | `} // while` |
+| Belge yorumu | docstring, `Args:`/`Returns:` | Javadoc, `@param`/`@return` (s.63, 71) | TSDoc: `/** */`, `@param`/`@returns` |
+| Biçimlendirici | black ya da ruff (kitapta yok) | IDE biçimlendiricisi (s.90) | proje kökündeki `.editorconfig` ve linter (`oxlint`) ayarı; DSH deposu böyle (kitapta yok) |
 
 **Sınıflar ve nesneler**
 
-| Kavram | Python | Java |
-|---|---|---|
-| Yapıcı | `__init__` | yapıcı |
-| Alanların bilinen yeri | yalnız `__init__`'te atanır | sınıfın tepesinde bildirilir (s.81) |
-| Erişim düzeyi | Gelenektir: `_ad` özeldir ve Java'daki `protected`/paket düzeyinin yerini tutar, `__ad` ad bozmalıdır. | `private`, paket, `protected`, `public` |
-| Açık alan (melezde A) | `_` ile başlamayan alan | `public` örnek alanı (s.99) |
-| Erişimci (melezde A) | yalnız `return self._x` yapan property ya da getter; yalnız `self._x = v` yapan setter | yalnız `return x;` yapan getter; yalnız `this.x = v;` yapan setter (s.94, 99) |
-| Dilin protokol metotları (melezde B sayılmaz) | `__eq__`, `__hash__`, `__repr__` gibi dunder metotlar | `equals`, `hashCode`, `toString` (kitapta yok) |
-| DTO | `@dataclass`, `NamedTuple` | açık alanlı fonksiyonsuz sınıf ya da bean (s.100); `record` (kitapta yok) |
-| Sınıf dışı fonksiyon | modül fonksiyonu | uygulanmaz: dilde yok, tümü static sınıf modülün karşılığıdır (`PrimeGenerator`, s.145) |
-| Statik metot | `@staticmethod` | `static` (s.296) |
-| Sabit | `BÜYÜK_AD`, modül ya da sınıf düzeyinde | `public static final` (s.136) |
-| Sabit kalıtımı (J2) | sabit tutan taban sınıftan türemek yerine modülden içe aktarmak | sabitli `interface`'i `implements` etmek yerine `import static` (s.307-308) |
-| Test için gevşetilmiş erişim | uygulanmaz: paket düzeyi yok; test `_` önekli üyelere dokunmaz | `protected` ya da paket düzeyi, yalnız aynı paketteki test için (s.136) |
-| Protected alan | alt sınıfın başka dosyada eriştiği `_` önekli alan | `protected` (s.80, 292) |
-| Arayüz | `Protocol` ya da `ABC` | `interface` (s.149) |
-| Kodlama standardı (G24) | PEP 8 (kitapta yok) | Yaygın Java gelenekleri (kitapta yok); yazarınki Listing B-7 – B-14 (s.394) |
-| Yapıyla zorlama (G27) | `ABC` + `@abstractmethod` örnekleme anında zorlar; yalnız `Protocol` tür denetleyicide zorlar, çalışma anında değil | `abstract` metot derleme anında zorlar (s.301) |
-| Davranış taşıyan enum | `enum.Enum` + metot; üyeler kendi gövdesini taşıyamaz, davranış değerden okunur | `enum` + sabit başına gövdeli soyut metot (s.308-309) |
-| Ham eşleme (Bl.8) | `dict` | `Map` (s.114) |
-| Yerel ada bağlama (Demeter ölçümü) | `x = …`, `x: T = …`, `(x := …)`, `with … as x`; `for` hedefi ve demet açma koleksiyon öğesidir | yerel değişken bildirimi, `try (… x = …)`; ölçüm aracı yok (kitapta yok) |
-| Kurup veren bağlam yöneticisi (Demeter) | `@contextmanager` üreteci, her `yield`i kurulan bir nesneyse fabrikadır: `with açılmış(yol) as sayfa` | kaynak döndüren fabrika ile `try (Sayfa sayfa = Sayfa.aç(yol))` (kitapta yok) |
-| Tablodan seçilen sınıfla kurma (Demeter) | `SINIFLAR[tür](veri)`, `SINIFLAR.get(tür, Varsayılan)(veri)`; tablo sözlük yazımı ya da `{s.KIND: s for s in (A, B)}` | `Map<String, Supplier<T>>` ya da `EnumMap` ile seçip kurmak (kitapta yok) |
-| Yeni nesne kuran standart kütüphane çağrısı (Demeter) | `re.compile`; argparse `add_subparsers`, `add_parser`, `add_argument_group`, `add_mutually_exclusive_group`, `parse_args`; `redirect_stdout`, `redirect_stderr` | `new` her kuruluşu açıkça gösterir; statik fabrikalar (`Pattern.compile`) (kitapta yok) |
-| Gereğinden somut tür (G26) | tür ipucunda `Sequence` ya da `Iterable` yeterken `list` (kitapta yok) | `List` yeterken `ArrayList` (s.301) |
-| Dağıtım birimi (G7) | paket ya da dağıtım (kitapta yok) | jar dosyası (s.291) |
-| Paketi içe aktarma (J1) | `import paket.modul` ve nitelikli ad (`modul.Sinif`). `from x import *` karşılık değildir: adları ad alanına kopyalar, modülü yükleyip sert bağımlılık kurar ve adın kaynağını gizler (kitapta yok). | `import package.*;` Joker yalnız paketi arama yoluna ekler, gerçek bağımlılık kurmaz (s.307). |
+| Kavram | Python | Java | TypeScript |
+|---|---|---|---|
+| Yapıcı | `__init__` | yapıcı | `constructor` |
+| Alanların bilinen yeri | yalnız `__init__`'te atanır | sınıfın tepesinde bildirilir (s.81) | sınıfın tepesinde bildirilir; ya da bütün alanlar yapıcının parametre özelliğidir (`constructor(private readonly source: Retriever)`). Bir sınıfta iki yol karıştırılmaz. |
+| Erişim düzeyi | Gelenektir: `_ad` özeldir ve Java'daki `protected`/paket düzeyinin yerini tutar, `__ad` ad bozmalıdır. | `private`, paket, `protected`, `public` | `private`, `protected`, `public` (varsayılan). Gizli üye `private` ile yazılır: Java'daki anlamıyla aynıdır, derleme anında korur. Çalışma anında koruyan `#ad` kullanılmaz; aynı kod tabanında iki gizlilik biçimi olmaz. |
+| Açık alan (melezde A) | `_` ile başlamayan alan | `public` örnek alanı (s.99) | `private` ya da `protected` taşımayan alan |
+| Erişimci (melezde A) | yalnız `return self._x` yapan property ya da getter; yalnız `self._x = v` yapan setter | yalnız `return x;` yapan getter; yalnız `this.x = v;` yapan setter (s.94, 99) | yalnız `return this.x` yapan `get` ya da metot; yalnız `this.x = v` yapan `set` ya da metot |
+| Dilin protokol metotları (melezde B sayılmaz) | `__eq__`, `__hash__`, `__repr__` gibi dunder metotlar | `equals`, `hashCode`, `toString` (kitapta yok) | `toString`, `toJSON`, `[Symbol.iterator]`, `[Symbol.dispose]` (kitapta yok) |
+| DTO | `@dataclass`, `NamedTuple` | açık alanlı fonksiyonsuz sınıf ya da bean (s.100); `record` (kitapta yok) | alanları `readonly`, metodu olmayan `interface` ya da `type` |
+| Sınıf dışı fonksiyon | modül fonksiyonu | uygulanmaz: dilde yok, tümü static sınıf modülün karşılığıdır (`PrimeGenerator`, s.145) | modül fonksiyonu: `export function` |
+| Statik metot | `@staticmethod` | `static` (s.296) | `static` |
+| Sabit | `BÜYÜK_AD`, modül ya da sınıf düzeyinde | `public static final` (s.136) | `UPPER_SNAKE_CASE`, modül düzeyinde `const` ya da `static readonly` |
+| Sabit kalıtımı (J2) | sabit tutan taban sınıftan türemek yerine modülden içe aktarmak | sabitli `interface`'i `implements` etmek yerine `import static` (s.307-308) | sabit tutan taban sınıftan türemek ya da sabitli arayüzü `implements` etmek yerine modülden içe aktarmak |
+| Test için gevşetilmiş erişim | uygulanmaz: paket düzeyi yok; test `_` önekli üyelere dokunmaz | `protected` ya da paket düzeyi, yalnız aynı paketteki test için (s.136) | uygulanmaz: paket düzeyi yok; test `private` üyelere dokunmaz, `as any` ile de dokunmaz |
+| Protected alan | alt sınıfın başka dosyada eriştiği `_` önekli alan | `protected` (s.80, 292) | `protected` |
+| Arayüz | `Protocol` ya da `ABC` | `interface` (s.149) | `interface`. Yapısal tiplemede uyum `implements` yazmadan da kurulur; gerçekleştirim yine de `implements` yazar ki bağ kodda görünsün. |
+| Kodlama standardı (G24) | PEP 8 (kitapta yok) | Yaygın Java gelenekleri (kitapta yok); yazarınki Listing B-7 – B-14 (s.394) | TypeScript ve DSH gelenekleri: derleyici `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`; linter `oxlint` (kitapta yok) |
+| Yapıyla zorlama (G27) | `ABC` + `@abstractmethod` örnekleme anında zorlar; yalnız `Protocol` tür denetleyicide zorlar, çalışma anında değil | `abstract` metot derleme anında zorlar (s.301) | `abstract` metot ve `implements` derleme anında zorlar; çalışma anında tür bilgisi yok |
+| Davranış taşıyan enum | `enum.Enum` + metot; üyeler kendi gövdesini taşıyamaz, davranış değerden okunur | `enum` + sabit başına gövdeli soyut metot (s.308-309) | `enum` davranış taşıyamaz. Karşılığı `private constructor`'lı sınıfın `static readonly` örnekleridir; sabit başına gövde, örneğin kendi metodudur (Java enum'unun karşılığı). |
+| Ham eşleme (Bl.8) | `dict` | `Map` (s.114) | `Record<string, T>`, `Map`, nesne değişmezi; dış API'den gelen `unknown` JSON |
+| Yerel ada bağlama (Demeter ölçümü) | `x = …`, `x: T = …`, `(x := …)`, `with … as x`; `for` hedefi ve demet açma koleksiyon öğesidir | yerel değişken bildirimi, `try (… x = …)`; ölçüm aracı yok (kitapta yok) | `const x = …`, `let x = …`; `for…of` hedefi ve dizi ya da nesne açma (destructuring) koleksiyon öğesidir |
+| Kurup veren bağlam yöneticisi (Demeter) | `@contextmanager` üreteci, her `yield`i kurulan bir nesneyse fabrikadır: `with açılmış(yol) as sayfa` | kaynak döndüren fabrika ile `try (Sayfa sayfa = Sayfa.aç(yol))` (kitapta yok) | `using` bildirimi (`Symbol.dispose`): `using page = openPage(path)`; kaynağı kuran fonksiyon fabrikadır (kitapta yok) |
+| Tablodan seçilen sınıfla kurma (Demeter) | `SINIFLAR[tür](veri)`, `SINIFLAR.get(tür, Varsayılan)(veri)`; tablo sözlük yazımı ya da `{s.KIND: s for s in (A, B)}` | `Map<String, Supplier<T>>` ya da `EnumMap` ile seçip kurmak (kitapta yok) | `new KINDS[kind](data)`; tablo `{ [A.kind]: A, [B.kind]: B }` (kitapta yok) |
+| Yeni nesne kuran standart kütüphane çağrısı (Demeter) | `re.compile`; argparse `add_subparsers`, `add_parser`, `add_argument_group`, `add_mutually_exclusive_group`, `parse_args`; `redirect_stdout`, `redirect_stderr` | `new` her kuruluşu açıkça gösterir; statik fabrikalar (`Pattern.compile`) (kitapta yok) | `new` her kuruluşu açıkça gösterir; ayrıca `Array.from`, `Object.fromEntries`, `structuredClone`, `AbortSignal.timeout` ve `fetch`'in kurduğu `Response` (kitapta yok) |
+| Gereğinden somut tür (G26) | tür ipucunda `Sequence` ya da `Iterable` yeterken `list` (kitapta yok) | `List` yeterken `ArrayList` (s.301) | `readonly T[]` ya da `Iterable<T>` yeterken `T[]`; arayüz yeterken sınıf (kitapta yok) |
+| Dağıtım birimi (G7) | paket ya da dağıtım (kitapta yok) | jar dosyası (s.291) | npm paketi (kitapta yok) |
+| Paketi içe aktarma (J1) | `import paket.modul` ve nitelikli ad (`modul.Sinif`). `from x import *` karşılık değildir: adları ad alanına kopyalar, modülü yükleyip sert bağımlılık kurar ve adın kaynağını gizler (kitapta yok). | `import package.*;` Joker yalnız paketi arama yoluna ekler, gerçek bağımlılık kurmaz (s.307). | `import * as knowledge from './knowledge/index.js'` ve nitelikli ad (`knowledge.Question`). Adlı içe aktarma (`import { A, B }`) her adı ayrı bir sert bağımlılık yapar. Aynı adı taşıyan iki ad tek tek içe aktarılır (kitapta yok). |
 
 **Hatalar**
 
-| Kavram | Python | Java |
-|---|---|---|
-| Null | `None` | `null` (s.110) |
-| Yakalama bloğu | `except` | `catch` |
-| Yutulan istisna | `except: pass`, gövdesi yalnız yorum olan `except` | boş ya da yalnız yorumlu `catch` (s.60) |
-| İstisna zinciri | `raise AlanHatasi(...) from e` | `new StorageException("retrieval error", e)` (s.106) |
-| G/Ç istisnası | `OSError` | `IOException`, `FileNotFoundException` (s.106) |
-| Denetimsiz istisna | uygulanmaz: dilde denetimli istisna yok, bütün istisnalar denetimsiz | kendi istisnaları `RuntimeException`'dan türer, imzada `throws` yayılmaz (s.106-107) |
+| Kavram | Python | Java | TypeScript |
+|---|---|---|---|
+| Null | `None` | `null` (s.110) | `null` ve `undefined`; ikisi de döndürülmez, geçilmez. Gövdesinde `undefined` denetlenen isteğe bağlı parametre (`x?: T`) geçilen null'dır; varsayılan değerli parametre (`limit = DEFAULT_LIMIT`) değildir. |
+| Yakalama bloğu | `except` | `catch` | `catch` |
+| Yutulan istisna | `except: pass`, gövdesi yalnız yorum olan `except` | boş ya da yalnız yorumlu `catch` (s.60) | boş `catch {}`, gövdesi yalnız yorum olan `catch`, `.catch(() => {})` ve beklenmeyen (await edilmeyen) promise: reddi kimseye ulaşmaz |
+| İstisna zinciri | `raise AlanHatasi(...) from e` | `new StorageException("retrieval error", e)` (s.106) | `throw new SourceError('…', { cause: error })` |
+| G/Ç istisnası | `OSError` | `IOException`, `FileNotFoundException` (s.106) | `fetch`'in ağ hatasında fırlattığı `TypeError`, iptalde `AbortError`; Node'un `code` alanlı hataları (`ENOENT`) |
+| Denetimsiz istisna | uygulanmaz: dilde denetimli istisna yok, bütün istisnalar denetimsiz | kendi istisnaları `RuntimeException`'dan türer, imzada `throws` yayılmaz (s.106-107) | uygulanmaz: dilde denetimli istisna yok, imzada `throws` yazılmaz |
 
 **Testler**
 
-| Kavram | Python | Java |
-|---|---|---|
-| Test çatısı | `unittest` | JUnit (s.128-130) |
-| Ortak kurulum | `setUp` | `@Before` (s.150) |
-| Beklenen istisna testi | `assertRaises` | `@Test(expected = ...)` (s.105) |
-| Gerekçeli atlama | `@unittest.skip("…")` | `@Ignore("…")` (s.58, 313) |
-| Bütün testler tek komutla (E2) | `python3 -m unittest discover -s tests -t .` | `mvn test` ya da `gradle test` (kitapta yok) |
-| Kapsam aracı (T2) | `coverage run -m unittest discover -s tests -t .` ve `coverage report -m`; `coverage` ayrıca kurulur (kitapta yok) | Clover (s.268); bugün JaCoCo (kitapta yok) |
-| Konsola yazma (Self-Validating) | `print` | `System.out.println` |
-| Ölçüm aracı | `measure_code.py` | Yok. [ö] maddeler okunarak denetlenir. |
+| Kavram | Python | Java | TypeScript |
+|---|---|---|---|
+| Test çatısı | `unittest` | JUnit (s.128-130) | vitest (DSH'nin çatısı; kitapta yok) |
+| Ortak kurulum | `setUp` | `@Before` (s.150) | `beforeEach` |
+| Beklenen istisna testi | `assertRaises` | `@Test(expected = ...)` (s.105) | `expect(() => f()).toThrow(SourceError)`; asenkronda `await expect(p).rejects.toThrow(SourceError)` |
+| Gerekçeli atlama | `@unittest.skip("…")` | `@Ignore("…")` (s.58, 313) | `it.skip('soru: …', …)`; gerekçe test adındadır |
+| Bütün testler tek komutla (E2) | `python3 -m unittest discover -s tests -t .` | `mvn test` ya da `gradle test` (kitapta yok) | `pnpm test` (`vitest run`; kitapta yok) |
+| Kapsam aracı (T2) | `coverage run -m unittest discover -s tests -t .` ve `coverage report -m`; `coverage` ayrıca kurulur (kitapta yok) | Clover (s.268); bugün JaCoCo (kitapta yok) | `vitest run --coverage`; `@vitest/coverage-v8` ayrıca kurulur (kitapta yok) |
+| Konsola yazma (Self-Validating) | `print` | `System.out.println` | `console.log` |
+| Ölçüm aracı | `measure_code.py` | Yok. [ö] maddeler okunarak denetlenir. | Yok. [ö] maddeler okunarak denetlenir. |
 
 **Sistem ve eşzamanlılık**
 
-| Kavram | Python | Java |
-|---|---|---|
-| Tek komutla kurma (E1) | `pip install -e .` (kitapta yok) | `ant all` (s.287); bugün `mvn package` ya da `gradle build` (kitapta yok) |
-| Giriş noktası | `main()` ve `if __name__ == "__main__":` | `public static void main` (s.155) |
-| Gömülü tembel kurulum | `if self._x is None: self._x = Somut()` | `if (service == null) service = new MyServiceImpl(...);` (s.154) |
-| Service locator | global kayıt sözlüğü, adla arama | JNDI `lookup` (s.157) |
-| Bağımlılığı verme (DI) | yapıcı argümanı ya da setter: `set_data_source(self, source)`; alan `__init__`'te çalışır bir varsayılanla doğar | yapıcı argümanı ya da setter: `setDataSource(...)` (s.157) |
-| Bağlama yeri | `main` ya da onun çağırdığı kurulum modülünde elle bağlama (kitapta yok) | `main` ya da DI kapsayıcısı; Spring XML `p:dataSource-ref` setter ile bağlar (s.157, 163-164) |
-| Kesişen kaygı | dekoratör, aynı arayüzü uygulayan sarmalayıcı sınıf | JDK Proxy, Spring AOP, AspectJ (s.161-166) |
-| Görünmez büyü | monkeypatch, `sys.meta_path`, metaclass | çalışma anında bytecode yeniden yazma, özel ClassLoader, yansımayla özel üyeye erişim (kitapta yok) |
-| Uyarı susturma (G4) | `# noqa`, `# type: ignore`, `# pylint: disable`, `warnings.filterwarnings("ignore")` | `@SuppressWarnings`, derleyici uyarısını kapatmak (s.289) |
-| Emniyeti elle yöneten ayar (G4) | uygulanmaz: `pickle`'da sürüm alanı yok | `serialVersionUID` (s.289) |
-| Çerçeve eşleme bilgisi (POJO) | ORM'in bildirimsel eşlemesi (kitapta yok) | `@Entity`, `@Table` gibi anotasyonlar ya da XML dağıtım tanımlayıcısı (s.166) |
-| Kritik bölüm | paylaşılan tek kilitle `with self._lock:` (`threading.Lock`) | `synchronized` (s.181) |
-| Hazır yapılar | `queue.Queue`, `concurrent.futures` | `java.util.concurrent`: `ConcurrentHashMap`, Executor, `Future` (s.182-183, 326) |
-| Atomik sayaç (kilitsiz çözüm) | uygulanmaz: standart kütüphanede atomik tür yok, kilit kullanılır | `AtomicInteger`, CAS (s.327-328) |
-| Oku-değiştir-yaz | `self.n += 1` | `++lastIdUsed` (s.180) |
-| Bileşik işlem | kilit (kitapta yok) | `ConcurrentHashMap.putIfAbsent` (s.329) |
-| Kapanma | `join(timeout)`, `future.result(timeout)`, `CancelledError` yeniden fırlatılır | `Thread.join(ms)`, `Future.get(t, unit)`, `InterruptedException` sonrası `interrupt()` (kitapta yok) |
-| Para (G26) | `int` kuruş ya da `Decimal` | tamsayı tabanlı Money sınıfı (s.301) |
+| Kavram | Python | Java | TypeScript |
+|---|---|---|---|
+| Tek komutla kurma (E1) | `pip install -e .` (kitapta yok) | `ant all` (s.287); bugün `mvn package` ya da `gradle build` (kitapta yok) | `pnpm install` (kitapta yok) |
+| Giriş noktası | `main()` ve `if __name__ == "__main__":` | `public static void main` (s.155) | çalıştırılan modülün kendisi; bir çerçevenin plugin'inde çerçevenin çağırdığı fonksiyon, DSH'de `apply` (kitapta yok) |
+| Gömülü tembel kurulum | `if self._x is None: self._x = Somut()` | `if (service == null) service = new MyServiceImpl(...);` (s.154) | `this.service ??= new MyServiceImpl(...)` |
+| Service locator | global kayıt sözlüğü, adla arama | JNDI `lookup` (s.157) | global kayıt nesnesi (`globalThis` üzerinde ya da modül düzeyinde), adla arama |
+| Bağımlılığı verme (DI) | yapıcı argümanı ya da setter: `set_data_source(self, source)`; alan `__init__`'te çalışır bir varsayılanla doğar | yapıcı argümanı ya da setter: `setDataSource(...)` (s.157) | yapıcı argümanı ya da setter: `setDataSource(source)`; alan yapıcıda çalışır bir varsayılanla doğar |
+| Bağlama yeri | `main` ya da onun çağırdığı kurulum modülünde elle bağlama (kitapta yok) | `main` ya da DI kapsayıcısı; Spring XML `p:dataSource-ref` setter ile bağlar (s.157, 163-164) | giriş noktasında ya da onun çağırdığı kurulum modülünde elle bağlama (kitapta yok) |
+| Kesişen kaygı | dekoratör, aynı arayüzü uygulayan sarmalayıcı sınıf | JDK Proxy, Spring AOP, AspectJ (s.161-166) | aynı arayüzü gerçekleştiren sarmalayıcı sınıf; dekoratör (`@log`) (kitapta yok) |
+| Görünmez büyü | monkeypatch, `sys.meta_path`, metaclass | çalışma anında bytecode yeniden yazma, özel ClassLoader, yansımayla özel üyeye erişim (kitapta yok) | prototip yamama (`X.prototype.f = …`), içe aktarılan modülü çalışma anında değiştirmek, davranışı gizleyen `Proxy`, `globalThis`'e yazmak (kitapta yok) |
+| Uyarı susturma (G4) | `# noqa`, `# type: ignore`, `# pylint: disable`, `warnings.filterwarnings("ignore")` | `@SuppressWarnings`, derleyici uyarısını kapatmak (s.289) | `// @ts-ignore`, `// @ts-expect-error`, `// oxlint-disable`, `as any`, `as unknown as T`, null olmadığını ileri süren `!` |
+| Emniyeti elle yöneten ayar (G4) | uygulanmaz: `pickle`'da sürüm alanı yok | `serialVersionUID` (s.289) | uygulanmaz: dilde sürüm alanlı serileştirme yok |
+| Çerçeve eşleme bilgisi (POJO) | ORM'in bildirimsel eşlemesi (kitapta yok) | `@Entity`, `@Table` gibi anotasyonlar ya da XML dağıtım tanımlayıcısı (s.166) | ORM dekoratörleri (`@Entity`, `@Column`) (kitapta yok) |
+| Kritik bölüm | paylaşılan tek kilitle `with self._lock:` (`threading.Lock`) | `synchronized` (s.181) | uygulanmaz: olay döngüsü tek iş parçacıklıdır. Paylaşılan durum ancak iki `await` arasında bozulur; o aralık kritik bölüm gibi ele alınır (kitapta yok). |
+| Hazır yapılar | `queue.Queue`, `concurrent.futures` | `java.util.concurrent`: `ConcurrentHashMap`, Executor, `Future` (s.182-183, 326) | `Promise.all`, `Promise.allSettled`, `AbortController`; ayrı iş parçacığı için `worker_threads` (kitapta yok) |
+| Atomik sayaç (kilitsiz çözüm) | uygulanmaz: standart kütüphanede atomik tür yok, kilit kullanılır | `AtomicInteger`, CAS (s.327-328) | uygulanmaz: tek iş parçacığında `n += 1` bölünmez; `worker_threads` arasında `Atomics` (kitapta yok) |
+| Oku-değiştir-yaz | `self.n += 1` | `++lastIdUsed` (s.180) | `const n = await read(); await write(n + 1)`: iki `await` arasına başka iş girer |
+| Bileşik işlem | kilit (kitapta yok) | `ConcurrentHashMap.putIfAbsent` (s.329) | `if (!cache.has(k)) cache.set(k, await create(k))`; çözüm: değer yerine promise saklamak (kitapta yok) |
+| Kapanma | `join(timeout)`, `future.result(timeout)`, `CancelledError` yeniden fırlatılır | `Thread.join(ms)`, `Future.get(t, unit)`, `InterruptedException` sonrası `interrupt()` (kitapta yok) | `AbortSignal` iletilir, süre için `AbortSignal.timeout(ms)`; iptal hatası yutulmaz, yeniden fırlatılır (kitapta yok) |
+| Para (G26) | `int` kuruş ya da `Decimal` | tamsayı tabanlı Money sınıfı (s.301) | `bigint` kuruş ya da ondalık sayı kütüphanesi |
